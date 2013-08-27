@@ -1,7 +1,6 @@
 import java.io.*;
 import org.broad.tribble.AbstractFeatureReader;
 import org.broad.tribble.FeatureReader;
-import org.broadinstitute.sting.utils.Utils;
 import org.broadinstitute.variant.vcf.VCFCodec;
 import org.broadinstitute.variant.vcf.VCFHeader;
 import org.broadinstitute.variant.variantcontext.VariantContext;
