@@ -3,13 +3,13 @@
  */
 package vtc;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
+
+import org.apache.log4j.Logger;
+
 import vtc.datastructures.InvalidInputFileException;
 import vtc.tools.setoperator.InvalidOperationException;
 import vtc.tools.setoperator.SetOperatorEngine;
@@ -20,6 +20,8 @@ import vtc.tools.setoperator.SetOperatorEngine;
  */
 public class VTCEngine implements Engine{
 	
+	private static Logger logger = Logger.getLogger(VTCEngine.class);
+	private static ArgumentParser parser;
 	
 	public VTCEngine(){
 		return;
@@ -32,11 +34,14 @@ public class VTCEngine implements Engine{
 
 		VTCEngine vtc = new VTCEngine();
 		
-		ArgumentParser parser = vtc.instantiateArgParser();
+		parser = vtc.instantiateArgParser();
 		Namespace parsedArgs;
 
 		try {
 			/* args[0] is the argument for VTCEngine specifying the tool to create */
+			if(args.length == 0){
+				printUsageHelpAndExit();
+			}
 			String[] vtcArgs = new String[] {args[0]};
 			
 			/* Remove args[0] so we can pass the rest to the appropriate tool */
@@ -59,15 +64,10 @@ public class VTCEngine implements Engine{
 			}
 			
 		} catch (ArgumentParserException e) {
-			System.err.println(e.getMessage());
-		} catch (InvalidInputFileException e) {
-			System.err.println(e.getMessage());
-		} catch (InvalidOperationException e) {
-			System.err.println(e.getMessage());
-		} finally{
-			parser.printUsage();
-			parser.printHelp();
-			System.exit(1);
+			printErrorUsageHelpAndExit(e);
+		} catch (Exception e) {
+			logger.error("Caught unexpected exception, something is very wrong!");
+			e.printStackTrace();
 		}
 	}
 
@@ -91,7 +91,7 @@ public class VTCEngine implements Engine{
 		parser.usage("java -jar vtc.jar ToolName");
 		
 		parser.addArgument("ToolName").dest("ToolName")
-				.help("Specify the tool to use. Available tools are: \n1. SetOperator (SO)\n2. Tool 2\n3. Tool 3");
+				.help("Specify the tool to use. Available tools are: " + createToolCommandLineToString());
 		
 		return parser;
 	}
@@ -108,6 +108,27 @@ public class VTCEngine implements Engine{
 			}
 		}
 		return null;
+	}
+	
+	private static void printErrorUsageHelpAndExit(Exception e){
+		logger.error(e.getMessage());
+		printUsageHelpAndExit();
+	}
+	
+	private static void printUsageHelpAndExit(){
+		parser.printUsage();
+		parser.printHelp();
+		System.exit(1);		
+	}
+	
+	private static String createToolCommandLineToString(){
+		StringBuilder sb = new StringBuilder();
+		int count = 1;
+		for(Tool t : Tool.values()){
+			sb.append("\n" + Integer.toString(count) + ". " + t.toString());
+			count++;
+		}
+		return sb.toString();
 	}
 	
 }

@@ -12,20 +12,29 @@ import java.util.Arrays;
  */
 public enum SupportedFileType {
 
-	VCF(new ArrayList<String>(Arrays.asList(".vcf,.vcf.gz".split(","))), "v");
+	VCF("VCF", "v", new ArrayList<String>(Arrays.asList(".vcf,.vcf.gz".split(","))));
 	
-	private String poolIDPrefix;
+	private String poolIDPrefix, name;
 	private ArrayList<String> expectedExtensions;
-	private SupportedFileType(ArrayList<String> expectedExtensions, String poolIDPrefix){
-		this.expectedExtensions = expectedExtensions;
+	private SupportedFileType(String name, String poolIDPrefix, ArrayList<String> expectedExtensions){
+		this.name = name;
 		this.poolIDPrefix = poolIDPrefix;
+		this.expectedExtensions = expectedExtensions;
+	}
+	
+	public String getName(){
+		return this.name;
+	}
+	
+	public String getPoolIDPrefix(){
+		return this.poolIDPrefix;
 	}
 	
 	public ArrayList<String> getExpectedExtensions(){
 		return this.expectedExtensions;
 	}
-	
-	public String getPoolIDPrefix(){
-		return this.poolIDPrefix;
+
+	public String toString(){
+		return getName();
 	}
 }

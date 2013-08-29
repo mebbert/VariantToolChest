@@ -43,15 +43,15 @@ public class Operation {
 	 * @throws InvalidOperationException
 	 */
 	public Operation(String operationString) throws InvalidOperationException{
+		init();
 		parseOperation(operationString);
 		this.operationString = operationString;
-		init();
 	}
 	
 	private void init(){
-//		operationPattern = Pattern.compile(operationPatternString);
 		usedOperationIDs = new ArrayList<String>();
 		generatedOperationIDs = new ArrayList<String>();
+		samplePools = new HashMap<String, SamplePool>();
 	}
 	
 //	private boolean isValidOperation(String operation){
@@ -62,6 +62,10 @@ public class Operation {
 	/****************************************************
 	 * Getters
 	 */
+	
+	public String getOperationID(){
+		return this.operID;
+	}
 	
 	/**
 	 * Get all sample pools involved in this operation
@@ -133,7 +137,7 @@ public class Operation {
 		Matcher m = p.matcher(operVals[operIndex]);
 		
 		// Something is wrong if there aren't two groups
-		if(m.groupCount() != 2){
+		if(!m.find() || m.groupCount() != 2){
 			throw new InvalidOperationException("Invalid operation, see help for more info: " + operation);
 		}
 		else{
@@ -155,8 +159,6 @@ public class Operation {
 				this.samplePools.put(sp.getPoolID(), sp);
 			}
 		}
-		
-		
 	}
 	
 	/**
@@ -165,7 +167,7 @@ public class Operation {
 	 * @return
 	 */
 	private static String generateOperationID(){
-		String id = "s" + generatedOperationIDs.size() + 1;
+		String id = "s" + Integer.toString(generatedOperationIDs.size() + 1);
 		generatedOperationIDs.add(id);
 		return id;
 	}

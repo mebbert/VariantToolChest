@@ -16,30 +16,27 @@ import vtc.tools.setoperator.InvalidOperationException;
  */
 public class SamplePool implements Pool{
 
-	private static ArrayList<String> usedPoolIDs;
+	private static ArrayList<String> usedPoolIDs = new ArrayList<String>();
 	
 	/* This poolID must match the poolID of its associated VariantPool object
 	 * since all samples come from the variants anyway.
 	 */
 	private String poolID;
 	private TreeSet<String> samples;
-	private Pattern samplePoolPattern;
+
+	// Match on the expected pattern for a sample pool (e.g. f1[s1,s3] )
+	private static Pattern samplePoolPattern = Pattern.compile("^(\\w+)(\\[(.+)\\])*$");
+
 	
 	/****************************************************
 	 * Constructors
 	 */
 	
 	public SamplePool(String pool) throws InvalidOperationException{
-		init();
+		this.samples = new TreeSet<String>();
 		parseSamplePool(pool);
 	}
 	
-	private void init(){
-		// Match on the expected pattern for a sample pool (e.g. f1[s1,s3] )
-		this.samplePoolPattern = Pattern.compile("^(\\w)\\[(.+)\\]$");
-		SamplePool.usedPoolIDs = new ArrayList<String>();
-		this.samples = new TreeSet<String>();
-	}
 	
 	
 	/****************************************************
@@ -65,7 +62,7 @@ public class SamplePool implements Pool{
 	private void parseSamplePool(String pool) throws InvalidOperationException{
 		Matcher m = samplePoolPattern.matcher(pool);
 		
-		if(m.groupCount() != 2){
+		if(!m.find() || m.groupCount() != 3){
 			throw new InvalidOperationException("Invalid operation. Malformed sample pool. See help for more info: " + pool);
 		}
 		else{
@@ -75,10 +72,10 @@ public class SamplePool implements Pool{
 			ArrayList<String> allVariantPoolIDs = VariantPool.getAllPoolIDs();
 			if(!allVariantPoolIDs.contains(this.poolID)){
 				throw new InvalidOperationException("Invalid sample pool ID. Sample pool " +
-						"IDs must be defined in an input file or in a previous set operation: " + this.poolID);
+						"IDs must be defined as an input file or in a previous set operation: " + this.poolID);
 			}
 
-			String[] samples = m.group(2).split(","); // split in comma and put sample names in map
+			String[] samples = m.group(3).split(","); // split in comma and put sample names in map
 			for (String s : samples){
 				this.samples.add(s);
 			}

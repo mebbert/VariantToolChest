@@ -3,8 +3,10 @@
  */
 package vtc.tools.setoperator;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.TreeSet;
 
 import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.GenotypesContext;
@@ -28,7 +30,7 @@ public class SetOperator {
 	public SetOperator(){
 		return;
 	}
-
+	
 //	public SetOperator(Operation op, HashMap<String, VariantPool> variantPools){
 //		this.operation = op;
 //		this.variantPools = variantPools;
@@ -56,21 +58,17 @@ public class SetOperator {
 	 * Useful operations
 	 */
 	
-	public VariantPool performOperation(Operation op, ArrayList<VariantPool> variantPools, IntersectType type){
-		
-		Operator o = op.getOperator();
-		if(o == Operator.COMPLEMENT){
-			return performComplement(op, variantPools);
+	private ArrayList<String> getMissingSamples(GenotypesContext gc, SamplePool sp){
+		Iterator<String> sampIT = sp.getSamples().iterator();
+		String samp;
+		ArrayList<String> missingSamps = new ArrayList<String>();
+		while(sampIT.hasNext()){
+			samp = sampIT.next();
+			if(!gc.containsSample(samp)){
+				missingSamps.add(samp);
+			}
 		}
-		else if(o == Operator.INTERSECT){
-			return performIntersect(op, variantPools, type);
-		}
-		else if(o == Operator.UNION){
-			return performUnion(op, variantPools);
-		}
-		else{
-			throw new RuntimeException("Something is very wrong! Received an invalid operator: " + o);
-		}
+		return missingSamps;
 	}
 	
 	
@@ -81,9 +79,9 @@ public class SetOperator {
 	 * Complement logic
 	 */
 	
-	private VariantPool performComplement(Operation op, ArrayList<VariantPool> variantPools){
+	public VariantPool performComplement(Operation op, ArrayList<VariantPool> variantPools){
 		
-		return new VariantPool();
+		return null;
 	}
 	
 	
@@ -100,8 +98,9 @@ public class SetOperator {
 	 * @param variantPools
 	 * @param type
 	 * @return A VariantPool with all variants that intersect, including only the samples of interest.
+	 * @throws InvalidOperationException 
 	 */
-	private VariantPool performIntersect(Operation op, ArrayList<VariantPool> variantPools, IntersectType type){
+	public VariantPool performIntersect(Operation op, ArrayList<VariantPool> variantPools, IntersectType type) throws InvalidOperationException{
 		
 		if(type == null){
 			throw new RuntimeException("Received null IntersectType in \'performIntersect.\' Something is very wrong!");
@@ -139,7 +138,11 @@ public class SetOperator {
 		String currVarKey;
 		VariantContext var;
 		VariantContextBuilder vcBuilder;
+
 		VariantPool intersection = new VariantPool();
+		intersection.setFile(new File(op.getOperationID()));
+		intersection.setPoolID(op.getOperationID());
+
 		SamplePool sp;
 		GenotypesContext gc;
 		Iterator<Genotype> genoIt;
@@ -169,12 +172,35 @@ public class SetOperator {
 					/* Start building the new VariantContext */
 					vcBuilder.chr(var.getChr());
 					vcBuilder.start(var.getStart());
+					vcBuilder.stop(var.getEnd());
+					vcBuilder.alleles(var.getAlleles());
+					vcBuilder.attributes(var.getAttributes());
 
 					/* Get the SamplePool associated with this VariantPool and get the genotypes for this VariantContext
 					 * Iterate over the genotypes and intersect.
 					 */
 					sp = op.getSamplePool(vp.getPoolID()); // SamplePool must have an associated VariantPool with identical poolID
 					gc = var.getGenotypes(sp.getSamples());
+
+					
+					/* Check if any samples from the SamplePool were missing in the file. If so,
+					 * throw error and let user know which samples were missing.
+					 */
+					if(!gc.containsSamples(sp.getSamples())){
+						ArrayList<String> missing = getMissingSamples(gc, sp);
+						StringBuilder sb = new StringBuilder();
+						String delim = "";
+					    for (String i : missing) {
+					        sb.append(delim).append(i);
+					        delim = ", ";
+					    }
+						throw new InvalidOperationException("The following sample names do not exist " +
+								"in the variant pool '" +
+								sp.getPoolID() + "' (" + vp.getFile().getName() +
+								") as specified in '" +
+								op.toString() + "': " + sb.toString());
+					}
+
 					genoIt = gc.iterator();
 					while(genoIt.hasNext()){
 						geno = genoIt.next();
@@ -270,8 +296,8 @@ public class SetOperator {
 	 * Union logic
 	 */
 	
-	private VariantPool performUnion(Operation op, ArrayList<VariantPool> variantPools){
+	public VariantPool performUnion(Operation op, ArrayList<VariantPool> variantPools){
 
-		return new VariantPool();
+		return null;
 	}
 }

@@ -13,16 +13,28 @@ import java.util.Comparator;
  */
 public enum Tool {
 
-	SET_OPERATOR("SetOperator", new ArrayList<String>(Arrays.asList(new String[]{"SO", "SetOperator"})));
+	SET_OPERATOR("SetOperator", "SO", "Perform set operations on variant sets",
+			new ArrayList<String>(Arrays.asList(new String[]{"SO", "SetOperator"})));
 	
-	private String name;
+	private String name, shortCommand, briefDescription;
 	private ArrayList<String> permittedCommands;
-	private Tool(String name, ArrayList<String> permittedCommands){
+	private Tool(String name, String shortCommand, String briefDescription, ArrayList<String> permittedCommands){
+		this.name = name;
+		this.shortCommand = shortCommand;
+		this.briefDescription = briefDescription;
 		this.permittedCommands = permittedCommands;
 	}
 	
 	public String getName(){
 		return this.name;
+	}
+	
+	public String getShortCommand(){
+		return this.shortCommand;
+	}
+	
+	public String getBriefDescription(){
+		return this.briefDescription;
 	}
 	
 	public ArrayList<String> getPermittedCommands(){
@@ -36,5 +48,12 @@ public enum Tool {
 			}
 		}
 		return false;
+	}
+	
+	public String toString(){
+		return  getName() + " (" +
+				getShortCommand() +
+				") -- " + getBriefDescription() +
+				".";
 	}
 }

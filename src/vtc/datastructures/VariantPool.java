@@ -7,10 +7,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+import net.sf.samtools.SAMSequenceDictionary;
+
 import org.apache.log4j.Logger;
 import org.broad.tribble.AbstractFeatureReader;
 import org.broad.tribble.FeatureReader;
 import org.broadinstitute.variant.variantcontext.VariantContext;
+import org.broadinstitute.variant.variantcontext.writer.VariantContextWriter;
+import org.broadinstitute.variant.variantcontext.writer.VariantContextWriterFactory;
 import org.broadinstitute.variant.vcf.VCFCodec;
 import org.broadinstitute.variant.vcf.VCFHeader;
 
@@ -44,22 +48,17 @@ public class VariantPool implements Pool{
 	/****************************************************
 	 * Constructors
 	 */
-
-	public VariantPool(){
-		return;
-	}
 	
-	public VariantPool(String inputString) throws InvalidInputFileException{
-		this.parseInputString(inputString);
+	/**
+	 * Create an empty VariantPool. Use this for building a
+	 * VariantPool from scratch rather than reading from a file.
+	 */
+	public VariantPool(){
+		init();
 	}
 
 	public VariantPool(VariantPool vp){
-		this.tMap = new TreeMap<String, VariantContext>(vp.tMap);
-		this.hMap = new HashMap<String, VariantContext>(vp.hMap);
-		this.poolID = new String(vp.poolID);
-		this.file = new File(vp.file.getPath());
-
-		addPoolID(vp.getPoolID());
+		this(vp.file, vp.poolID);
 	}
 	
 	public VariantPool(String filePath, String poolID){
@@ -67,18 +66,32 @@ public class VariantPool implements Pool{
 	}
 	
 	public VariantPool(File file, String poolID){
-		this(file, false, poolID);
+		this(file, poolID, false);
 	}
 
-	public VariantPool(File file, boolean requireIndex, String poolID){
+	public VariantPool(File file, String poolID, boolean requireIndex){
 		logger.info("Creating new VariantPool from " + file.getName() + " with poolID " + poolID);
-		this.tMap = new TreeMap<String, VariantContext>();
-		this.hMap = new HashMap<String, VariantContext>();
+		init(file, poolID, requireIndex);
+				
+	}
+	
+	public VariantPool(String inputString, boolean requireIndex) throws InvalidInputFileException{
+		HashMap<String, String> fileAndPoolIDMap = this.parseInputString(inputString);
+		init(new File(fileAndPoolIDMap.get("file")), fileAndPoolIDMap.get("poolID"), requireIndex);
+	}
+
+	private void init(File file, String poolID, boolean requireIndex){
+		init();
+
 		this.file = file;
 		this.poolID = poolID;
-		this.parseVCF(file.getPath(), requireIndex);
-				
 		addPoolID(this.poolID);
+		this.parseVCF(file.getPath(), requireIndex);
+	}
+	
+	private void init(){
+		this.tMap = new TreeMap<String, VariantContext>();
+		this.hMap = new HashMap<String, VariantContext>();
 	}
 	
 	
@@ -152,38 +165,50 @@ public class VariantPool implements Pool{
 		this.file = file;
 	}
 	
+	public void setPoolID(String poolID){
+		this.poolID = poolID;
+	}
+	
 	
 	
 	
 	/****************************************************
 	 * Useful operations
 	 */
-	
+
 	/**
 	 * This method will parse an input string from the command line. e.g.
 	 * f1=/path/to/file.vcf or the same without the 'f1='
 	 * @param inputString
-	 * @throws InvalidInputFileException 
+	 * @return A HashMap<String, String> with the poolID and file string. Keys are 'poolID' and
+	 * 'file', respectively
+	 * @throws InvalidInputFileException
 	 */
-	private void parseInputString(String inputString) throws InvalidInputFileException{
+	private HashMap<String, String> parseInputString(String inputString) throws InvalidInputFileException{
 		/* Loop over all input files, extract any user-specified pool IDs and file names,
 		 * and create associated VariantPool objects
 		 */
 		String[] inputVals = inputString.split("=");
+		HashMap<String, String> fileAndPoolIDMap = new HashMap<String, String>(2); // only need size 2
 		
 		if(inputVals.length == 1){
-			this.file = new File(inputVals[0]);
-			this.poolID = VariantPool.generatePoolID(SupportedFileType.VCF);
+			fileAndPoolIDMap.put("file", inputVals[0]);
+			fileAndPoolIDMap.put("poolID", VariantPool.generatePoolID(SupportedFileType.VCF));
 		}
 		else if(inputVals.length > 2 || inputVals.length < 1){
 			throw new InvalidInputFileException("Invalid input file specified: " + inputString);
 		}
 		else{
-			this.poolID = inputVals[0];
-			this.file = new File(inputVals[1]);
+			fileAndPoolIDMap.put("poolID", inputVals[0]);
+			fileAndPoolIDMap.put("file", inputVals[1]);
 		}
+		return fileAndPoolIDMap;
 	}
 	
+	/**
+	 * Add a VariantContext object to the pool
+	 * @param v
+	 */
 	public void addVariant(VariantContext v){
 		String chrPos = new String(v.getChr() + ":" + Integer.toString(v.getStart()));
 		hMap.put(chrPos, v);
@@ -243,6 +268,30 @@ public class VariantPool implements Pool{
 		}
 	}
 	
+	
+	/**
+	 * Print a VariantPool to file in the format specified by SupportedFileType. If fileType is
+	 * VCF, we must have a SAMSequenceDictionary
+	 * @param filePath
+	 * @param vp
+	 * @param refDict
+	 * @param fileType
+	 */
+	public static void printVariantPool(String filePath, VariantPool vp, SAMSequenceDictionary refDict, SupportedFileType fileType){
+		
+		if(fileType == SupportedFileType.VCF){
+			printVariantPoolToVCF(filePath, vp, refDict);
+		}
+	}
+	
+	private static void printVariantPoolToVCF(String filePath, VariantPool vp, SAMSequenceDictionary refDict){
+		
+		if(refDict == null){
+			throw new RuntimeException("Received a 'null' SAMSequenceDictionary. Something is very wrong!");
+		}
+			VariantContextWriter writer = VariantContextWriterFactory.create(new File(filePath), refDict);
+	}
+	
 	/**
 	 * This method will generate a poolID for files that the user does not define one
 	 * 
@@ -250,7 +299,7 @@ public class VariantPool implements Pool{
 	 * @return
 	 */
 	public static String generatePoolID(SupportedFileType fileType){
-		String id = fileType.getPoolIDPrefix() + generatedPoolIDs.size() + 1; 
+		String id = fileType.getPoolIDPrefix() + Integer.toString(generatedPoolIDs.size() + 1); 
 		generatedPoolIDs.add(id);
 		return id;
 	}
