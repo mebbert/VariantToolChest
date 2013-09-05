@@ -6,10 +6,12 @@ package vtc.tools.setoperator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import vtc.datastructures.SamplePool;
+import vtc.datastructures.VariantPool;
 
 /**
  * @author markebbert
@@ -42,9 +44,9 @@ public class Operation {
 	 * @param operationString
 	 * @throws InvalidOperationException
 	 */
-	public Operation(String operationString) throws InvalidOperationException{
+	public Operation(String operationString, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
 		init();
-		parseOperation(operationString);
+		parseOperation(operationString, variantPools);
 		this.operationString = operationString;
 	}
 	
@@ -107,7 +109,7 @@ public class Operation {
 	 * @param operation
 	 * @throws InvalidOperationException
 	 */
-	private void parseOperation(String operation) throws InvalidOperationException{
+	private void parseOperation(String operation, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
 
 		/* TODO: simplify the set operations to specify operators as '+', '-', and 'n'. Place
 		 * operator between sample pools and drop outer brackets (e.g. out1=f1[s1,s3]+f2[s2,s5]+f3[s6,s7] ).
@@ -155,7 +157,7 @@ public class Operation {
 			
 			// Create the pools and store
 			for(String s : samplePools){
-				sp = new SamplePool(s);
+				sp = new SamplePool(s, variantPools);
 				this.samplePools.put(sp.getPoolID(), sp);
 			}
 		}

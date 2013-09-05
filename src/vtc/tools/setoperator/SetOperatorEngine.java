@@ -4,12 +4,12 @@
 package vtc.tools.setoperator;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
-import net.sf.samtools.SAMSequenceDictionary;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentGroup;
@@ -18,8 +18,11 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import org.apache.log4j.Logger;
-import org.broadinstitute.variant.variantcontext.writer.VariantContextWriter;
-import org.broadinstitute.variant.variantcontext.writer.VariantContextWriterFactory;
+import org.broad.tribble.TribbleException;
+import org.broadinstitute.variant.vcf.VCFFormatHeaderLine;
+import org.broadinstitute.variant.vcf.VCFHeader;
+import org.broadinstitute.variant.vcf.VCFHeaderLineType;
+import org.broadinstitute.variant.vcf.VCFUtils;
 
 import vtc.Engine;
 import vtc.datastructures.InvalidInputFileException;
@@ -56,10 +59,10 @@ public class SetOperatorEngine implements Engine{
 				"file input ID (see --input), and 'sample_id' is a " +
 				"sample ID within a file (or other variant set).";
 
-		/*
-		 * Create new options for the SetOperator
-		 */
 
+		/*
+		 * Create arguments for the SetOperator
+		 */
 
 		parser = ArgumentParsers.newArgumentParser("SetOperator");
 		parser.description("Set Operator (SO) will perform various set math operations on sets of variants" +
@@ -91,7 +94,7 @@ public class SetOperatorEngine implements Engine{
 					"file ID (see --input) and an 'sId' refers to a " + 
 					"sample within a file (or other variant set).");
 		
-		operation.addArgument("-g", "--genotype-intersect-type").nargs(1).dest("TYPE").type(String.class)
+		operation.addArgument("-g", "--genotype-intersect-type").dest("TYPE").type(String.class)
 				.setDefault(IntersectType.HET_OR_HOMO_ALT.getCommand())
 				.help("Specify the type of intersect to perform for a" +
 						" variant across samples (e.g. require all samples" +
@@ -99,15 +102,15 @@ public class SetOperatorEngine implements Engine{
 						" for the alternate allele). Possible options are: " + 
 						createIntersectTypeCommandLineToString());
 				
-		output.addArgument("-o", "--out").nargs(1).setDefault("variant_list.out.vcf")
+		output.addArgument("-o", "--out").dest("OUT").setDefault("variant_list.out.vcf")
 				.help("Specify the final output file name.");
 		
-		output.addArgument("-f", "--output-file-format").nargs(1).dest("FORMAT").type(String.class)
+		output.addArgument("-f", "--output-file-format").dest("FORMAT").type(String.class)
 				.setDefault(SupportedFileType.VCF.getName())
 				.help("Specify the output file format. Possible options are: " +
 						createSupportedFileTypeCommandLineToString());
 		
-		output.addArgument("-R", "--reference-genome").nargs(1).dest("REF").type(String.class)
+		output.addArgument("-R", "--reference-genome").dest("REF").type(String.class)
 				.help("Specify path to the reference genome associated with the data." +
 						" This is required if output format is 'VCF'");
 		
@@ -116,6 +119,16 @@ public class SetOperatorEngine implements Engine{
                         " performing multiple set operations. Intermediate" +
                         " files will be named according to the --set-operation" +
                         " IDs (e.g. the user-provided IDs or \'s0.vcf\', \'s1.vcf\', etc.)");
+		
+		output.addArgument("-r", "--repair-header").dest("REPAIR").action(Arguments.storeTrue())
+				.help("(EXPERIMENTAL) Add missing header lines to the VCF. This is useful to make the output VCF" +
+						" comply with requirements. INFO and FORMAT annotations must be specified" +
+						" in the VCF header to be valid. If a header line is missing, a dummy line will be inserted" +
+						" to satisfy requirements. This is not the recommended solution, but can be useful if" +
+						" necessary. If false, missing header lines will be ignored.");
+		
+		output.addArgument("-v", "--verbose").dest("VERBOSE").action(Arguments.storeTrue())
+				.help("Print useful information to 'debug.txt'.");
 
 		try {
 			parsedArgs = parser.parseArgs(args);
@@ -146,6 +159,13 @@ public class SetOperatorEngine implements Engine{
 				throw new ArgumentParserException("Invalid intersect type specified: " + intersectString, parser);
 			}
 			
+
+			String outFileName = parsedArgs.getString("OUT");
+			File outFile = null;
+			if(outFileName != null){
+				outFile = new File(outFileName);
+			}
+			
 			SupportedFileType outputFormat = getSupportedFileTypeByName(parsedArgs.getString("FORMAT"));
 			String refGenome = parsedArgs.getString("REF");
 			
@@ -155,17 +175,22 @@ public class SetOperatorEngine implements Engine{
 			}
 			
 			boolean printIntermediateFiles = parsedArgs.getBoolean("INTERMEDIATE");
+			boolean repairHeader = parsedArgs.getBoolean("REPAIR");
+			boolean verbose = parsedArgs.getBoolean("VERBOSE");
 	
 	
-			TreeMap<String, VariantPool> AllVPs = createVariantPools(vcfArgs);
-			ArrayList<Operation> ops = createOperations(operations);
+			TreeMap<String, VariantPool> allVPs = createVariantPools(vcfArgs);
+			ArrayList<Operation> ops = createOperations(operations, allVPs);
 	
 			ArrayList<VariantPool> associatedVPs;
+			ArrayList<VCFHeader> associatedVPHeaders;
 			VariantPool result;
 			Operator o;
+			String intermediateOut, canonicalPath;
+			VCFHeader header;
 			for(Operation op : ops){
-				SetOperator so = new SetOperator();
-				associatedVPs = getAssociatedVariantPoolsAsArrayList(op, AllVPs);
+				SetOperator so = new SetOperator(verbose);
+				associatedVPs = getAssociatedVariantPoolsAsArrayList(op, allVPs);
 				result = null;
 				
 				o = op.getOperator();
@@ -183,10 +208,55 @@ public class SetOperatorEngine implements Engine{
 				}
 				
 				if(result != null){
-					AllVPs.put(result.getPoolID(), result);
+					associatedVPHeaders = getHeaders(associatedVPs);
 					
+					/* Try to merge headers between the original VCFs and use for the resulting
+					 * VariantPool header. If unsuccessful, emit warning and continue. A basic
+					 * header will be generated when printed to file.
+					 */
+					try{
+						header = new VCFHeader(VCFUtils.smartMergeHeaders(associatedVPHeaders, true), result.getSamples());
+						
+						/* If the resulting data has genotype data but the header does not specify
+						 * such, add the appropriate format header line
+						 */
+						if(result.hasGenotypeData() && !header.hasGenotypingData()){
+							String s = "Resulting variant pool (" + op.getOperationID() + ") has genotype " +
+									"data but the header does not include the appropriate line. Adding and continuing...";
+							logger.warn(s);
+							System.out.println(s);
+
+							header.addMetaDataLine(new VCFFormatHeaderLine("GT", 1,
+									VCFHeaderLineType.String, "Genotype"));
+						}
+
+						result.setHeader(header);
+					} catch (IllegalStateException e){
+						String s = "Could not merge headers from VariantPools in operation: ";
+						String c = "Continuing...";
+						logger.warn(s + op.toString() + "\t" + c);
+						System.out.println("Warning: " + s + "\n" + c);
+					}
+					
+					/* Add the resulting VariantPool to the list of VariantPools
+					 * so it's available for future operations.
+					 */
+					allVPs.put(result.getPoolID(), result);
+					
+					/* If user asked to print intermediate files, print the resulting
+					 * VariantPool to file.
+					 */
 					if(printIntermediateFiles){
-//						printVariantPool(result, SupportedFileType.VCF);
+						intermediateOut = op.getOperationID() + outputFormat.getDefaultExtension();
+						if(outFile != null){
+							canonicalPath = outFile.getCanonicalPath();
+							VariantPool.printVariantPool(intermediateOut,
+									canonicalPath.substring(0,canonicalPath.lastIndexOf(File.separator) + 1),
+									result, refGenome, outputFormat, repairHeader);
+						}
+						else{
+							VariantPool.printVariantPool(intermediateOut, result, refGenome, SupportedFileType.VCF, repairHeader);
+						}
 					}
 				}
 				else{
@@ -198,6 +268,10 @@ public class SetOperatorEngine implements Engine{
 		} catch (InvalidOperationException e) {
 			printErrorUsageHelpAndExit(e);
 		} catch (InvalidInputFileException e) {
+			printErrorUsageHelpAndExit(e);
+		} catch (FileNotFoundException e) {
+			printErrorUsageHelpAndExit(e);
+		} catch (TribbleException e) {
 			printErrorUsageHelpAndExit(e);
 		} catch (Exception e) {
 			logger.error("Caught unexpected exception, something is very wrong!");
@@ -227,11 +301,11 @@ public class SetOperatorEngine implements Engine{
 	 * @return
 	 * @throws InvalidOperationException
 	 */
-	private ArrayList<Operation> createOperations(ArrayList<Object> operations) throws InvalidOperationException{
+	private ArrayList<Operation> createOperations(ArrayList<Object> operations, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
 		
 		ArrayList<Operation> opList = new ArrayList<Operation>();
 		for(Object o : operations){
-			Operation op = new Operation(o.toString());
+			Operation op = new Operation(o.toString(), variantPools);
 			opList.add(op);
 		}
 		return opList;
@@ -263,6 +337,20 @@ public class SetOperatorEngine implements Engine{
 			}
 		}
 		return vpList;
+	}
+	
+	/**
+	 * Get VCFHeaders from the list of VariantPools.
+	 * @param vps
+	 * @return
+	 */
+	private ArrayList<VCFHeader> getHeaders(ArrayList<VariantPool> vps){
+		
+		ArrayList<VCFHeader> headers = new ArrayList<VCFHeader>();
+		for(VariantPool vp : vps){
+			headers.add(vp.getHeader());
+		}
+		return headers;
 	}
 	
 	/**
@@ -302,7 +390,7 @@ public class SetOperatorEngine implements Engine{
 	 */
 	private static IntersectType getIntersectTypeByCommand(String commandString){
 		for(IntersectType i : IntersectType.values()){
-			if(i.getCommand().equals(commandString)){
+			if(i.getCommand().equalsIgnoreCase(commandString)){
 				return i;
 			}
 		}
@@ -316,42 +404,28 @@ public class SetOperatorEngine implements Engine{
 	 */
 	public SupportedFileType getSupportedFileTypeByName(String name){
 		for (SupportedFileType t : SupportedFileType.values()){
-			if(t.getName().equals(name)){
+			if(t.getName().equalsIgnoreCase(name)){
 				return t;
 			}
 		}
 		return null;
 	}
+
 	
 	/**
-	 * Print a VariantPool to file in the format specified by SupportedFileType. If fileType is
-	 * VCF, we must have a SAMSequenceDictionary
-	 * @param filePath
-	 * @param vp
-	 * @param refDict
-	 * @param fileType
+	 * Print the error to stdout and log. Then print the usage and help
+	 * information and exit
+	 * @param e
 	 */
-	private static void printVariantPool(String filePath, VariantPool vp, SAMSequenceDictionary refDict, SupportedFileType fileType){
-		
-		if(fileType == SupportedFileType.VCF){
-			printVariantPoolToVCF(filePath, vp, refDict);
-		}
-	}
-	
-	private static void printVariantPoolToVCF(String filePath, VariantPool vp, SAMSequenceDictionary refDict){
-		
-		if(refDict == null){
-			throw new RuntimeException("Received a 'null' SAMSequenceDictionary. Something is very wrong!");
-		}
-			VariantContextWriter writer = VariantContextWriterFactory.create(new File(filePath), refDict);
-	}
-	
 	private static void printErrorUsageHelpAndExit(Exception e){
 		System.err.println(e.getMessage());
 		logger.error(e.getMessage());
 		printUsageHelpAndExit();
 	}
 	
+	/**
+	 * Print only the usage and help information and exit.
+	 */
 	private static void printUsageHelpAndExit(){
 		parser.printUsage();
 		parser.printHelp();
