@@ -94,6 +94,12 @@ public class SetOperator {
 	
 	
 	
+	
+	
+	
+	
+	
+	
 	/****************************************************
 	 * Intersect logic
 	 */
@@ -127,16 +133,14 @@ public class SetOperator {
 		Iterator<String> it = smallest.getIterator();
 		String currVarKey;
 		VariantContext var = null;
-		VariantContextBuilder vcBuilder;
 		SamplePool sp;
 		GenotypesContext gc;
 		Iterator<Genotype> genoIt;
 		Genotype geno;
 		ArrayList<Genotype> genotypes;
 		LinkedHashSet<Allele> allAlleles;
-		Allele ref = null;
 		HashMap<String, Genotype> sampleGenotypes;
-		boolean intersects;
+		boolean intersects, allVPsContainVarAtLoc;
 
 		/* Add all samples from each VariantPool involved in the intersection */
 		for(VariantPool vp : variantPools){
@@ -154,34 +158,18 @@ public class SetOperator {
 			 * I believe verifying the var at least exists in all VPs first should save time over
 			 * interrogating the genotypes along the way.
 			 */
-			if(allVariantPoolsContainVariantAtLoc(variantPools, currVarKey)){
+			allVPsContainVarAtLoc = allVariantPoolsContainVariant(variantPools, currVarKey, op.getOperationID());
+			if(allVPsContainVarAtLoc){
 
 				intersects = true;
 				genotypes = new ArrayList<Genotype>();
 				allAlleles = new LinkedHashSet<Allele>();
 				sampleGenotypes = new HashMap<String, Genotype>();
-				int count = 0;
 				for(VariantPool vp : variantPools){
 					
 					var = vp.getVariant(currVarKey);
 					allAlleles.addAll(var.getAlternateAlleles());
 					
-					/* Track whether the reference allele is the same across all
-					 * VariantPools. If not, ignore the variant, emit warning,
-					 * and continue.
-					 */
-					if(count == 0){
-						ref = var.getReference();
-					}
-					else{
-						if(!ref.equals(var.getReference(), true)){
-							String s = "Reference alleles do not match between variant pools for variant " +
-									currVarKey + ". Ignoring variant and continuing...";
-							logger.warn(s);
-							System.out.println("Warning: " + s);
-							break;
-						}
-					}
 
 					/* Get the SamplePool associated with this VariantPool and get the genotypes for this VariantContext
 					 * Iterate over the genotypes and intersect.
@@ -203,7 +191,7 @@ public class SetOperator {
 					genoIt = gc.iterator();
 					while(genoIt.hasNext()){
 						geno = genoIt.next();
-						if(!intersectsByGenotype(geno, type, sampleGenotypes, currVarKey, op.getOperationID())){
+						if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, op.getOperationID())){
 							intersects = false;
 							break;
 						}
@@ -213,7 +201,6 @@ public class SetOperator {
 
 					if(!intersects)
 						break;
-					count++;
 				}
 
 				// If all VariantPools contain var and they intersect by IntersectTypes, add it to the new pool
@@ -222,29 +209,18 @@ public class SetOperator {
 					/* add Ref allele */
 					allAlleles.add(var.getReference());
 
-					/* Start building the new VariantContext */
-					vcBuilder = new VariantContextBuilder();
-					vcBuilder.chr(var.getChr());
-					vcBuilder.start(var.getStart());
-					vcBuilder.stop(var.getEnd());
-					vcBuilder.alleles(allAlleles);
-					vcBuilder.genotypes(genotypes);
-					
-					/* TODO: Figure out how to approach attributes (i.e. INFO). */
-//					vcBuilder.attributes(var.getAttributes());
-
 					// Build the VariantContext and add to the VariantPool
-					intersection.addVariant(vcBuilder.make());
+					intersection.addVariant(buildVariant(var, allAlleles, genotypes));
 				}
 			}
-			else{
-				if(this.verbose){
-					String s = "Variant at (chr:pos) " + currVarKey + " in operation " + op.getOperationID() + " excluded " +
-							"because it was not present in all variant pools.";
-					logger.warn(s);
-					System.out.println(s);
-				}
-			}
+//			else{
+//				if(this.verbose){
+//					String s = "Variant at (chr:pos) " + currVarKey + " in operation " + op.getOperationID() + " excluded " +
+//							"because it was not present in all variant pools.";
+//					logger.warn(s);
+//					System.out.println(s);
+//				}
+//			}
 		}
 		return intersection;
 	}
@@ -270,93 +246,68 @@ public class SetOperator {
 	
 	/**
 	 * See if all VariantPools contain a variant at the same location. All VariantPools must have the same reference
-	 * allele
+	 * allele and at least one alt allele in common.
 	 * @param variantPools
 	 * @param varKey
 	 * @return true if all VariantPools contain the variant of interest. False, otherwise.
 	 * @throws InvalidOperationException 
 	 */
-	private boolean allVariantPoolsContainVariantAtLoc(ArrayList<VariantPool> variantPools, String varKey) throws InvalidOperationException{
+	private boolean allVariantPoolsContainVariant(ArrayList<VariantPool> variantPools, String varKey, String operationID) throws InvalidOperationException{
 		VariantContext var;
 		Allele ref = null; 
+		ArrayList<Allele> alts = null;
 		int count = 0;
+		boolean commonAlt;
 		for(VariantPool vp : variantPools){
 			var = vp.getVariant(varKey);
 			if(var == null){
 				return false;
 			}
-			
+			/* Track whether the reference and alt alleles are the same across all
+			 * VariantPools. If ref is not identical, ignore the variant, emit warning,
+			 * and continue. Alts must have at least one in common
+			 */
 			if(count == 0){
 				ref = var.getReference();
+				alts = new ArrayList<Allele>(var.getAlternateAlleles());
 			}
-			// Verify that all VariantPools have the same Reference. If not, fail because we're comparing different builds
-			else if(!ref.equals(var.getReference(), true)){
-				throw new InvalidOperationException("The variant pools being compared to not have the same" +
-						"reference allele at: chromosome " + var.getChr() + ", position " + var.getStart() + ". " +
-						"This is inappropriately comparing variants derived from different reference genome builds.");
+			else{
+				if(!ref.equals(var.getReference(), true)){
+					String s = "Variant at (chr:pos) " + varKey + " in operation " + operationID +
+							" excluded because reference alleles" +
+							" do not match between variant pools. Do the reference builds match?";
+					logger.warn(s);
+					System.out.println("Warning: " + s);
+					return false;
+				}
+				else{
+					/* Make sure there is at least one alt allele in common with
+					 * the alleles from the first VariantPool
+					 */
+					commonAlt = false;
+					for(Allele a : var.getAlternateAlleles()){
+						if(alts.contains(a)){
+							/* Found one that matches. Break and continue */
+							commonAlt = true;
+							break;
+						}
+					}
+					
+					/* If we didn't find common alt, exclude variant */
+					if(!commonAlt){
+						String s = "Variant at (chr:pos) " + varKey + " in operation " + operationID +
+								" excluded because alternate alleles" +
+								" do not overlap between variant pools.";
+						logger.warn(s);
+						System.out.println("Warning: " + s);
+						return false;
+					}
+				}
 			}
-			
 			count++;
 		}	
 		return true;
 	}
-	
-	
-	/**
-	 * Given a list of VariantPool objects and a chr:pos key pertaining to a chromosomal position, collect
-	 * and return the list of called alternate alleles that intersect across the VariantPool Objects. Ignore
-	 * uncalled alternate alleles
-	 * @param variantPools
-	 * @param varKey
-	 * @return An ArrayList<Allele> of only called alternate alleles that intersect between all VariantPools,
-	 * or null if none intersect.
-	 * @throws InvalidOperationException 
-	 */
-//	private ArrayList<Allele> getIntersectingAllelesThatAreCalled(ArrayList<VariantPool> variantPools, String varKey) throws InvalidOperationException{
-//		
-//		/* First make sure that all VariantPools at least have a mutation at the
-//		 * location. Return null if not. i.e. fail as quickly as possible.
-//		 */
-//		if(!allVariantPoolsContainVariantAtLoc(variantPools, varKey)){
-//			return null;
-//		}
-//		
-//		ArrayList<Allele> intersectingCalledAlleles = new ArrayList<Allele>();
-//		ArrayList<Allele> tmpAlts;
-//		ArrayList<Allele> currAlleles;
-//		VariantContext var;
-//		
-//		int count = 0;
-//		for(VariantPool vp : variantPools){
-//			var = vp.getVariant(varKey);
-//			currAlleles = new ArrayList<Allele>(var.getAlternateAlleles());
-//			
-//			/* If this is the first VariantPool, just add all called alleles */
-//			if(count == 0){
-//				for(Allele a : currAlleles){
-////					if(a.isCalled())
-//						intersectingCalledAlleles.add(a);
-//				}
-//			}
-//			
-//			/* For subsequent VariantPools, just check if the allele(s) from the first
-//			 * are called. If not, remove them from the list
-//			 */
-//			else{
-//				tmpAlts = new ArrayList<Allele>(intersectingCalledAlleles);
-//				for(Allele a : tmpAlts){
-//					if(!currAlleles.contains(a)){
-//						intersectingCalledAlleles.remove(a);
-//					}
-//				}
-//			}
-//			count++;
-//		}
-//		
-//		if(intersectingCalledAlleles.size() > 0)
-//			return intersectingCalledAlleles;
-//		return null;
-//	}
 	
 	
 	/**
@@ -365,7 +316,7 @@ public class SetOperator {
 	 * @param type
 	 * @return True if the genotype matches the intersect type
 	 */
-	private boolean intersectsByGenotype(Genotype geno, IntersectType type, HashMap<String, Genotype> sampleGenotypes,
+	private boolean intersectsByType(Genotype geno, IntersectType type, HashMap<String, Genotype> sampleGenotypes,
 			String currVarKey, String operationID){
 		
 		/* If any sample is found in multiple VariantPools and the sample's 
@@ -468,6 +419,13 @@ public class SetOperator {
 	
 	
 	
+	
+	
+	
+	
+	
+	
+	
 	/****************************************************
 	 * Union logic
 	 */
@@ -476,6 +434,13 @@ public class SetOperator {
 
 		return null;
 	}
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -494,6 +459,20 @@ public class SetOperator {
 //			}
 //		}
 //	}
+	
+	private VariantContext buildVariant(VariantContext var, LinkedHashSet<Allele> alleles, ArrayList<Genotype> genos){
+		/* Start building the new VariantContext */
+		VariantContextBuilder vcBuilder = new VariantContextBuilder();
+		vcBuilder.chr(var.getChr());
+		vcBuilder.start(var.getStart());
+		vcBuilder.stop(var.getEnd());
+		vcBuilder.alleles(alleles);
+		vcBuilder.genotypes(genos);
+		
+		/* TODO: Figure out how to approach attributes (i.e. INFO). */
+//		vcBuilder.attributes(var.getAttributes());
+		return vcBuilder.make();
+	}
 
 	
 	/**
