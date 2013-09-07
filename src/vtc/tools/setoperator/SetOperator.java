@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
+import org.broadinstitute.variant.variantcontext.GenotypeBuilder;
 import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.broadinstitute.variant.variantcontext.VariantContextBuilder;
@@ -130,6 +132,11 @@ public class SetOperator {
 		intersection.setFile(new File(op.getOperationID()));
 		intersection.setPoolID(op.getOperationID());
 
+		/* Add all samples from each VariantPool involved in the intersection */
+		for(VariantPool vp : variantPools){
+			intersection.addSamples(vp.getSamples());
+		}
+
 		Iterator<String> it = smallest.getIterator();
 		String currVarKey;
 		VariantContext var = null;
@@ -142,10 +149,7 @@ public class SetOperator {
 		HashMap<String, Genotype> sampleGenotypes;
 		boolean intersects, allVPsContainVarAtLoc;
 
-		/* Add all samples from each VariantPool involved in the intersection */
-		for(VariantPool vp : variantPools){
-			intersection.addSamples(vp.getSamples());
-		}
+
 
 
 		// Iterate over the smallest VariantPool and lookup each variant in the other(s)
@@ -213,14 +217,6 @@ public class SetOperator {
 					intersection.addVariant(buildVariant(var, allAlleles, genotypes));
 				}
 			}
-//			else{
-//				if(this.verbose){
-//					String s = "Variant at (chr:pos) " + currVarKey + " in operation " + op.getOperationID() + " excluded " +
-//							"because it was not present in all variant pools.";
-//					logger.warn(s);
-//					System.out.println(s);
-//				}
-//			}
 		}
 		return intersection;
 	}
@@ -273,11 +269,8 @@ public class SetOperator {
 			}
 			else{
 				if(!ref.equals(var.getReference(), true)){
-					String s = "Variant at (chr:pos) " + varKey + " in operation " + operationID +
-							" excluded because reference alleles" +
-							" do not match between variant pools. Do the reference builds match?";
-					logger.warn(s);
-					System.out.println("Warning: " + s);
+					String s = "reference alleles do not match between variant pools. Do the reference builds match?";
+					emitExcludedVariantWarning(s, varKey, operationID, null);
 					return false;
 				}
 				else{
@@ -295,11 +288,8 @@ public class SetOperator {
 					
 					/* If we didn't find common alt, exclude variant */
 					if(!commonAlt){
-						String s = "Variant at (chr:pos) " + varKey + " in operation " + operationID +
-								" excluded because alternate alleles" +
-								" do not overlap between variant pools.";
-						logger.warn(s);
-						System.out.println("Warning: " + s);
+						String s = "alternate alleles do not overlap between variant pools.";
+						emitExcludedVariantWarning(s, varKey, operationID, null);
 						return false;
 					}
 				}
@@ -325,11 +315,8 @@ public class SetOperator {
 		Genotype sg = sampleGenotypes.get(geno.getSampleName());
 		if(sg != null && !sg.sameGenotype(geno)){
 			if(this.verbose){
-				String s = "Variant at (chr:pos) " + currVarKey + " in operation " + operationID + " excluded " +
-						"because sample " + geno.getSampleName() + " exists in multiple " +
-						"variant pools but the genotype did not match.";
-				logger.warn(s);
-				System.out.println(s);
+				String s = "exists in multiple variant pools but the genotype did not match.";
+				emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 			}
 			return false;
 		}
@@ -342,10 +329,8 @@ public class SetOperator {
 				return true;
 			else{
 				if(this.verbose){
-					String s = "Variant at (chr:pos) " + currVarKey + " in operation " + operationID + " excluded " +
-							"because sample " + geno.getSampleName() + " is not Homo Ref.";
-					logger.warn(s);
-					System.out.println(s);
+					String s = "is not Homo Ref.";
+					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
 			}
 		}
@@ -357,10 +342,8 @@ public class SetOperator {
 				return true;
 			else{
 				if(this.verbose){
-					String s = "Variant at (chr:pos) " + currVarKey + " in operation " + operationID + " excluded " +
-							"because sample " + geno.getSampleName() + " is not Homo Alt.";
-					logger.warn(s);
-					System.out.println(s);
+					String s = "is not Homo Alt.";
+					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
 			}
 		}
@@ -380,11 +363,8 @@ public class SetOperator {
 			}
 			if(!geno.isHet() || noRef){
 				if(this.verbose){
-					String s = "Variant at (chr:pos) " + currVarKey + " in operation " + operationID + " excluded " +
-							"because sample " + geno.getSampleName() + " is not Heterozygous" +
-							" containing a Ref allele.";
-					logger.warn(s);
-					System.out.println(s);
+					String s = "is not Heterozygous containing a Ref allele.";
+					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
 			}
 		}
@@ -393,11 +373,8 @@ public class SetOperator {
 				return true;
 			else{
 				if(this.verbose){
-					String s = "Variant at (chr:pos) " + currVarKey + " in operation " + operationID + " excluded " +
-							"because sample " + geno.getSampleName() + " is Homo Ref" +
-							" containing a Ref allele.";
-					logger.warn(s);
-					System.out.println(s);
+					String s = "is Homo Ref containing a Ref allele.";
+					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
 			}
 		}
@@ -432,10 +409,94 @@ public class SetOperator {
 	
 	public VariantPool performUnion(Operation op, ArrayList<VariantPool> variantPools){
 
+		String currVarKey;
+		VariantContext var, var2;
+		ArrayList<String> processedVarKeys = new ArrayList<String>();
+		Iterator<String> it;
+		ArrayList<Genotype> genotypes;
+		LinkedHashSet<Allele> alleles;
+		Allele ref;
+		
+		VariantPool union = new VariantPool();
+		union.setFile(new File(op.getOperationID()));
+		union.setPoolID(op.getOperationID());
+
+		/* Add all samples from each VariantPool involved in the intersection */
+		for(VariantPool vp : variantPools){
+			union.addSamples(vp.getSamples());
+		}
+		
+		/* Loop over variantPools */
+		for(VariantPool vp : variantPools){
+			it = vp.getIterator();
+			
+			/* Iterate over each variant in this pool */
+			while(it.hasNext()){
+				currVarKey = it.next();
+				genotypes = new ArrayList<Genotype>();
+				alleles = new LinkedHashSet<Allele>();
+				
+				/* Track each variant that we've processed
+				 * so we don't process it in subsequent VariantPools
+				 */
+				if(!processedVarKeys.contains(currVarKey)){
+					processedVarKeys.add(currVarKey);
+	
+					/* Get variant and loop over the other VariantPools
+					 * and add the samples to the new VariantPool
+					 */
+					var = vp.getVariant(currVarKey);
+					genotypes.addAll(var.getGenotypes());
+					alleles.addAll(var.getAlleles());
+					ref = var.getReference();
+					for(VariantPool vp2 : variantPools){
+						
+						/* Skip this VariantPool if it's the same as vp */
+						if(vp2.getPoolID().equals(vp.getPoolID())){
+							continue;
+						}
+						
+						/* Get the variant from this VariantPool. If exists,
+						 * add genotypes. Otherwise, create NO_CALL genotypes
+						 */
+						var2 = vp2.getVariant(currVarKey);
+						if(var2 != null){
+							genotypes.addAll(var2.getGenotypes());
+							alleles.addAll(var2.getAlleles());
+							if(!ref.equals(var2.getReference())){
+								String s = "reference alleles do not match between variant pools. Do the reference builds match?";
+								emitExcludedVariantWarning(s, currVarKey, op.getOperationID(), null);
+							}
+						}
+						else{
+							genotypes.addAll(generateNoCallGenotypesForSamples(vp.getSamples()));
+						}
+						union.addVariant(buildVariant(var, alleles, genotypes));
+					}
+				}
+			}
+		}
 		return null;
 	}
 	
 	
+	private ArrayList<Genotype> generateNoCallGenotypesForSamples(TreeSet<String> samples){
+		
+		ArrayList<Genotype> genotypes = new ArrayList<Genotype>();
+		ArrayList<Allele> alleles;
+		Genotype g;
+
+		for(String s : samples){
+			alleles = new ArrayList<Allele>();
+			
+			/* Create to NO_Call alleles */
+			alleles.add(Allele.create(Allele.NO_CALL_STRING));
+			alleles.add(Allele.create(Allele.NO_CALL_STRING));
+			g = new GenotypeBuilder(s, alleles).make();
+			genotypes.add(g);
+		}
+		return genotypes;
+	}
 	
 	
 	
@@ -497,5 +558,26 @@ public class SetOperator {
 				sp.getPoolID() + "' (" + vp.getFile().getName() +
 				") as specified in '" +
 				op.toString() + "': " + sb.toString());
+	}
+	
+	/**
+	 * Emit a warning why a variant was excluded in set operation
+	 * 
+	 * @param reason
+	 * @param varKey
+	 * @param operationID
+	 * @param sampleName
+	 */
+	private void emitExcludedVariantWarning(String reason, String varKey, String operationID, String sampleName){
+		String message;
+		if(sampleName == null){
+			message = "Variant at (chr:pos) " + varKey + " in operation " + operationID + " excluded because " + reason;
+		}
+		else{
+			message = "Variant at (chr:pos) " + varKey + " in operation " + operationID + " excluded " +
+							"because sample " + sampleName + " " + reason;
+		}
+		logger.warn(message);
+		System.out.println("Warning: " + message);	
 	}
 }

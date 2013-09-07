@@ -14,7 +14,9 @@ import java.util.Comparator;
 public enum Tool {
 
 	SET_OPERATOR("SetOperator", "SO", "Perform set operations on variant sets",
-			new ArrayList<String>(Arrays.asList(new String[]{"SO", "SetOperator"})));
+			new ArrayList<String>(Arrays.asList(new String[]{"SO", "SetOperator"}))),
+    VAR_STATS("VarStats", "VS", "Perform various statistical analyses",
+            new ArrayList<String>(Arrays.asList(new String[]{"VS", "VarStats"})));;
 	
 	private String name, shortCommand, briefDescription;
 	private ArrayList<String> permittedCommands;

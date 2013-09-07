@@ -10,9 +10,8 @@ import net.sourceforge.argparse4j.inf.Namespace;
 
 import org.apache.log4j.Logger;
 
-import vtc.datastructures.InvalidInputFileException;
-import vtc.tools.setoperator.InvalidOperationException;
 import vtc.tools.setoperator.SetOperatorEngine;
+import vtc.tools.varstats.VarStatsEngine;
 
 /**
  * @author markebbert
@@ -62,6 +61,10 @@ public class VTCEngine implements Engine{
 				SetOperatorEngine soe = new SetOperatorEngine(toolArgs);
 				soe.operate();
 			}
+			else if(tool == Tool.VAR_STATS){
+                VarStatsEngine vse = new VarStatsEngine(toolArgs);
+                vse.doStats();
+            }
 			
 		} catch (ArgumentParserException e) {
 			printErrorUsageHelpAndExit(e);

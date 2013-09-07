@@ -28,6 +28,7 @@ import vtc.Engine;
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.SupportedFileType;
 import vtc.datastructures.VariantPool;
+import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
  * @author markebbert
@@ -179,7 +180,7 @@ public class SetOperatorEngine implements Engine{
 			boolean verbose = parsedArgs.getBoolean("VERBOSE");
 	
 	
-			TreeMap<String, VariantPool> allVPs = createVariantPools(vcfArgs);
+			TreeMap<String, VariantPool> allVPs = UtilityBelt.createVariantPools(vcfArgs);
 			ArrayList<Operation> ops = createOperations(operations, allVPs);
 	
 			ArrayList<VariantPool> associatedVPs;
@@ -264,36 +265,36 @@ public class SetOperatorEngine implements Engine{
 				}
 			}
 		} catch(ArgumentParserException e){
-			printErrorUsageHelpAndExit(e);
+			UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
 		} catch (InvalidOperationException e) {
-			printErrorUsageHelpAndExit(e);
+			UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
 		} catch (InvalidInputFileException e) {
-			printErrorUsageHelpAndExit(e);
+			UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
 		} catch (FileNotFoundException e) {
-			printErrorUsageHelpAndExit(e);
+			UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
 		} catch (TribbleException e) {
-			printErrorUsageHelpAndExit(e);
+			UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
 		} catch (Exception e) {
 			logger.error("Caught unexpected exception, something is very wrong!");
 			e.printStackTrace();
 		}
 	}
-	
-	/**
-	 * Will create VariantPool objects from command line-provided input file strings and return as ArrayList<VariantPool>
-	 * @param inputFiles
-	 * @return
-	 * @throws InvalidInputFileException
-	 */
-	private TreeMap<String, VariantPool> createVariantPools(ArrayList<Object> inputFiles) throws InvalidInputFileException{
-		
-		TreeMap<String, VariantPool> vpMap = new TreeMap<String, VariantPool>();
-		for(Object o : inputFiles){
-			VariantPool vp = new VariantPool(o.toString(), false);
-			vpMap.put(vp.getPoolID(), vp);
-		}
-		return vpMap;
-	}
+//	
+//	/**
+//	 * Will create VariantPool objects from command line-provided input file strings and return as ArrayList<VariantPool>
+//	 * @param inputFiles
+//	 * @return
+//	 * @throws InvalidInputFileException
+//	 */
+//	private TreeMap<String, VariantPool> createVariantPools(ArrayList<Object> inputFiles) throws InvalidInputFileException{
+//		
+//		TreeMap<String, VariantPool> vpMap = new TreeMap<String, VariantPool>();
+//		for(Object o : inputFiles){
+//			VariantPool vp = new VariantPool(o.toString(), false);
+//			vpMap.put(vp.getPoolID(), vp);
+//		}
+//		return vpMap;
+//	}
 	
 	/**
 	 * Will create Operation objects from command line-provided operation strings and return as ArrayList<Operation>
@@ -412,23 +413,23 @@ public class SetOperatorEngine implements Engine{
 	}
 
 	
-	/**
-	 * Print the error to stdout and log. Then print the usage and help
-	 * information and exit
-	 * @param e
-	 */
-	private static void printErrorUsageHelpAndExit(Exception e){
-		System.err.println(e.getMessage());
-		logger.error(e.getMessage());
-		printUsageHelpAndExit();
-	}
-	
-	/**
-	 * Print only the usage and help information and exit.
-	 */
-	private static void printUsageHelpAndExit(){
-		parser.printUsage();
-		parser.printHelp();
-		System.exit(1);		
-	}
+//	/**
+//	 * Print the error to stdout and log. Then print the usage and help
+//	 * information and exit
+//	 * @param e
+//	 */
+//	private static void printErrorUsageHelpAndExit(Exception e){
+//		System.err.println(e.getMessage());
+//		logger.error(e.getMessage());
+//		printUsageHelpAndExit();
+//	}
+//	
+//	/**
+//	 * Print only the usage and help information and exit.
+//	 */
+//	private static void printUsageHelpAndExit(){
+//		parser.printUsage();
+//		parser.printHelp();
+//		System.exit(1);		
+//	}
 }
