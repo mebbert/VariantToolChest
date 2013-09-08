@@ -130,6 +130,9 @@ public class SetOperatorEngine implements Engine{
 		
 		output.addArgument("-v", "--verbose").dest("VERBOSE").action(Arguments.storeTrue())
 				.help("Print useful information to 'debug.txt'.");
+		
+		output.addArgument("-c", "--chr").dest("CHR").action(Arguments.storeTrue())
+				.help("Add 'chr' to chromosome (e.g. 'chr20' instead of '20'");
 
 		try {
 			parsedArgs = parser.parseArgs(args);
@@ -178,6 +181,7 @@ public class SetOperatorEngine implements Engine{
 			boolean printIntermediateFiles = parsedArgs.getBoolean("INTERMEDIATE");
 			boolean repairHeader = parsedArgs.getBoolean("REPAIR");
 			boolean verbose = parsedArgs.getBoolean("VERBOSE");
+			boolean chr = parsedArgs.getBoolean("CHR");
 	
 	
 			TreeMap<String, VariantPool> allVPs = UtilityBelt.createVariantPools(vcfArgs);
@@ -190,7 +194,7 @@ public class SetOperatorEngine implements Engine{
 			String intermediateOut, canonicalPath;
 			VCFHeader header;
 			for(Operation op : ops){
-				SetOperator so = new SetOperator(verbose);
+				SetOperator so = new SetOperator(verbose, chr);
 				associatedVPs = getAssociatedVariantPoolsAsArrayList(op, allVPs);
 				result = null;
 				

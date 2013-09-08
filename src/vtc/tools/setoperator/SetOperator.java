@@ -29,15 +29,16 @@ public class SetOperator {
 
 	private static Logger logger = Logger.getLogger(SetOperator.class);
 	private boolean verbose;
+	private boolean addChr;
 
 	
 	/****************************************************
 	 * Constructors
 	 */
 	
-	public SetOperator(boolean verbose){
+	public SetOperator(boolean verbose, boolean addChr){
 		this.verbose = verbose;
-		return;
+		this.addChr = addChr;
 	}
 	
 //	public SetOperator(Operation op, HashMap<String, VariantPool> variantPools){
@@ -51,6 +52,9 @@ public class SetOperator {
 	 * Getters
 	 */
 	
+	public boolean addChr(){
+		return addChr;
+	}
 //	public Operation getOperation(){
 //		return this.operation;
 //	}
@@ -416,6 +420,7 @@ public class SetOperator {
 		ArrayList<Genotype> genotypes;
 		LinkedHashSet<Allele> alleles;
 		Allele ref;
+		boolean add;
 		
 		VariantPool union = new VariantPool();
 		union.setFile(new File(op.getOperationID()));
@@ -449,6 +454,7 @@ public class SetOperator {
 					genotypes.addAll(var.getGenotypes());
 					alleles.addAll(var.getAlleles());
 					ref = var.getReference();
+					add = true;
 					for(VariantPool vp2 : variantPools){
 						
 						/* Skip this VariantPool if it's the same as vp */
@@ -461,6 +467,18 @@ public class SetOperator {
 						 */
 						var2 = vp2.getVariant(currVarKey);
 						if(var2 != null){
+
+							/* Check that refs match, otherwise omit */
+							if(!ref.equals(var2.getReference(), true)){
+								String s = "reference alleles do not match between variant pools. Do the reference builds match?";
+								emitExcludedVariantWarning(s, currVarKey, op.getOperationID(), null);
+								break;
+							}
+							
+							if(hasMatchingSampleWithDifferentGenotype(var, var2, currVarKey, op.getOperationID())){
+								break;
+							}
+							
 							genotypes.addAll(var2.getGenotypes());
 							alleles.addAll(var2.getAlleles());
 							if(!ref.equals(var2.getReference())){
@@ -469,31 +487,65 @@ public class SetOperator {
 							}
 						}
 						else{
-							genotypes.addAll(generateNoCallGenotypesForSamples(vp.getSamples()));
+							genotypes.addAll(generateNoCallGenotypesForSamples(vp.getSamples(), vp2.getSamples()));
 						}
 						union.addVariant(buildVariant(var, alleles, genotypes));
 					}
 				}
 			}
 		}
-		return null;
+		return union;
 	}
 	
 	
-	private ArrayList<Genotype> generateNoCallGenotypesForSamples(TreeSet<String> samples){
+	/**
+	 * Check if var1 and var2 have an overlapping sample with different genotypes. If so,
+	 * return true.
+	 * @param var1
+	 * @param var2
+	 * @param varKey
+	 * @param operationID
+	 * @return
+	 */
+	private boolean hasMatchingSampleWithDifferentGenotype(VariantContext var1, VariantContext var2, String varKey, String operationID){
+		for(String sampleName : var2.getSampleNames()){
+			if(var1.getSampleNames().contains(sampleName)){
+				if(!var1.getGenotype(sampleName).sameGenotype(var2.getGenotype(sampleName))){
+					String s = "encountered in multiple variant pools but the genotypes" +
+							" do not match.";
+					emitExcludedVariantWarning(s, varKey, operationID, sampleName);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Generate NO_CALL genotypes for samples that we don't have data for.
+	 * @param samples
+	 * @return
+	 */
+	private ArrayList<Genotype> generateNoCallGenotypesForSamples(TreeSet<String> var1Samples, TreeSet<String> var2Samples){
 		
 		ArrayList<Genotype> genotypes = new ArrayList<Genotype>();
 		ArrayList<Allele> alleles;
 		Genotype g;
 
-		for(String s : samples){
-			alleles = new ArrayList<Allele>();
+		for(String s : var2Samples){
 			
-			/* Create to NO_Call alleles */
-			alleles.add(Allele.create(Allele.NO_CALL_STRING));
-			alleles.add(Allele.create(Allele.NO_CALL_STRING));
-			g = new GenotypeBuilder(s, alleles).make();
-			genotypes.add(g);
+			/* If var2 has the same samples, don't
+			 * overwrite genotypes from var1.
+			 */
+			if(!var1Samples.contains(s)){
+				alleles = new ArrayList<Allele>();
+				
+				/* Create to NO_Call alleles */
+				alleles.add(Allele.create(Allele.NO_CALL_STRING));
+				alleles.add(Allele.create(Allele.NO_CALL_STRING));
+				g = new GenotypeBuilder(s, alleles).make();
+				genotypes.add(g);
+			}
 		}
 		return genotypes;
 	}
@@ -524,7 +576,7 @@ public class SetOperator {
 	private VariantContext buildVariant(VariantContext var, LinkedHashSet<Allele> alleles, ArrayList<Genotype> genos){
 		/* Start building the new VariantContext */
 		VariantContextBuilder vcBuilder = new VariantContextBuilder();
-		vcBuilder.chr(var.getChr());
+		vcBuilder.chr(generateChrString(var.getChr()));
 		vcBuilder.start(var.getStart());
 		vcBuilder.stop(var.getEnd());
 		vcBuilder.alleles(alleles);
@@ -535,6 +587,23 @@ public class SetOperator {
 		return vcBuilder.make();
 	}
 
+	
+	/**
+	 * Add 'chr' to chromosome if user requests
+	 * @param chr
+	 * @return
+	 */
+	private String generateChrString(String chr){
+		if(this.addChr()){
+			if(!chr.toLowerCase().startsWith("chr")){
+				return "chr" + chr;
+			}
+		}
+		else if(chr.toLowerCase().startsWith("chr")){
+			return chr.substring(3);
+		}
+		return chr;
+	}
 	
 	/**
 	 * Throw an invalidOperationException specifying which samples are missing that were

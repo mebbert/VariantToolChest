@@ -1,0 +1,11 @@
+This will test unioning two vcfs with no overlapping samples. One var
+has a different alt. This should add both alts to the line. If we
+encounter the same sample with different genotypes, it should be
+omitted because we don't know which one to report.
+
+Expected result:
+20	14370	Pass
+20	17330	Pass
+20	1110696	Pass
+20	1230237	Pass
+20	1234567	Pass
