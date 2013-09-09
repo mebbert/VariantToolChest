@@ -108,13 +108,13 @@ public class VarStatsEngine implements Engine {
 		}
 
 		try {
-			//Summary was chosen
-			if(parsedArgs.getBoolean("Summary") == true){
-				TreeMap<String, VariantPool> AllVPs = UtilityBelt.createVariantPools(vcfArgs);
-				//VarStats vstat = new VarStats(AllVPs);
-			}
 			
-			/* TODO: This is performed twice. One should be removed.
+            if(parsedArgs.getBoolean("Summary")){
+                TreeMap<String, VariantPool> AllVPs = UtilityBelt.createVariantPools(vcfArgs);
+                VarStats vstat = new VarStats(AllVPs);
+            }
+			
+			/* TODO: This is performed twice! One should be removed!
 			 * 
 			 */
 			TreeMap<String, VariantPool> AllVPs = UtilityBelt.createVariantPools(vcfArgs);
