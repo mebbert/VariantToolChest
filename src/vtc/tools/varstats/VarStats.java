@@ -22,6 +22,8 @@ public class VarStats {
 	private int TotalNumHet = 0;
 	private int TotalNumMultiAlts = 0;
 	private double TotalQualScore = 0;
+	private double TotalTiCount = 0;
+	private double TotalTvCount = 0;
 	
 	private int NumVars = 0;
 	private int NumSNVs = 0;
@@ -32,6 +34,8 @@ public class VarStats {
 	private int NumHet = 0;
 	private int NumMultiAlts = 0;
 	private double QualScore = 0;
+	private double TiCount = 0;
+	private double TvCount = 0;
 	
 	boolean PrintMulti;
 	boolean PrintSingle;
@@ -61,6 +65,8 @@ public class VarStats {
 				NumHet = 0;
 				NumMultiAlts = 0;
 				QualScore = 0;
+				TiCount = 0;
+				TvCount = 0;
 			}
 			
 			Iterator<String> it = VP.getIterator();
@@ -73,13 +79,14 @@ public class VarStats {
 				TotalNumVars++;
 				VariantContext var = VP.getVariant(currVarKey);
 //				System.out.println(var);
-				ArrayList<Allele> Alts = (ArrayList<Allele>) var.getAlternateAlleles();
+				List<Allele> Alts = var.getAlternateAlleles();
 				Allele ref = var.getReference();
 				
 				if(var.isSNP()){
 					NumSNVs++;
 					TotalNumSNVs++;
-					int transition = isTransition(ref, Alts);
+					TiCount += isTransition(ref, Alts);
+					TvCount += isTransversion(ref, Alts);
 				}
 				else if(var.isIndel()){
 					InDels++;
@@ -106,7 +113,7 @@ public class VarStats {
 				}
 				
 				AltCounter(Alts);
-				int transition = isTransition(ref, Alts);
+				
 						
 			}
 			System.out.println("Total: " + NumVars + "\nSNPs: " + NumSNVs + "\nInDels: " + InDels + "\nStructInDels: " + StructVars + "\nNumHet: " +
@@ -138,7 +145,7 @@ public class VarStats {
 		
 	}
 	
-	private int isTransition(Allele ref, ArrayList<Allele> alts){
+	private int isTransition(Allele ref, List<Allele> alts){
 		String base;
 		String refBase = ref.getBaseString();
 		int count = 0;
@@ -157,12 +164,34 @@ public class VarStats {
 				count++;
 			}
 		}
+		TotalTiCount += count;
 		return count;
 	}
 	
+	private int isTransversion(Allele ref, List<Allele> alts){
+		String base;
+		String refBase = ref.getBaseString();
+		int count = 0;
+		for(Allele a : alts){
+			base = a.getBaseString();
+			if(base.equals("G") && refBase.equals("C")){
+				count++;
+			}
+			else if(base.equals("C") && refBase.equals("G")){
+				count++;
+			}
+			else if(base.equals("T") && refBase.equals("A")){
+				count++;
+			}
+			else if(base.equals("A") && refBase.equals("T")){
+				count++;
+			}
+		}
+		TotalTvCount += count;
+		return count;
+	}
 	
-	
-	private void AltCounter(ArrayList <Allele> Alts){
+	private void AltCounter(List <Allele> Alts){
 		
 		if(Alts.size() > 1){
 			NumMultiAlts++;
