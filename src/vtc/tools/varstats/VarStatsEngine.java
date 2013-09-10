@@ -40,10 +40,12 @@ public class VarStatsEngine implements Engine {
 	HashMap phenoInfo = new HashMap();
 
 	public VarStatsEngine(String[] args) {
+		
 		init(args);
 	}
 
 	private void init(String[] args) {
+		
 
 		parser = ArgumentParsers.newArgumentParser("VarStats");
 		parser.description("Variant Stats will perform basic statistical analysis.");
@@ -68,6 +70,12 @@ public class VarStatsEngine implements Engine {
 		Stats.addArgument("-s", "--summary").dest("Summary")
 				.action(Arguments.storeTrue())
 				.help("Prints summary statistics to the console");
+		Stats.addArgument("-pm", "-print-mulitple").dest("Print-multiple")
+				.action(Arguments.storeTrue())
+				.help("Prints summary statistics to the console for mulitple files in one block.");
+		Stats.addArgument("-ps", "-print-single").dest("Print-single")
+				.action(Arguments.storeTrue())
+				.help("Prints summary statistics to the console for individual files. This is the default option.");
 		Stats.addArgument("-a", "--association")
 				.nargs("+")
 				.dest("pheno")
@@ -95,6 +103,7 @@ public class VarStatsEngine implements Engine {
 	 * @throws ArgumentParserException
 	 */
 	public void doStats() {
+		System.out.println("beginning of dostat");
 		// lets have all the stats take place here for now..
 
 		ArrayList<Object> vcfArgs = new ArrayList<Object>(
@@ -109,15 +118,21 @@ public class VarStatsEngine implements Engine {
 
 		try {
 			
-            if(parsedArgs.getBoolean("Summary")){
-                TreeMap<String, VariantPool> AllVPs = UtilityBelt.createVariantPools(vcfArgs);
-                VarStats vstat = new VarStats(AllVPs);
-            }
 			
-			/* TODO: This is performed twice! One should be removed!
-			 * 
-			 */
 			TreeMap<String, VariantPool> AllVPs = UtilityBelt.createVariantPools(vcfArgs);
+			if(parsedArgs.getBoolean("Summary")){
+				
+				boolean PrintMulti = parsedArgs.getBoolean("Print-multiple");
+				boolean PrintSingle = parsedArgs.getBoolean("Print-single");
+				if(PrintMulti == true){
+					VarStats vstat = new VarStats(AllVPs, PrintMulti, PrintSingle);
+				}
+				else{
+					VarStats vstat = new VarStats(AllVPs, PrintMulti, true);
+				}
+			}
+			
+			
 			
 			// OK we have the phenotype information (phenoInfo) and we have the
 			// vcf (ALLVPs).
