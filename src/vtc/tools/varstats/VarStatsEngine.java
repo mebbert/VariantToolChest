@@ -70,12 +70,9 @@ public class VarStatsEngine implements Engine {
 		Stats.addArgument("-s", "--summary").dest("Summary")
 				.action(Arguments.storeTrue())
 				.help("Prints summary statistics to the console");
-		Stats.addArgument("-pm", "-print-mulitple").dest("Print-multiple")
+		Stats.addArgument("-c", "--combined").dest("Combined")
 				.action(Arguments.storeTrue())
-				.help("Prints summary statistics to the console for mulitple files in one block.");
-		Stats.addArgument("-ps", "-print-single").dest("Print-single")
-				.action(Arguments.storeTrue())
-				.help("Prints summary statistics to the console for individual files. This is the default option.");
+				.help("Prints summary statistics to the console for mulitple files in one block.  The default is will print each file separately.");
 		Stats.addArgument("-a", "--association")
 				.nargs("+")
 				.dest("pheno")
@@ -103,7 +100,6 @@ public class VarStatsEngine implements Engine {
 	 * @throws ArgumentParserException
 	 */
 	public void doStats() {
-		System.out.println("beginning of dostat");
 		// lets have all the stats take place here for now..
 
 		ArrayList<Object> vcfArgs = new ArrayList<Object>(
@@ -120,16 +116,10 @@ public class VarStatsEngine implements Engine {
 			
 			
 			TreeMap<String, VariantPool> AllVPs = UtilityBelt.createVariantPools(vcfArgs);
+			
 			if(parsedArgs.getBoolean("Summary")){
-				
-				boolean PrintMulti = parsedArgs.getBoolean("Print-multiple");
-				boolean PrintSingle = parsedArgs.getBoolean("Print-single");
-				if(PrintMulti == true){
-					VarStats vstat = new VarStats(AllVPs, PrintMulti, PrintSingle);
-				}
-				else{
-					VarStats vstat = new VarStats(AllVPs, PrintMulti, true);
-				}
+				boolean PrintMulti = parsedArgs.getBoolean("Combined");
+				VarStats vstat = new VarStats(AllVPs, PrintMulti);	
 			}
 			
 			

@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
+import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.datastructures.VariantPool;
@@ -22,63 +23,64 @@ public class VarStats {
 	private int TotalNumHet = 0;
 	private int TotalNumMultiAlts = 0;
 	private double TotalQualScore = 0;
+	private int TotalDepth = 0;
+	private int TotalNumGeno = 0;
 	private double TotalTiCount = 0;
 	private double TotalTvCount = 0;
+	private double TotalTiTv = 0;
+	private double TotalGenoTiCount = 0;
+	private double TotalGenoTvCount = 0;
+	private double TotalGenoTiTv = 0;
 	
-	private int NumVars = 0;
-	private int NumSNVs = 0;
-	private int InDels = 0;
-	private int StructVars = 0;
-	private int NumHomoRef = 0;
-	private int NumHomoVar = 0;
-	private int NumHet = 0;
-	private int NumMultiAlts = 0;
-	private double QualScore = 0;
-	private double TiCount = 0;
-	private double TvCount = 0;
 	
-	boolean PrintMulti;
-	boolean PrintSingle;
+
+	
 	
 	//constructor
 	
-	public VarStats(TreeMap<String, VariantPool> allVPs, boolean printMulti, boolean printSingle) {
+	public VarStats(TreeMap<String, VariantPool> allVPs, boolean printMulti) {
 		
-		IterateAndCount(allVPs, printMulti, printSingle);
+		IterateAndCount(allVPs, printMulti);
 		
 	}
 	
 	//Functions
 	
-	private void IterateAndCount (TreeMap<String, VariantPool> allVPs, boolean printMulti, boolean printSingle){
+	private void IterateAndCount (TreeMap<String, VariantPool> allVPs, boolean printMulti){
+		
 
 		for (VariantPool VP : allVPs.values()) {
 			boolean PrintMulti = printMulti;
-			boolean PrintSingle = printSingle;
-			if(PrintSingle == true){
-				NumVars = 0;
-				NumSNVs = 0;
-				InDels = 0;
-				StructVars = 0;
-				NumHomoRef = 0;
-				NumHomoVar = 0;
-				NumHet = 0;
-				NumMultiAlts = 0;
-				QualScore = 0;
-				TiCount = 0;
-				TvCount = 0;
-			}
+		
+			int NumVars = 0;
+			int NumSNVs = 0;
+			int InDels = 0;
+			int StructVars = 0;
+			int NumHomoRef = 0;
+			int NumHomoVar = 0;
+			int NumMultiAlts = 0;
+			int NumHet = 0;
+			double QualScore = 0;
+			double TiCount = 0;
+			double TvCount = 0;
+			int Depth = 0;
+			int NumGeno = 0;
+			double TiTv = 0;
+			double GenoTiCount = 0;
+			double GenoTvCount = 0;
+			double GenoTiTv = 0;
+		
 			
 			Iterator<String> it = VP.getIterator();
 			String currVarKey;
 			while (it.hasNext()) {
 				
 				currVarKey = it.next();
-//				System.out.println(currVarKey);
 				NumVars++;
 				TotalNumVars++;
 				VariantContext var = VP.getVariant(currVarKey);
-//				System.out.println(var);
+				List<String> names = var.getSampleNamesOrderedByName();
+			
 				List<Allele> Alts = var.getAlternateAlleles();
 				Allele ref = var.getReference();
 				
@@ -87,6 +89,9 @@ public class VarStats {
 					TotalNumSNVs++;
 					TiCount += isTransition(ref, Alts);
 					TvCount += isTransversion(ref, Alts);
+					double[] temp = testTiTv(var, names, ref);
+					GenoTiCount += temp[0];
+					GenoTvCount += temp[1];
 				}
 				else if(var.isIndel()){
 					InDels++;
@@ -112,37 +117,93 @@ public class VarStats {
 					TotalNumHomoVar = TotalNumHomoVar + var.getHetCount();
 				}
 				
-				AltCounter(Alts);
+				NumMultiAlts += AltCounter(Alts);
 				
-						
-			}
+				QualScore += var.getPhredScaledQual();
+				TotalQualScore += var.getPhredScaledQual();
+				
+				Depth += getDepth(var, names);
+				TotalDepth += getDepth(var, names);
+				NumGeno = names.size();
+				TotalNumGeno = names.size();
+			}		
+			TotalTiCount += TiCount;
+			TotalTvCount += TvCount;
+			TotalGenoTiCount += GenoTiCount;
+			TotalGenoTvCount += GenoTvCount;
+			TiTv = TiCount/TvCount;
+			GenoTiTv = GenoTiCount/GenoTvCount;
+			Depth = Depth/(NumVars*NumGeno);
+			QualScore = QualScore/NumVars;
+			
 			System.out.println("Total: " + NumVars + "\nSNPs: " + NumSNVs + "\nInDels: " + InDels + "\nStructInDels: " + StructVars + "\nNumHet: " +
 					NumHet + "\nNumhomoRef: " + NumHomoRef + "\nNumHomoVar: " + NumHomoVar + "\nNumMulitAlts: " + NumMultiAlts + "\nQualScore: "
-					+ QualScore);
+					+ QualScore + "\nDepth: " + Depth + "\nTi/Tv: " + TiTv + "\nGenoTiTv: " + GenoTiTv);
 		}
+		System.out.println(TotalTiCount + "\n" + TotalTvCount);
+		TotalTiTv = TotalTiCount/TotalTvCount;
+		TotalGenoTiTv = TotalGenoTiCount/TotalGenoTvCount;
+		TotalDepth = TotalDepth/(TotalNumVars*TotalNumGeno);
+		TotalQualScore = TotalQualScore/TotalNumVars;
+		
 		System.out.println("Total: " + TotalNumVars + "\nTotalSNPs: " + TotalNumSNVs + "\nTotalInDels: " + TotalInDels + "\nTotalStructInDels: " +
 				TotalStructVars + "\nTotalNumHet: " +
 				TotalNumHet + "\nTotalNumhomoRef: " + 
 				TotalNumHomoRef + "\nTotalNumHomoVar: " + 
 				TotalNumHomoVar + "\nTotalNumMulitAlts: " + 
 				TotalNumMultiAlts + "\nTotalQualScore: "
-				+ TotalQualScore);
+				+ TotalQualScore + "\nTotalDepth: " + 
+				TotalDepth + "\nTotalTiTv: " + TotalTiTv
+				+ "\nTotalGenoTiTv: " + TotalGenoTiTv);
 	}
 	
-	private void QualScoreCounter (){
+	
+	private int getDepth(VariantContext var, List<String> names){
 		
+		int count = 0;
+		for(String s : names){
+			Genotype geno = var.getGenotypes().get(s);
+			count += geno.getDP();
+			
+		}
+		return count;
 	}
 	
-	private void QualScoreAvg (){
+	private double[] testTiTv(VariantContext var, List<String> names, Allele ref){
+		double countTi = 0;
+		double countTv = 0;
+		for(String s : names){
+			String refBase = ref.getBaseString();
+			Genotype geno = var.getGenotypes().get(s);
+			String gt = geno.getGenotypeString();
+			String first = Character.toString(gt.charAt(0));
+			String second = Character.toString(gt.charAt(2));
+			countTi += checkTransition(refBase, first);
+			countTi += checkTransition(refBase, second);
+			countTv += checkTransversion(refBase, first);
+			countTv += checkTransversion(refBase, second);
+		}
 		
+		return new double[] {countTi, countTv};
 	}
 	
-	private void DepthScoresCounter (){
-		
-	}
 	
-	private void DepthScoresAvg (){
-		
+	
+	private int checkTransition(String ref, String base){
+		int count = 0;
+		if(base.equals("G") && ref.equals("A")){
+			count++;
+		}
+		else if(base.equals("A") && ref.equals("G")){
+			count++;
+		}
+		else if(base.equals("T") && ref.equals("C")){
+			count++;
+		}
+		else if(base.equals("C") && ref.equals("T")){
+			count++;
+		}
+		return count;
 	}
 	
 	private int isTransition(Allele ref, List<Allele> alts){
@@ -151,20 +212,26 @@ public class VarStats {
 		int count = 0;
 		for(Allele a : alts){
 			base = a.getBaseString();
-			if(base.equals("G") && refBase.equals("A")){
-				count++;
-			}
-			else if(base.equals("A") && refBase.equals("G")){
-				count++;
-			}
-			else if(base.equals("T") && refBase.equals("C")){
-				count++;
-			}
-			else if(base.equals("C") && refBase.equals("T")){
-				count++;
-			}
+			count += checkTransition(refBase, base);
 		}
 		TotalTiCount += count;
+		return count;
+	}
+	
+	private int checkTransversion(String ref, String base){
+		int count = 0;
+		if(base.equals("G") && ref.equals("C")){
+			count++;
+		}
+		else if(base.equals("C") && ref.equals("G")){
+			count++;
+		}
+		else if(base.equals("T") && ref.equals("A")){
+			count++;
+		}
+		else if(base.equals("A") && ref.equals("T")){
+			count++;
+		}
 		return count;
 	}
 	
@@ -174,29 +241,19 @@ public class VarStats {
 		int count = 0;
 		for(Allele a : alts){
 			base = a.getBaseString();
-			if(base.equals("G") && refBase.equals("C")){
-				count++;
-			}
-			else if(base.equals("C") && refBase.equals("G")){
-				count++;
-			}
-			else if(base.equals("T") && refBase.equals("A")){
-				count++;
-			}
-			else if(base.equals("A") && refBase.equals("T")){
-				count++;
-			}
+			count += checkTransversion(refBase, base);
 		}
 		TotalTvCount += count;
 		return count;
 	}
 	
-	private void AltCounter(List <Allele> Alts){
+	private int AltCounter(List <Allele> Alts){
 		
 		if(Alts.size() > 1){
-			NumMultiAlts++;
 			TotalNumMultiAlts++;
+			return 1;
 		}
+		return 0;
 	}
 	
 	private void print1file(){
