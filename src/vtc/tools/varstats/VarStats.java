@@ -1,6 +1,11 @@
 package vtc.tools.varstats;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
@@ -13,6 +18,9 @@ import org.broadinstitute.variant.variantcontext.VariantContext;
 import vtc.datastructures.VariantPool;
 
 public class VarStats {
+	
+	HashMap phenoInfo = new HashMap();
+	
 	
 	private int TotalNumVars = 0;
 	private int TotalNumSNVs = 0;
@@ -31,20 +39,128 @@ public class VarStats {
 	private double TotalGenoTiCount = 0;
 	private double TotalGenoTvCount = 0;
 	private double TotalGenoTiTv = 0;
+	private float TotalFreqA = 0;
+	private float TotalFreqT = 0;
+	private float TotalFreqG = 0;
+	private float TotalFreqC = 0;
+	private float TotalFreqCount = 0;
 	
 	
 
 	
 	
-	//constructor
+	//constructors
 	
-	public VarStats(TreeMap<String, VariantPool> allVPs, boolean printMulti) {
-		
-		IterateAndCount(allVPs, printMulti);
+	public VarStats(TreeMap<String, VariantPool> allVPs, ArrayList<Object> phenoArgs, boolean printMulti, boolean sum, boolean assoc) {
+		if(sum)
+			IterateAndCount(allVPs, printMulti);
+		if(assoc)
+			doAssociation(allVPs, phenoArgs);
+	}
+	
+	public VarStats(){}
+	
+	//Functions
+	
+	
+	
+	private void doAssociation(TreeMap<String, VariantPool> AllVPs, ArrayList<Object> phenoArgs){
+		if (phenoArgs != null) {
+			// Make a structure to read in the phenotype information...
+			phenoInfo = ParsePhenoFile(phenoArgs);
+		}
+		float freqA = 0;
+		float freqT = 0;
+		float freqC = 0;
+		float freqG = 0;
+		for (VariantPool VP : AllVPs.values()) {
+
+			Iterator<String> it = VP.getIterator();
+			String currVarKey;
+			int Num_SNPS = 0;
+			while (it.hasNext()) {
+				currVarKey = it.next();
+				VariantContext vc = VP.getVariant(currVarKey);
+				// Its a SNP now calculate frequencies
+				if (vc.isSNP()) {
+					Num_SNPS++;
+					System.out.println(vc.toString());
+					System.out.println("---------------------------");
+					String[] alleles = { "A", "T", "C", "G" };
+					for (String all : alleles) {
+						
+						if (all.equals("A")) {
+							freqA = (float) vc.getCalledChrCount(vc
+									.getAllele(all))
+									/ vc.getCalledChrCount();
+						} else if (all.equals("T"))
+							freqT = (float) vc.getCalledChrCount(vc
+									.getAllele(all))
+									/ vc.getCalledChrCount();
+						else if (all.equals("C"))
+							freqC = (float) vc.getCalledChrCount(vc
+									.getAllele(all))
+									/ vc.getCalledChrCount();
+						else if (all.equals("G"))
+							freqG = (float) vc.getCalledChrCount(vc
+									.getAllele(all))
+									/ vc.getCalledChrCount();
+						
+						
+					}
+					
+					TotalFreqCount += (freqA + freqT + freqG + freqC);
+					TotalFreqA += freqA;
+					TotalFreqT += freqT;
+					TotalFreqG += freqG;
+					TotalFreqC += freqC;
+					
+					System.out.printf("frequency of A: %.2f\n", freqA);
+					System.out.printf("frequency of T: %.2f\n", freqT);
+					System.out.printf("frequency of C: %.2f\n", freqC);
+					System.out.printf("frequency of G: %.2f\n", freqG);
+				}
+				System.out.printf("Number of SNPS %d\n", Num_SNPS);
+			}
+			TotalFreqA = TotalFreqA/TotalFreqCount;
+			TotalFreqT = TotalFreqT/TotalFreqCount;
+			TotalFreqG = TotalFreqG/TotalFreqCount;
+			TotalFreqC = TotalFreqC/TotalFreqCount;
+		}
+		System.out.printf("Total frequency of A: %.2f\n", TotalFreqA);
+		System.out.printf("Total frequency of T: %.2f\n", TotalFreqT);
+		System.out.printf("Total frequency of C: %.2f\n", TotalFreqC);
+		System.out.printf("Total frequency of G: %.2f\n", TotalFreqG);
 		
 	}
 	
-	//Functions
+	private HashMap ParsePhenoFile(ArrayList<Object> phenofiles) {
+		HashMap phenos = new HashMap();
+		for (Object o : phenofiles) {
+			// lets parse the phenotype file.
+			BufferedReader br;
+			try {
+				br = new BufferedReader(new FileReader(o.toString()));
+				String line;
+				while ((line = br.readLine()) != null){
+					// process the line.
+					String line1[] = line.split("\t");
+					phenos.put(line1[0], line1[1]);
+				}
+				br.close();
+			} catch (FileNotFoundException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return phenos;
+	}
+	
+	
+	
 	
 	private void IterateAndCount (TreeMap<String, VariantPool> allVPs, boolean printMulti){
 		
@@ -155,6 +271,7 @@ public class VarStats {
 				TotalDepth + "\nTotalTiTv: " + TotalTiTv
 				+ "\nTotalGenoTiTv: " + TotalGenoTiTv);
 	}
+	
 	
 	
 	private int getDepth(VariantContext var, List<String> names){

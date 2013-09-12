@@ -20,6 +20,9 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import org.apache.log4j.Logger;
+import org.broadinstitute.variant.variantcontext.VariantContext;
+
+import com.sun.jdi.connect.Connector.Argument;
 
 import vtc.Engine;
 import vtc.datastructures.InvalidInputFileException;
@@ -37,15 +40,14 @@ public class VarStatsEngine implements Engine {
 
 	private Namespace parsedArgs;
 
-	HashMap phenoInfo = new HashMap();
+	
 
 	public VarStatsEngine(String[] args) {
-		
+
 		init(args);
 	}
 
 	private void init(String[] args) {
-		
 
 		parser = ArgumentParsers.newArgumentParser("VarStats");
 		parser.description("Variant Stats will perform basic statistical analysis.");
@@ -70,12 +72,14 @@ public class VarStatsEngine implements Engine {
 		Stats.addArgument("-s", "--summary").dest("Summary")
 				.action(Arguments.storeTrue())
 				.help("Prints summary statistics to the console");
-		Stats.addArgument("-c", "--combined").dest("Combined")
+		Stats.addArgument("-c", "--combined")
+				.dest("Combined")
 				.action(Arguments.storeTrue())
 				.help("Prints summary statistics to the console for mulitple files in one block.  The default is will print each file separately.");
 		Stats.addArgument("-a", "--association")
 				.nargs("+")
 				.dest("pheno")
+				.action(Arguments.storeTrue()).dest("association")
 				.type(String.class)
 				.help("Performs an association test (also generates allele frequencies).  "
 						+ "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
@@ -103,67 +107,25 @@ public class VarStatsEngine implements Engine {
 
 		ArrayList<Object> vcfArgs = new ArrayList<Object>(
 				parsedArgs.getList("VCF"));
-		ArrayList<Object> phenoArgs = (ArrayList<Object>) parsedArgs
-				.getList("pheno");
-		
-		if (phenoArgs != null) {
-			// Make a structure to read in the phenotype information...
-			phenoInfo = ParsePhenoFile(phenoArgs);
-		}
+		ArrayList<Object> phenoArgs = (ArrayList<Object>)
+				parsedArgs.getList("pheno");
 
 		try {
+
+			TreeMap<String, VariantPool> AllVPs = UtilityBelt
+					.createVariantPools(vcfArgs);
+
 			
+			boolean PrintMulti = parsedArgs.getBoolean("Combined");
+			boolean assoc = parsedArgs.getBoolean("association");
+			boolean sum = parsedArgs.getBoolean("Summary");
+			VarStats vstat = new VarStats(AllVPs, phenoArgs, PrintMulti, sum, assoc);
 			
-			TreeMap<String, VariantPool> AllVPs = UtilityBelt.createVariantPools(vcfArgs);
-			
-			if(parsedArgs.getBoolean("Summary")){
-				boolean PrintMulti = parsedArgs.getBoolean("Combined");
-				VarStats vstat = new VarStats(AllVPs, PrintMulti);	
-			}
-			
-			
-			
-			// OK we have the phenotype information (phenoInfo) and we have the
-			// vcf (ALLVPs).
-			for (VariantPool VP : AllVPs.values()) {
-				
-				Iterator<String> it = VP.getIterator();
-				String currVarKey;
-				while (it.hasNext()) {
-					currVarKey = it.next();
-					//VariantContext vc = AllVPs.get(currVarKey).getVariant(currVarKey); //TODO calculate allele frequencies here. This goes out of bounds
-				}
-			}	
 		} catch (InvalidInputFileException e) {
 			UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
 		} catch (Exception e) {
 			logger.error("Caught unexpected exception, something is very wrong!");
 			e.printStackTrace();
 		}
-	}
-
-	private HashMap ParsePhenoFile(ArrayList<Object> phenofiles) {
-		HashMap phenos = new HashMap();
-		for (Object o : phenofiles) {
-			// lets parse the phenotype file.
-			BufferedReader br;
-			try {
-				br = new BufferedReader(new FileReader(o.toString()));
-				String line;
-				while ((line = br.readLine()) != null) {
-					// process the line.
-					String line1[] = line.split("\t");
-					phenos.put(line1[0], line1[1]);
-				}
-				br.close();
-			} catch (FileNotFoundException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return phenos;
 	}
 }
