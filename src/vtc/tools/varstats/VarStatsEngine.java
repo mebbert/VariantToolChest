@@ -79,7 +79,6 @@ public class VarStatsEngine implements Engine {
 				.type(String.class)
 				.help("Performs an association test (also generates allele frequencies).  "
 						+ "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
-
 		output.addArgument("-o", "--out").nargs("?")
 				.setDefault("variant_list.out.vcf")
 				.help("Specify the final output file name.");

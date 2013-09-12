@@ -140,7 +140,6 @@ public class VarStats {
 					NumHet + "\nNumhomoRef: " + NumHomoRef + "\nNumHomoVar: " + NumHomoVar + "\nNumMulitAlts: " + NumMultiAlts + "\nQualScore: "
 					+ QualScore + "\nDepth: " + Depth + "\nTi/Tv: " + TiTv + "\nGenoTiTv: " + GenoTiTv);
 		}
-		System.out.println(TotalTiCount + "\n" + TotalTvCount);
 		TotalTiTv = TotalTiCount/TotalTvCount;
 		TotalGenoTiTv = TotalGenoTiCount/TotalGenoTvCount;
 		TotalDepth = TotalDepth/(TotalNumVars*TotalNumGeno);
