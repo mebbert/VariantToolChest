@@ -77,12 +77,15 @@ public class VarStatsEngine implements Engine {
 				.action(Arguments.storeTrue())
 				.help("Prints summary statistics to the console for mulitple files in one block.  The default is will print each file separately.");
 		Stats.addArgument("-a", "--association")
-				.nargs("+")
-				.dest("pheno")
 				.action(Arguments.storeTrue()).dest("association")
-				.type(String.class)
 				.help("Performs an association test (also generates allele frequencies).  "
 						+ "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
+		Stats.addArgument("-p", "--pheno")
+				.nargs("+")
+				.dest("pheno")
+				.type(String.class)
+				.help("Allows for multiple pheno files.");
+		
 		output.addArgument("-o", "--out").nargs("?")
 				.setDefault("variant_list.out.vcf")
 				.help("Specify the final output file name.");
@@ -112,13 +115,26 @@ public class VarStatsEngine implements Engine {
 
 		try {
 
-			TreeMap<String, VariantPool> AllVPs = UtilityBelt
-					.createVariantPools(vcfArgs);
-
+			TreeMap<String, VariantPool> AllVPs;
 			
+			/*if(parsedArgs.getBoolean("merger")){
+				/*
+				 * Get the list of VCF files (vcfArgs) and use the picard format for merging
+				 * create a new arraylist with the newly merged file in it.
+				 * create the variant pool and continue with the rest of the commands.
+				 */
+				
+			/*	ArrayList<Object> newVCF = null; 
+				newVCF.add("variants_merged.vcf");
+				AllVPs = UtilityBelt.createVariantPools(newVCF);
+			}
+			else{*/
+				AllVPs = UtilityBelt.createVariantPools(vcfArgs);
+		//	}
+			boolean sum = parsedArgs.getBoolean("Summary");
 			boolean PrintMulti = parsedArgs.getBoolean("Combined");
 			boolean assoc = parsedArgs.getBoolean("association");
-			boolean sum = parsedArgs.getBoolean("Summary");
+			
 			VarStats vstat = new VarStats(AllVPs, phenoArgs, PrintMulti, sum, assoc);
 			
 		} catch (InvalidInputFileException e) {
