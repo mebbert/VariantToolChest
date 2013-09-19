@@ -166,7 +166,7 @@ public class VarStats {
 	
 	
 	private void IterateAndCount (TreeMap<String, VariantPool> allVPs, boolean printMulti){
-		boolean PrintMulti = printMulti;
+		
 		ArrayList<String> files = new ArrayList<String>();
 		NavigableSet<String> filenames = allVPs.descendingKeySet();
 		Iterator<String> i = filenames.descendingIterator();
@@ -186,7 +186,7 @@ public class VarStats {
 		double TotalQualScore = 0;
 		double TotalMaxQScore = 0;
 		double TotalMinQScore = Integer.MAX_VALUE;
-		int TotalDepth = 0;
+		double TotalDepth = 0;
 		int TotalMaxDepth = 0;
 		int TotalMinDepth = Integer.MAX_VALUE;
 		int TotalNumGeno = 0;
@@ -215,7 +215,7 @@ public class VarStats {
 			double MinQScore = Integer.MAX_VALUE;
 			double TiCount = 0;
 			double TvCount = 0;
-			int Depth = 0;
+			double Depth = 0;
 			int MaxDepth = 0;
 			int MinDepth = Integer.MAX_VALUE;
 			int NumGeno = 0;
@@ -278,9 +278,9 @@ public class VarStats {
 				
 				double tempQualScore = var.getPhredScaledQual();
 				if(tempQualScore>MaxQScore)
-					MaxQScore = QualScore;
+					MaxQScore = tempQualScore;
 				if(tempQualScore<MinQScore)
-					MinQScore = QualScore;
+					MinQScore = tempQualScore;
 				QualScore += tempQualScore;
 				TotalQualScore += tempQualScore;
 				
@@ -309,11 +309,13 @@ public class VarStats {
 			TotalGenoTvCount += GenoTvCount;
 			TiTv = TiCount/TvCount;
 			GenoTiTv = GenoTiCount/GenoTvCount;
-			Depth = Depth/(NumVars*NumGeno);
+			Depth = Depth/(NumVars);
 			QualScore = QualScore/NumVars;
 			
-			print1file(files.get(count), FileName, NumVars, NumSNVs, InDels, StructVars, NumHet, NumHomoRef, NumHomoVar, NumMultiAlts, QualScore,
-					Depth, TiTv, GenoTiTv, MinDepth, MaxDepth, MinQScore, MaxQScore);
+			if(!printMulti){
+				printFiles(files, count, Files, NumVars, NumSNVs, InDels, StructVars, NumHet, NumHomoRef, NumHomoVar, NumMultiAlts, QualScore,
+					Depth, TiTv, GenoTiTv, MinDepth, MaxDepth, MinQScore, MaxQScore, printMulti);
+			}
 			
 //			System.out.println("Total: " + NumVars + "\nSNPs: " + NumSNVs + "\nInDels: " + InDels + "\nStructInDels: " + StructVars + "\nNumHet: " +
 //					NumHet + "\nNumhomoRef: " + NumHomoRef + "\nNumHomoVar: " + NumHomoVar + "\nNumMulitAlts: " + NumMultiAlts + "\nQualScore: "
@@ -322,14 +324,15 @@ public class VarStats {
 		}
 		TotalTiTv = TotalTiCount/TotalTvCount;
 		TotalGenoTiTv = TotalGenoTiCount/TotalGenoTvCount;
-		TotalDepth = TotalDepth/(TotalNumVars*TotalNumGeno);
+		TotalDepth = TotalDepth/(TotalNumVars);
 		TotalQualScore = TotalQualScore/TotalNumVars;
 		
 		if(printMulti){
-			printMultiFiles(files, Files, TotalNumVars, TotalNumSNVs, TotalInDels, TotalStructVars, TotalNumHet, TotalNumHomoRef,
+			printFiles(files, count, Files, TotalNumVars, TotalNumSNVs, TotalInDels, TotalStructVars, TotalNumHet, TotalNumHomoRef,
 					TotalNumHomoVar, TotalNumMultiAlts,TotalQualScore,TotalDepth, TotalTiTv, TotalGenoTiTv, TotalMinDepth,
-					TotalMaxDepth, TotalMinQScore, TotalMaxQScore);
+					TotalMaxDepth, TotalMinQScore, TotalMaxQScore, printMulti);
 		}
+		
 		
 		
 //		System.out.println("Total: " + TotalNumVars + "\nTotalSNPs: " + TotalNumSNVs + "\nTotalInDels: " + TotalInDels + "\nTotalStructInDels: " +
@@ -494,137 +497,69 @@ public class VarStats {
 		
 	}
 	
-	private void print1file(String file, String FileName, int NumVars, int SNPs, int InDels, int StructVars, int NumHets, int NumHomoRef,
-			int NumHomoVar, int NumMultiAlts, double QualScore, double Depth, double TiTv, double GenoTiTv, int MinDepth, int MaxDepth,
-			double MinQScore, double MaxQScore){
-		String newLine = System.getProperty("line.separator");
-		
-		String title = "Summary of "+file+": "+FileName;
-		
-		int length = FindLength(NumVars, SNPs, InDels, StructVars, NumHets, NumHomoRef,
-			NumHomoVar, NumMultiAlts, QualScore, Depth, TiTv, GenoTiTv, MinDepth, MaxDepth, MinQScore, MaxQScore, title)+5;
-		
-		
-		
-		char[] chars = new char[length+1];
-		Arrays.fill(chars, '-');
-		String s = new String(chars);
-		s = "+"+s+"+";
-		
-		char[] ch = new char[length+3];
-		Arrays.fill(ch, '=');
-		String t = new String(ch);
-		
-		
-//		System.out.println(file);
-		
-		int LeftColumn = 15;
-		
-		
-		String leftalignFormatint = "|%-"+LeftColumn+"s%"+(length-LeftColumn)+"d |" + newLine;
-		String leftalignFormatd = "|%-"+LeftColumn+"s%"+(length-LeftColumn)+".2f |" + newLine;
-		String rightalignFormati = "|%"+LeftColumn+"s%"+(length-LeftColumn)+"d |" + newLine;
-		String rightalignFormatf = "|%"+LeftColumn+"s%"+(length-LeftColumn)+".2f |" + newLine;
-		String leftalignFormats = " %-"+(length--)+"s" + newLine;
-		
-		
-		
-		
-		
-		System.out.format(t + newLine);
-		System.out.format(leftalignFormats, "");
-		System.out.format(leftalignFormats, title);
-		System.out.format(leftalignFormats, "");
-		System.out.format(t + newLine);
-		System.out.format(newLine);
-		System.out.format(s + newLine);
-		System.out.format(leftalignFormatint, "TotalVars:", NumVars);
-		System.out.format(s + newLine);
-		System.out.format(rightalignFormati, "SNVs:      ", SNPs);
-		System.out.format(rightalignFormatf, "Ti/Tv:", TiTv);
-		System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", GenoTiTv);
-		System.out.format(s + newLine);
-		System.out.format(rightalignFormati, "INDEls:    ", InDels);
-		System.out.format(s + newLine);
-		System.out.format(rightalignFormati, "StructVars:", StructVars);
-		System.out.format(s + newLine);
-//		System.out.format(leftalignFormatint, "Hets:", NumHets);
-//		System.out.format(s + newLine);
-//		System.out.format(leftalignFormatint, "HomoRef:", NumHomoRef);
-//		System.out.format(s + newLine);
-//		System.out.format(leftalignFormatint, "HomoVar:", NumHomoVar);
-//		System.out.format(s + newLine);
-		System.out.format(leftalignFormatint, "MultiAlts:", NumMultiAlts);
-		System.out.format(s + newLine);
-		System.out.format(leftalignFormatd, "AvgQualScore:", QualScore);
-		System.out.format(rightalignFormatf, "MinQualScore:", MinQScore);
-		System.out.format(rightalignFormatf, "MaxQualScore:", MaxQScore);
-		System.out.format(s + newLine);
-		System.out.format(leftalignFormatd, "AvgDepth:", Depth);
-		System.out.format(rightalignFormati, "MinDepth:", MinDepth);
-		System.out.format(rightalignFormati, "MaxDepth:", MaxDepth);
-		System.out.format(s + newLine);
-		
-		System.out.format(newLine + newLine);
-		
-	}
-	
-	
-	
-	
-	
-	
-	private void printMultiFiles (ArrayList<String> file, ArrayList<String> FileName, int NumVars, int SNPs, int InDels, int StructVars, int NumHets, int NumHomoRef,
-			int NumHomoVar, int NumMultiAlts, double QualScore, double Depth, double TiTv, double GenoTiTv, int MinDepth, int MaxDepth,
-			double MinQScore, double MaxQScore){
-		String newLine = System.getProperty("line.separator");
-		
-		
-		
-		
-	
-		String title = "Summary of "+file.get(0)+": "+FileName.get(0);
-		
-		
-		int length = FindLength(NumVars, SNPs, InDels, StructVars, NumHets, NumHomoRef,
-			NumHomoVar, NumMultiAlts, QualScore, Depth, TiTv, GenoTiTv, MinDepth, MaxDepth, MinQScore, MaxQScore, title)+5;
-		
-		
-		
-		char[] chars = new char[length+1];
-		Arrays.fill(chars, '-');
-		String s = new String(chars);
-		s = "+"+s+"+";
-		
-		char[] ch = new char[length+3];
-		Arrays.fill(ch, '=');
-		String t = new String(ch);
-		
-		
-//		System.out.println(file);
-		
-		int LeftColumn = 15;
-		
-		
-		String leftalignFormatint = "|%-"+LeftColumn+"s%"+(length-LeftColumn)+"d |" + newLine;
-		String leftalignFormatd = "|%-"+LeftColumn+"s%"+(length-LeftColumn)+".2f |" + newLine;
-		String rightalignFormati = "|%"+LeftColumn+"s%"+(length-LeftColumn)+"d |" + newLine;
-		String rightalignFormatf = "|%"+LeftColumn+"s%"+(length-LeftColumn)+".2f |" + newLine;
-		String leftalignFormats = " %-"+(length--)+"s" + newLine;
-		
-		
-		
-		System.out.format(t + newLine);
-		int count = 0;
-		
-		System.out.format(leftalignFormats, "");
-		for(String vpfile : file){
-			if(count>0)
-				title = "           "+vpfile+" :"+FileName.get(count);
-			count++;
-			System.out.format(leftalignFormats, title);
-			
 
+	
+	
+	
+	
+	private void printFiles (ArrayList<String> file, int count, ArrayList<String> FileName, int NumVars, int SNPs, int InDels, int StructVars, int NumHets, int NumHomoRef,
+			int NumHomoVar, int NumMultiAlts, double QualScore, double Depth, double TiTv, double GenoTiTv, int MinDepth, int MaxDepth,
+			double MinQScore, double MaxQScore, boolean printmulti)
+	{
+		
+		String newLine = System.getProperty("line.separator");
+		
+		String title;
+		
+		
+		if(printmulti)
+			title = "Summary of "+file.get(0)+": "+FileName.get(0);
+		else
+			title = "Summary of "+file.get(count)+": "+FileName.get(count);
+		
+		int length = FindLength(NumVars, SNPs, InDels, StructVars, NumHets, NumHomoRef,
+			NumHomoVar, NumMultiAlts, QualScore, Depth, TiTv, GenoTiTv, MinDepth, MaxDepth, MinQScore, MaxQScore, title)+5;
+		
+		
+		
+		char[] chars = new char[length+1];
+		Arrays.fill(chars, '-');
+		String s = new String(chars);
+		s = "+"+s+"+";
+		
+		char[] ch = new char[length+3];
+		Arrays.fill(ch, '=');
+		String t = new String(ch);
+		
+		
+//		System.out.println(file);
+		
+		int LeftColumn = 15;
+		
+		
+		String leftalignFormatint = "|%-"+LeftColumn+"s%"+(length-LeftColumn)+"d |" + newLine;
+		String leftalignFormatd = "|%-"+LeftColumn+"s%"+(length-LeftColumn)+".2f |" + newLine;
+		String rightalignFormati = "|%"+LeftColumn+"s%"+(length-LeftColumn)+"d |" + newLine;
+		String rightalignFormatf = "|%"+LeftColumn+"s%"+(length-LeftColumn)+".2f |" + newLine;
+		String leftalignFormats = " %-"+(length--)+"s" + newLine;
+		
+		
+		if(printmulti){
+			System.out.format(t + newLine);
+			int pos = 0;
+		
+			System.out.format(leftalignFormats, "");
+			for(String vpfile : file){
+				if(pos>0)
+					title = "           "+vpfile+": "+FileName.get(pos);
+				pos++;
+			System.out.format(leftalignFormats, title);
+			}
+		}
+		else{
+			System.out.format(t + newLine);
+			System.out.format(leftalignFormats, "");
+			System.out.format(leftalignFormats, title);
 		}
 		System.out.format(leftalignFormats, "");
 		System.out.format(t + newLine);
@@ -657,16 +592,7 @@ public class VarStats {
 		System.out.format(rightalignFormati, "MaxDepth:", MaxDepth);
 		System.out.format(s + newLine);
 		
-		System.out.format(newLine + newLine);
-
-
-		
-		
-		
+		System.out.format(newLine + newLine);		
 	}
-	
-	
-	
-	
 	
 }
