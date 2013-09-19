@@ -50,12 +50,8 @@ import vtc.datastructures.VariantPool;
 public class VarStats {
 	
 
-	HashMap phenoInfo = new HashMap();
-	
-	
-	
-	
-	
+	HashMap<String, String> phenoInfo = new HashMap<String, String>();
+
 	//constructors
 	
 	public VarStats(TreeMap<String, VariantPool> allVPs, ArrayList<Object> phenoArgs, boolean printMulti, boolean sum, boolean assoc) {
@@ -137,8 +133,8 @@ public class VarStats {
 		
 	}
 	
-	private HashMap ParsePhenoFile(ArrayList<Object> phenofiles) {
-		HashMap phenos = new HashMap();
+	private HashMap<String, String> ParsePhenoFile(ArrayList<Object> phenofiles) {
+		HashMap<String, String> phenos = new HashMap<String, String>();
 		for (Object o : phenofiles) {
 			// lets parse the phenotype file.
 			BufferedReader br;
