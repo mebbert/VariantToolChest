@@ -1,7 +1,7 @@
 /**
  * 
  */
-package vtc.tools.setoperator;
+package vtc.tools.setoperator.operation;
 
 /**
  * @author markebbert

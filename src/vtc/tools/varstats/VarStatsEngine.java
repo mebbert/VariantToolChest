@@ -3,13 +3,7 @@
  */
 package vtc.tools.varstats;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.TreeMap;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -20,9 +14,6 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import org.apache.log4j.Logger;
-import org.broadinstitute.variant.variantcontext.VariantContext;
-
-import com.sun.jdi.connect.Connector.Argument;
 
 import vtc.Engine;
 import vtc.datastructures.InvalidInputFileException;
