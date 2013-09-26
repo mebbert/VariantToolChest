@@ -23,8 +23,10 @@
 package vtc.tools.varstats;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -35,6 +37,8 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.TreeMap;
 
+import org.apache.commons.math3.stat.inference.ChiSquareTest;
+import org.apache.log4j.Logger;
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
@@ -45,13 +49,15 @@ public class VarStats {
 
     HashMap<String, String> phenoInfo = new HashMap<String, String>();
 
+    Logger                  logger    = Logger.getLogger(VarStats.class);
+
     // constructors
 
-    public VarStats(TreeMap<String, VariantPool> allVPs, ArrayList<Object> phenoArgs, boolean printMulti, boolean sum, boolean assoc) {
+    public VarStats(TreeMap<String, VariantPool> allVPs, ArrayList<Object> phenoArgs, boolean printMulti, boolean sum, boolean assoc, String Outfile) {
         if (sum)
             IterateAndCount(allVPs, printMulti);
         if (assoc)
-            doAssociation(allVPs, phenoArgs);
+            doAssociation(allVPs, phenoArgs, Outfile);
     }
 
     public VarStats() {
@@ -59,53 +65,97 @@ public class VarStats {
 
     // Functions
 
-    private void doAssociation(TreeMap<String, VariantPool> AllVPs, ArrayList<Object> phenoArgs) {
+    private void doAssociation(TreeMap<String, VariantPool> AllVPs, ArrayList<Object> phenoArgs, String OutFile) {
 
         if (phenoArgs != null) {
             // Make a structure to read in the phenotype information...
             phenoInfo = ParsePhenoFile(phenoArgs);
         }
 
-        float freqA = 0;
-        float freqT = 0;
-        float freqC = 0;
-        float freqG = 0;
+        // float freqA = 0;
+        // float freqT = 0;
+        // float freqC = 0;
+        // float freqG = 0;
 
         for (VariantPool VP : AllVPs.values()) {
+
+            ArrayList<Association> association = new ArrayList<Association>();
+
+            Object[] SampleList = VP.getSamples().toArray();
+            ArrayList<String> CasePhenos = new ArrayList<String>();
+            ArrayList<String> ControlPhenos = new ArrayList<String>();
+            for (Object o : SampleList) {
+                if (phenoInfo.containsKey(o)) {
+                    String phenotype = phenoInfo.get(o);
+                    // System.out.println(o + phenotype);
+                    if (phenotype.equals("1")) {
+                        CasePhenos.add((String) o);
+
+                    } else if (phenotype.equals("2"))
+                        ControlPhenos.add((String) o);
+                    // System.out.println(o + "'s pheno is " +phenoInfo.get(o));
+                }
+            }
 
             Iterator<String> it = VP.getIterator();
             String currVarKey;
             int Num_SNPS = 0;
             while (it.hasNext()) {
+
                 currVarKey = it.next();
                 VariantContext vc = VP.getVariant(currVarKey);
                 // Its a SNP now calculate frequencies
-                if (vc.isSNP()) {
-                    Num_SNPS++;
-                    System.out.println(vc.toString());
-                    System.out.println("---------------------------");
-                    String[] alleles = { "A", "T", "C", "G" };
-                    for (String all : alleles) {
+                Allele Ref = vc.getReference();
+                List<Allele> Alts = vc.getAlternateAlleles();
 
-                        if (all.equals("A")) {
-                            freqA = (float) vc.getCalledChrCount(vc.getAllele(all)) / vc.getCalledChrCount();
-                        } else if (all.equals("T")) {
-                            freqT = (float) vc.getCalledChrCount(vc.getAllele(all)) / vc.getCalledChrCount();
-                        } else if (all.equals("C")) {
-                            freqC = (float) vc.getCalledChrCount(vc.getAllele(all)) / vc.getCalledChrCount();
-                        } else if (all.equals("G")) {
-                            freqG = (float) vc.getCalledChrCount(vc.getAllele(all)) / vc.getCalledChrCount();
-                        }
+                for (Allele A : Alts) {
 
-                    }
+                    Association Assoc = new Association(vc.getChr(), vc.getID(), vc.getStart(), vc.getReference().getBaseString(), A.getBaseString());
+                    long[] CaseAlleleCount = Assoc.CaseControlCounts(CasePhenos, vc, A.getBaseString());
+                    long[] ControlAlleleCount = Assoc.CaseControlCounts(ControlPhenos, vc, A.getBaseString());
+                    Assoc.SetCaseRefCount(CaseAlleleCount[0]);
+                    Assoc.SetCaseAltCount(CaseAlleleCount[1]);
+                    Assoc.SetControlRefCount(ControlAlleleCount[0]);
+                    Assoc.SetControlAltCount(ControlAlleleCount[1]);
+                    ChiSquareTest test = new ChiSquareTest();
+                    double PVal = test.chiSquareTestDataSetsComparison(ControlAlleleCount, CaseAlleleCount);
+                    // System.out.println(PVal);
+                    Assoc.SetPValue(PVal);
+                    association.add(Assoc);
 
-                    System.out.printf("frequency of A: %.2f\n", freqA);
-                    System.out.printf("frequency of T: %.2f\n", freqT);
-                    System.out.printf("frequency of C: %.2f\n", freqC);
-                    System.out.printf("frequency of G: %.2f\n", freqG);
                 }
-                System.out.printf("Number of SNPS %d\n", Num_SNPS);
+
+                // if (vc.isSNP()) {
+                // Num_SNPS++;
+                // System.out.println(vc.toString());
+                // System.out.println("---------------------------");
+                // String[] alleles = { "A", "T", "C", "G" };
+                // for (String all : alleles) {
+                //
+                // if (all.equals("A")) {
+                // freqA = (float) vc.getCalledChrCount(vc.getAllele(all)) /
+                // vc.getCalledChrCount();
+                // } else if (all.equals("T")) {
+                // freqT = (float) vc.getCalledChrCount(vc.getAllele(all)) /
+                // vc.getCalledChrCount();
+                // } else if (all.equals("C")) {
+                // freqC = (float) vc.getCalledChrCount(vc.getAllele(all)) /
+                // vc.getCalledChrCount();
+                // } else if (all.equals("G")) {
+                // freqG = (float) vc.getCalledChrCount(vc.getAllele(all)) /
+                // vc.getCalledChrCount();
+                // r
+                //
+                // }
+                //
+                // System.out.printf("frequency of A: %.2f\n", freqA);
+                // System.out.printf("frequency of T: %.2f\n", freqT);
+                // System.out.printf("frequency of C: %.2f\n", freqC);
+                // System.out.printf("frequency of G: %.2f\n", freqG);
+                // }
+                // System.out.printf("Number of SNPS %d\n", Num_SNPS);
             }
+            printToFile(association, OutFile);
 
         }
 
@@ -135,6 +185,33 @@ public class VarStats {
         }
         return phenos;
     }
+
+    HashMap<String, String> MakePhenoList(Object[] SampleList, HashMap<String, String> phenoInfo) {
+        HashMap<String, String> Phenos = new HashMap<String, String>();
+
+        return Phenos;
+    }
+
+    private void printToFile(ArrayList<Association> A, String OutFile) {
+        try {
+            BufferedWriter out = new BufferedWriter(new FileWriter(OutFile));
+            out.write("Chr" + '\t' + "ID" + '\t' + "Pos" + '\t' + "Ref" + '\t' + "Alt" + '\t' + "CaseRefCount" + '\t' + "CaseAltCount" + '\t' + "ControlRefCount" + '\t' + "ControlAltCount" + '\t' + "P-Value" + '\n');
+            for (Association a : A) {
+                out.write(a.toString() + '\n');
+            }
+            out.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /*
+     * 
+     * 
+     * 
+     * Association functions above, Summary functions below
+     */
 
     private void IterateAndCount(TreeMap<String, VariantPool> allVPs, boolean printMulti) {
 
@@ -250,7 +327,6 @@ public class VarStats {
                 NumMultiAlts += AltCounter(Alts);
 
                 double tempQualScore = var.getPhredScaledQual();
-                // System.out.println(tempQualScore);
                 if (tempQualScore >= 0) {
                     if (tempQualScore > MaxQScore)
                         MaxQScore = tempQualScore;
@@ -264,7 +340,8 @@ public class VarStats {
                     QualError = "There was an error in the Qual formatting of: " + FileName + "  One or more variants had no Quality Score. It was excluded in the calculation.";
                 }
                 int TempDepth = getDepth(var, names);
-                // System.out.println(TempDepth);
+                // System.out.println("TempDepth = " + TempDepth);
+                // logger.info("TempDepth = " + TempDepth);
                 if (TempDepth >= 0) {
                     if (TempDepth > MaxDepth)
                         MaxDepth = TempDepth;
