@@ -6,8 +6,8 @@ package vtc.tools.setoperator;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.TreeMap;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -28,6 +28,11 @@ import vtc.Engine;
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.SupportedFileType;
 import vtc.datastructures.VariantPool;
+import vtc.tools.setoperator.operation.ComplementOperation;
+import vtc.tools.setoperator.operation.IntersectOperation;
+import vtc.tools.setoperator.operation.InvalidOperationException;
+import vtc.tools.setoperator.operation.Operation;
+import vtc.tools.setoperator.operation.OperationFactory;
 import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
@@ -95,7 +100,7 @@ public class SetOperatorEngine implements Engine{
 					"file ID (see --input) and an 'sId' refers to a " + 
 					"sample within a file (or other variant set).");
 		
-		operation.addArgument("-g", "--genotype-intersect-type").dest("TYPE").type(String.class)
+		operation.addArgument("-g", "--genotype-intersect-type").dest("INTER_TYPE").type(String.class)
 				.setDefault(IntersectType.HET_OR_HOMO_ALT.getCommand())
 				.help("Specify the type of intersect to perform for a" +
 						" variant across samples (e.g. require all samples" +
@@ -103,6 +108,14 @@ public class SetOperatorEngine implements Engine{
 						" for the alternate allele). Possible options are: " + 
 						createIntersectTypeCommandLineToString());
 				
+		
+		operation.addArgument("-c", "--genotype-complement-type").dest("COMP_TYPE").type(String.class)
+				.setDefault(IntersectType.HET_OR_HOMO_ALT.getCommand())
+				.help("Specify the type of complement to perform for a" +
+						" variant across samples (e.g. require all samples" +
+						" be heterozygous). Possible options are: " + 
+						createComplementTypeCommandLineToString());
+
 		output.addArgument("-o", "--out").dest("OUT").setDefault("variant_list.out.vcf")
 				.help("Specify the final output file name.");
 		
@@ -131,7 +144,7 @@ public class SetOperatorEngine implements Engine{
 		output.addArgument("-v", "--verbose").dest("VERBOSE").action(Arguments.storeTrue())
 				.help("Print useful information to 'debug.txt'.");
 		
-		output.addArgument("-c", "--chr").dest("CHR").action(Arguments.storeTrue())
+		output.addArgument("-a", "--add-chr").dest("CHR").action(Arguments.storeTrue())
 				.help("Add 'chr' to chromosome (e.g. 'chr20' instead of '20'");
 
 		try {
@@ -157,10 +170,16 @@ public class SetOperatorEngine implements Engine{
 		try{
 
 			/* Collect and verify arguments */
-			String intersectString = parsedArgs.getString("TYPE");
+			String intersectString = parsedArgs.getString("INTER_TYPE");
 			IntersectType intersectType = getIntersectTypeByCommand(intersectString);
 			if(intersectType == null){
 				throw new ArgumentParserException("Invalid intersect type specified: " + intersectString, parser);
+			}
+			
+			String complementString = parsedArgs.getString("COMP_TYPE");
+			ComplementType complementType = getComplementTypeByCommand(complementString);
+			if(complementType == null){
+				throw new ArgumentParserException("Invalid complement type specified: " + complementString, parser);
 			}
 			
 
@@ -189,7 +208,7 @@ public class SetOperatorEngine implements Engine{
 	
 			ArrayList<VariantPool> associatedVPs;
 			ArrayList<VCFHeader> associatedVPHeaders;
-			VariantPool result;
+			VariantPool result = null;
 			Operator o;
 			String intermediateOut, canonicalPath;
 			VCFHeader header;
@@ -200,10 +219,10 @@ public class SetOperatorEngine implements Engine{
 				
 				o = op.getOperator();
 				if(o == Operator.COMPLEMENT){
-					result = so.performComplement(op, associatedVPs);
+					result = so.performComplement((ComplementOperation)op, associatedVPs, complementType);
 				}
 				else if(o == Operator.INTERSECT){
-					result = so.performIntersect(op, associatedVPs, intersectType);
+					result = so.performIntersect((IntersectOperation)op, associatedVPs, intersectType);
 				}
 				else if(o == Operator.UNION){
 					result = so.performUnion(op, associatedVPs);
@@ -253,21 +272,28 @@ public class SetOperatorEngine implements Engine{
 					 */
 					if(printIntermediateFiles){
 						intermediateOut = op.getOperationID() + outputFormat.getDefaultExtension();
-						if(outFile != null){
-							canonicalPath = outFile.getCanonicalPath();
-							VariantPool.printVariantPool(intermediateOut,
-									canonicalPath.substring(0,canonicalPath.lastIndexOf(File.separator) + 1),
-									result, refGenome, outputFormat, repairHeader);
-						}
-						else{
-							VariantPool.printVariantPool(intermediateOut, result, refGenome, SupportedFileType.VCF, repairHeader);
-						}
+						canonicalPath = outFile.getCanonicalPath();
+						VariantPool.printVariantPool(intermediateOut,
+								canonicalPath.substring(0,canonicalPath.lastIndexOf(File.separator) + 1),
+								result, refGenome, outputFormat, repairHeader);
+						
+						logger.info(result.getCount() + " variants written for operation: '" + op.getOperationID() + "'");
 					}
 				}
 				else{
 					throw new RuntimeException("Something is very wrong! 'result' should not be null");
 				}
 			}
+			
+			/* Now print the final output file */
+			if(result != null){
+				logger.info("Printing " + result.getPoolID() + " to file: " + outFile.getAbsolutePath());
+				VariantPool.printVariantPool(outFile.getAbsolutePath(), result, refGenome, outputFormat, repairHeader);
+				
+				logger.info(result.getCount() + " variant(s) written.");
+			}
+			
+			
 		} catch(ArgumentParserException e){
 			UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
 		} catch (InvalidOperationException e) {
@@ -310,7 +336,7 @@ public class SetOperatorEngine implements Engine{
 		
 		ArrayList<Operation> opList = new ArrayList<Operation>();
 		for(Object o : operations){
-			Operation op = new Operation(o.toString(), variantPools);
+			Operation op = OperationFactory.createOperation(o.toString(), variantPools);
 			opList.add(op);
 		}
 		return opList;
@@ -327,7 +353,7 @@ public class SetOperatorEngine implements Engine{
 		/* Get all pool IDs associated with this Operation. Note: All SamplePool objects
 		 * have a pool ID that matches a VariantPool pool ID.
 		 */
-		Set<String> pids = op.getAllPoolIDs(); 
+		Collection<String> pids = op.getAllPoolIDs(); 
 		ArrayList<VariantPool> vpList = new ArrayList<VariantPool>();
 		Iterator<String> it = vps.keySet().iterator();
 		String pid;
@@ -372,6 +398,21 @@ public class SetOperatorEngine implements Engine{
 		}
 		return sb.toString();
 	}
+	
+	/**
+	 * Build a string to dynamically provide allowable input options for
+	 * IntersectType
+	 * @return
+	 */
+	private static String createComplementTypeCommandLineToString(){
+		StringBuilder sb = new StringBuilder();
+		int count = 1;
+		for(ComplementType t : ComplementType.values()){
+			sb.append("\n" + Integer.toString(count) + ". " + t.toString());
+			count++;
+		}
+		return sb.toString();
+	}
 
 	/**
 	 * Build a string to dynamically provide allowable input options for
@@ -395,6 +436,20 @@ public class SetOperatorEngine implements Engine{
 	 */
 	private static IntersectType getIntersectTypeByCommand(String commandString){
 		for(IntersectType i : IntersectType.values()){
+			if(i.getCommand().equalsIgnoreCase(commandString)){
+				return i;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Get the IntersectType based on user input value
+	 * @param commandString
+	 * @return
+	 */
+	private static ComplementType getComplementTypeByCommand(String commandString){
+		for(ComplementType i : ComplementType.values()){
 			if(i.getCommand().equalsIgnoreCase(commandString)){
 				return i;
 			}

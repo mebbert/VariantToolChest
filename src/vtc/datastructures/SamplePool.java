@@ -9,7 +9,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import vtc.tools.setoperator.InvalidOperationException;
+import vtc.tools.setoperator.operation.InvalidOperationException;
 
 /**
  * @author markebbert

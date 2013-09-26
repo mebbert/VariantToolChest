@@ -22,7 +22,10 @@ import net.sf.samtools.SAMSequenceDictionary;
 import org.apache.log4j.Logger;
 import org.broad.tribble.AbstractFeatureReader;
 import org.broad.tribble.FeatureReader;
+import org.broadinstitute.variant.variantcontext.Allele;
+import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
+import org.broadinstitute.variant.variantcontext.VariantContextBuilder;
 import org.broadinstitute.variant.variantcontext.writer.Options;
 import org.broadinstitute.variant.variantcontext.writer.VariantContextWriter;
 import org.broadinstitute.variant.variantcontext.writer.VariantContextWriterFactory;
@@ -141,12 +144,12 @@ public class VariantPool implements Pool{
 	 * @param pos
 	 * @return Either a VariantContext object or null
 	 */
-	public VariantContext getVariant(String chr, int pos){
-		return getVariant(chr + ":" + Integer.toString(pos));
+	public VariantContext getVariant(String chr, int pos, String ref){
+		return getVariant(chr + ":" + Integer.toString(pos) + ":" + ref);
 	}
 
 	/**
-	 * Get variant by key ('chr:pos')
+	 * Get variant by key ('chr:pos:ref')
 	 * @param key
 	 * @return Either a VariantContext object or null
 	 */
@@ -296,10 +299,63 @@ public class VariantPool implements Pool{
 	 */
 	public void addVariant(VariantContext v){
 		this.addContig(v.getChr());
-		String chrPos = new String(v.getChr() + ":" + Integer.toString(v.getStart()));
-		hMap.put(chrPos, v);
-		tMap.put(chrPos, v);
+		String chrPosRef = new String(v.getChr() + ":" + Integer.toString(v.getStart()) + ":" + v.getReference());
+		
+		/* If a variant already exists with this chr:pos:ref,
+		 * combine the two and replace the original
+		 */
+		if(hMap.containsKey(chrPosRef)){
+//			VariantContext existingVar = hMap.get(chrPosRef);
+//			VariantContext newVar = combineVariants(v, existingVar);
+//			
+//			/* Add the new variant */
+//			hMap.put(chrPosRef, newVar);
+//			tMap.put(chrPosRef, newVar);
+			
+			try{
+			throw new VariantPoolException("Found separate variant records with the same Chr, pos, and ref. Ignoring " +
+					"subsequent variants at: "  
+					+ v.getChr() + ":" + v.getStart() + ":" + v.getReference());
+			} catch (VariantPoolException e){
+				logger.error(e.getMessage());
+			}
+		}
+		else{
+			hMap.put(chrPosRef, v);
+			tMap.put(chrPosRef, v);
+		}
 	}
+	
+	
+	/**
+	 * Combine variants with the same chr, pos, and ref found in the same VariantPool
+	 * 
+	 * @param var
+	 * @param alleles
+	 * @param genos
+	 * @return
+	 */
+//	private VariantContext combineVariants(VariantContext var1, VariantContext var2){
+//		/* Start building the new VariantContext */
+//		VariantContextBuilder vcBuilder = new VariantContextBuilder();
+//		vcBuilder.chr(var1.getChr());
+//		vcBuilder.start(var1.getStart());
+//		vcBuilder.stop(var1.getEnd());
+//		
+//		TreeSet<Allele> allAlleles = new TreeSet<Allele>();
+//		allAlleles.addAll(var1.getAlleles());
+//		allAlleles.addAll(var2.getAlleles());
+//		vcBuilder.alleles(allAlleles);
+//		
+//		ArrayList<Genotype> genos = new ArrayList<Genotype>();
+//		genos.addAll(var1.getGenotypes());
+//		genos.addAll(var2.getGenotypes());
+//		vcBuilder.genotypes(genos);
+//		
+//		/* TODO: Figure out how to approach attributes (i.e. INFO). */
+////		vcBuilder.attributes(var.getAttributes());
+//		return vcBuilder.make();
+//	}
 
 	/**
 	 * Read a vcf and add VariantContext objects to the pool. 
@@ -363,8 +419,6 @@ public class VariantPool implements Pool{
 	
 	/**
 	 * Generate a basic header for the VCF
-	 * 
-	 * TODO: FOR GENOTYPES TO PRINT THE HEADER MUST HAVE SAMPLES!!!!!!!
 	 * 
 	 * @param refDict
 	 */
