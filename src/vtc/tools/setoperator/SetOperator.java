@@ -61,6 +61,10 @@ public class SetOperator {
 	public boolean addChr(){
 		return addChr;
 	}
+	
+	private boolean verbose(){
+		return this.verbose;
+	}
 //	public Operation getOperation(){
 //		return this.operation;
 //	}
@@ -302,7 +306,8 @@ public class SetOperator {
 	 * @return A VariantPool with all variants that intersect, including only the samples of interest.
 	 * @throws InvalidOperationException 
 	 */
-	public VariantPool performIntersect(IntersectOperation op, ArrayList<VariantPool> variantPools, IntersectType type) throws InvalidOperationException{
+	public VariantPool performIntersect(IntersectOperation op,
+			ArrayList<VariantPool> variantPools, IntersectType type) throws InvalidOperationException{
 		
 		if(type == null){
 			throw new RuntimeException("Received null IntersectType in \'performIntersect.\' Something is very wrong!");
@@ -334,6 +339,7 @@ public class SetOperator {
 		ArrayList<Genotype> genotypes;
 		LinkedHashSet<Allele> allAlleles;
 		HashMap<String, Genotype> sampleGenotypes;
+		VariantContext smallestVar;
 		boolean intersects, allVPsContainVar;
 
 
@@ -342,66 +348,89 @@ public class SetOperator {
 		while(it.hasNext()){
 			currVarKey = it.next();
 			
-			/* See if all VariantPools contain this variant before interogating genotypes.
-			 * This includes the VP we're iterating over, but lookup is O(n) + O(1), where n is the number
-			 * of VariantPools and the O(1) is looking up in a Hash. Not a big deal.
-			 * I believe verifying the var at least exists in all VPs first should save time over
-			 * interrogating the genotypes along the way.
-			 */
-			allVPsContainVar = allVariantPoolsContainVariant(variantPools, currVarKey, op.getOperationID());
-			if(allVPsContainVar){
-
-				intersects = true;
-				genotypes = new ArrayList<Genotype>();
-				allAlleles = new LinkedHashSet<Allele>();
-				sampleGenotypes = new HashMap<String, Genotype>();
+			intersects = true;
+			genotypes = new ArrayList<Genotype>();
+			allAlleles = new LinkedHashSet<Allele>();
+			
+			/* If intersect type is POS, only check that */
+			if(type == IntersectType.POS){
+				
+				smallestVar = smallest.getVariant(currVarKey);
 				for(VariantPool vp : variantPools){
-					
 					var = vp.getVariant(currVarKey);
-					allAlleles.addAll(var.getAlternateAlleles());
-					
-
-					/* Get the SamplePool associated with this VariantPool and get the genotypes for this VariantContext
-					 * Iterate over the genotypes and intersect.
-					 */
-					sp = op.getSamplePool(vp.getPoolID()); // SamplePool must have an associated VariantPool with identical poolID
-					gc = var.getGenotypes(sp.getSamples());
-
-					
-					/* Check if any samples from the SamplePool were missing in the file. If so,
-					 * throw error and let user know which samples were missing.
-					 */
-					if(!gc.containsSamples(sp.getSamples())){
-						throwMissingSamplesError(gc, sp, vp, op);
-					}
-
-					/* Iterate over the sample genotypes in this GenotypeContext
-					 * and determine if they intersect by genotype
-					 */
-					genoIt = gc.iterator();
-					while(genoIt.hasNext()){
-						geno = genoIt.next();
-						if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, op.getOperationID())){
-							intersects = false;
-							break;
+					if(var == null || !var.getReference().equals(smallestVar.getReference(), true)){
+						if(verbose()){
+							String s = "not all variant pools have variant at position " + smallestVar.getStart()
+									+ " with reference " + smallestVar.getReference();
+							emitExcludedVariantWarning(s, currVarKey, op.getOperationID(), null);
 						}
-						sampleGenotypes.put(geno.getSampleName(), geno);
-						genotypes.add(geno);
+						intersects = false;
+						break;
+					}
+					allAlleles.addAll(var.getAlternateAlleles());
+					genotypes.addAll(var.getGenotypes());
+				}
+			}
+			else{
+				/* See if all VariantPools contain this variant before interogating genotypes.
+				 * This includes the VP we're iterating over, but lookup is O(n) + O(1), where n is the number
+				 * of VariantPools and the O(1) is looking up in a Hash. Not a big deal.
+				 * I believe verifying the var at least exists in all VPs first should save time over
+				 * interrogating the genotypes along the way.
+				 */
+				allVPsContainVar = allVariantPoolsContainVariant(variantPools, currVarKey, op.getOperationID());
+				if(allVPsContainVar){
+	
+					sampleGenotypes = new HashMap<String, Genotype>();
+					for(VariantPool vp : variantPools){
+						
+						var = vp.getVariant(currVarKey);
+						allAlleles.addAll(var.getAlternateAlleles());
+						
+	
+						/* Get the SamplePool associated with this VariantPool and get the genotypes for this VariantContext
+						 * Iterate over the genotypes and intersect.
+						 */
+						sp = op.getSamplePool(vp.getPoolID()); // SamplePool must have an associated VariantPool with identical poolID
+						gc = var.getGenotypes(sp.getSamples());
+	
+						
+						/* Check if any samples from the SamplePool were missing in the file. If so,
+						 * throw error and let user know which samples were missing.
+						 */
+						if(!gc.containsSamples(sp.getSamples())){
+							throwMissingSamplesError(gc, sp, vp, op);
+						}
+	
+						/* Iterate over the sample genotypes in this GenotypeContext
+						 * and determine if they intersect by genotype
+						 */
+						genoIt = gc.iterator();
+						while(genoIt.hasNext()){
+							geno = genoIt.next();
+							if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, op.getOperationID())){
+								intersects = false;
+								break;
+							}
+							sampleGenotypes.put(geno.getSampleName(), geno);
+							genotypes.add(geno);
+						}
+	
+						if(!intersects)
+							break;
 					}
 
-					if(!intersects)
-						break;
 				}
+			}
 
-				// If all VariantPools contain var and they intersect by IntersectTypes, add it to the new pool
-				if(intersects && var != null){
-					
-					/* add Ref allele */
-					allAlleles.add(var.getReference());
+			// If all VariantPools contain var and they intersect by IntersectTypes, add it to the new pool
+			if(intersects && var != null){
+				
+				/* add Ref allele */
+				allAlleles.add(var.getReference());
 
-					// Build the VariantContext and add to the VariantPool
-					intersection.addVariant(buildVariant(var, allAlleles, genotypes));
-				}
+				// Build the VariantContext and add to the VariantPool
+				intersection.addVariant(buildVariant(var, allAlleles, genotypes));
 			}
 		}
 		return intersection;
@@ -455,8 +484,10 @@ public class SetOperator {
 			}
 			else{
 				if(!ref.equals(var.getReference(), true)){
-					String s = "reference alleles do not match between variant pools. Do the reference builds match?";
-					emitExcludedVariantWarning(s, varKey, operationID, null);
+					if(verbose()){
+						String s = "reference alleles do not match between variant pools. Do the reference builds match?";
+						emitExcludedVariantWarning(s, varKey, operationID, null);
+					}
 					return false;
 				}
 				else{
@@ -474,8 +505,10 @@ public class SetOperator {
 					
 					/* If we didn't find common alt, exclude variant */
 					if(!commonAlt){
-						String s = "alternate alleles do not overlap between variant pools.";
-						emitExcludedVariantWarning(s, varKey, operationID, null);
+						if(verbose()){
+							String s = "alternate alleles do not overlap between variant pools.";
+							emitExcludedVariantWarning(s, varKey, operationID, null);
+						}
 						return false;
 					}
 				}
@@ -500,7 +533,7 @@ public class SetOperator {
 		 */
 		Genotype sg = sampleGenotypes.get(geno.getSampleName());
 		if(sg != null && !sg.sameGenotype(geno)){
-			if(this.verbose){
+			if(verbose()){
 				String s = "exists in multiple variant pools but the genotype did not match.";
 				emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 			}
@@ -514,7 +547,7 @@ public class SetOperator {
 			if(geno.isHomRef())
 				return true;
 			else{
-				if(this.verbose){
+				if(verbose()){
 					String s = "is not Homo Ref.";
 					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
@@ -527,7 +560,7 @@ public class SetOperator {
 			if(geno.isHomVar())
 				return true;
 			else{
-				if(this.verbose){
+				if(verbose()){
 					String s = "is not Homo Alt.";
 					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
@@ -542,7 +575,7 @@ public class SetOperator {
 					return true;
 			}
 			else{
-				if(this.verbose){
+				if(verbose()){
 					String s = "is not Heterozygous containing a Ref allele.";
 					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
@@ -552,8 +585,8 @@ public class SetOperator {
 			if(geno.isHomVar() || (geno.isHet() && genoContainsRefAllele(geno)))
 				return true;
 			else{
-				if(this.verbose){
-					String s = "is Homo Ref containing a Ref allele.";
+				if(verbose()){
+					String s = "is not Homo Alt or Het containing a Ref allele.";
 					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
 			}
