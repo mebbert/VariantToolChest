@@ -151,6 +151,7 @@ public class SetOperator {
 		 * subtract from vp1
 		 */
 		while(it.hasNext()){
+			keep = false;
 			allAlleles = new LinkedHashSet<Allele>();
 			
 			currVarKey = it.next();

@@ -26,8 +26,8 @@ public abstract class Operation {
 	private String operationString;
 	private String operID;
 	private Operator operator;
-	private static ArrayList<String> usedOperationIDs;
-	private static ArrayList<String> generatedOperationIDs;
+	private static ArrayList<String> usedOperationIDs = new ArrayList<String>();
+	private static ArrayList<String> generatedOperationIDs = new ArrayList<String>();
 //	private Matcher matcher;
 //	private HashMap<String, SamplePool> samplePools;
 
@@ -42,13 +42,11 @@ public abstract class Operation {
 	 * @throws InvalidOperationException
 	 */
 	public Operation(String operationString, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
-		init();
 //		parseOperation(operationString, variantPools);
 		this.operationString = operationString;
 	}
 	
 	public Operation(String operationString, String operID, Operator op){
-		init();
 		this.operationString = operationString;
 		
 		if(operID == null){
@@ -61,11 +59,6 @@ public abstract class Operation {
 		addOperationID(this.operID);
 
 		this.operator = op;
-	}
-	
-	private void init(){
-		usedOperationIDs = new ArrayList<String>();
-		generatedOperationIDs = new ArrayList<String>();
 	}
 	
 //	private boolean isValidOperation(String operation){

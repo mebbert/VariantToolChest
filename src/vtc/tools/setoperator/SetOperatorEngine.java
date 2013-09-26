@@ -276,6 +276,8 @@ public class SetOperatorEngine implements Engine{
 						VariantPool.printVariantPool(intermediateOut,
 								canonicalPath.substring(0,canonicalPath.lastIndexOf(File.separator) + 1),
 								result, refGenome, outputFormat, repairHeader);
+						
+						logger.info(result.getCount() + " variants written for operation: '" + op.getOperationID() + "'");
 					}
 				}
 				else{
@@ -287,6 +289,8 @@ public class SetOperatorEngine implements Engine{
 			if(result != null){
 				logger.info("Printing " + result.getPoolID() + " to file: " + outFile.getAbsolutePath());
 				VariantPool.printVariantPool(outFile.getAbsolutePath(), result, refGenome, outputFormat, repairHeader);
+				
+				logger.info(result.getCount() + " variant(s) written.");
 			}
 			
 			
