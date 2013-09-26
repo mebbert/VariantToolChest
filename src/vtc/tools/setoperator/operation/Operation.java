@@ -50,7 +50,16 @@ public abstract class Operation {
 	public Operation(String operationString, String operID, Operator op){
 		init();
 		this.operationString = operationString;
-		this.operID = operID;
+		
+		if(operID == null){
+			this.operID = generateOperationID();
+		}
+		else{
+			this.operID = operID;
+		}
+		
+		addOperationID(this.operID);
+
 		this.operator = op;
 	}
 	
@@ -146,7 +155,7 @@ public abstract class Operation {
 	 * as 's1', 's2', etc.
 	 * @return
 	 */
-	protected static String generateOperationID(){
+	private static String generateOperationID(){
 		String id = "s" + Integer.toString(generatedOperationIDs.size() + 1);
 		generatedOperationIDs.add(id);
 		return id;

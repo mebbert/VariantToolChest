@@ -53,9 +53,9 @@ public class OperationFactory {
 		ArrayList<SamplePool> samplePoolList = new ArrayList<SamplePool>();
 		int operIndex;
 
-		// If only one val after split, user didn't provide operID, so generate it
+		// If only one val after split, user didn't provide operID. Set to null. Will be generated.
 		if(operVals.length == 1){
-			operID = Operation.generateOperationID();
+			operID = null;
 			operIndex = 0;
 		}
 		else if(operVals.length > 2){

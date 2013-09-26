@@ -144,7 +144,7 @@ public class SetOperatorEngine implements Engine{
 		output.addArgument("-v", "--verbose").dest("VERBOSE").action(Arguments.storeTrue())
 				.help("Print useful information to 'debug.txt'.");
 		
-		output.addArgument("-c", "--chr").dest("CHR").action(Arguments.storeTrue())
+		output.addArgument("-a", "--add-chr").dest("CHR").action(Arguments.storeTrue())
 				.help("Add 'chr' to chromosome (e.g. 'chr20' instead of '20'");
 
 		try {
@@ -208,7 +208,7 @@ public class SetOperatorEngine implements Engine{
 	
 			ArrayList<VariantPool> associatedVPs;
 			ArrayList<VCFHeader> associatedVPHeaders;
-			VariantPool result;
+			VariantPool result = null;
 			Operator o;
 			String intermediateOut, canonicalPath;
 			VCFHeader header;
@@ -272,21 +272,24 @@ public class SetOperatorEngine implements Engine{
 					 */
 					if(printIntermediateFiles){
 						intermediateOut = op.getOperationID() + outputFormat.getDefaultExtension();
-						if(outFile != null){
-							canonicalPath = outFile.getCanonicalPath();
-							VariantPool.printVariantPool(intermediateOut,
-									canonicalPath.substring(0,canonicalPath.lastIndexOf(File.separator) + 1),
-									result, refGenome, outputFormat, repairHeader);
-						}
-						else{
-							VariantPool.printVariantPool(intermediateOut, result, refGenome, SupportedFileType.VCF, repairHeader);
-						}
+						canonicalPath = outFile.getCanonicalPath();
+						VariantPool.printVariantPool(intermediateOut,
+								canonicalPath.substring(0,canonicalPath.lastIndexOf(File.separator) + 1),
+								result, refGenome, outputFormat, repairHeader);
 					}
 				}
 				else{
 					throw new RuntimeException("Something is very wrong! 'result' should not be null");
 				}
 			}
+			
+			/* Now print the final output file */
+			if(result != null){
+				logger.info("Printing " + result.getPoolID() + " to file: " + outFile.getAbsolutePath());
+				VariantPool.printVariantPool(outFile.getAbsolutePath(), result, refGenome, outputFormat, repairHeader);
+			}
+			
+			
 		} catch(ArgumentParserException e){
 			UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
 		} catch (InvalidOperationException e) {

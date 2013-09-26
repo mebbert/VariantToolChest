@@ -6,6 +6,7 @@ package vtc.tools.setoperator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -605,11 +606,11 @@ public class SetOperator {
 
 		String currVarKey;
 		VariantContext var, var2;
-		ArrayList<String> processedVarKeys = new ArrayList<String>();
+		HashSet<String> processedVarKeys = new HashSet<String>();
 		Iterator<String> it;
 		ArrayList<Genotype> genotypes;
 		LinkedHashSet<Allele> alleles;
-		Allele ref;
+//		Allele ref;
 		
 		VariantPool union = new VariantPool();
 		union.setFile(new File(op.getOperationID()));
@@ -622,13 +623,18 @@ public class SetOperator {
 		
 		/* Loop over variantPools */
 		for(VariantPool vp : variantPools){
+			logger.info("Processing variant pool '" + vp.getPoolID() + "'...");
+			int nVars = vp.getCount();
 			it = vp.getIterator();
 			
 			/* Iterate over each variant in this pool */
+			int count = 0;
 			while(it.hasNext()){
 				currVarKey = it.next();
 				genotypes = new ArrayList<Genotype>();
 				alleles = new LinkedHashSet<Allele>();
+				
+				if(count > 1 && count % 10000 == 0) logger.info("Processed " + count + " of " + nVars + " variants...");
 				
 				/* Track each variant that we've processed
 				 * so we don't process it in subsequent VariantPools
@@ -642,7 +648,7 @@ public class SetOperator {
 					var = vp.getVariant(currVarKey);
 					genotypes.addAll(var.getGenotypes());
 					alleles.addAll(var.getAlleles());
-					ref = var.getReference();
+//					ref = var.getReference();
 					for(VariantPool vp2 : variantPools){
 						
 						/* Skip this VariantPool if it's the same as vp */
@@ -656,30 +662,31 @@ public class SetOperator {
 						var2 = vp2.getVariant(currVarKey);
 						if(var2 != null){
 
+							/* TODO: Verify that this is unnecessary. We will assume they are using the
+							 * same build. Since variants are stored by 'chr:pos:ref', anything at this
+							 * point must match!
+							 */
+							
 							/* Check that refs match, otherwise omit */
-							if(!ref.equals(var2.getReference(), true)){
-								String s = "reference alleles do not match between variant pools. Do the reference builds match?";
-								emitExcludedVariantWarning(s, currVarKey, op.getOperationID(), null);
-								break;
-							}
+//							if(!ref.equals(var2.getReference(), true)){
+//								String s = "reference alleles do not match between variant pools. Do the reference builds match?";
+//								emitExcludedVariantWarning(s, currVarKey, op.getOperationID(), null);
+//								break;
+//							}
 							
 							if(hasMatchingSampleWithDifferentGenotype(var, var2, currVarKey, op.getOperationID())){
 								break;
 							}
 							
 							genotypes.addAll(var2.getGenotypes());
-							alleles.addAll(var2.getAlleles());
-							if(!ref.equals(var2.getReference())){
-								String s = "reference alleles do not match between variant pools. Do the reference builds match?";
-								emitExcludedVariantWarning(s, currVarKey, op.getOperationID(), null);
-							}
-						}
+							alleles.addAll(var2.getAlleles());						}
 						else{
 							genotypes.addAll(generateNoCallGenotypesForSamples(vp.getSamples(), vp2.getSamples()));
 						}
 						union.addVariant(buildVariant(var, alleles, genotypes));
 					}
 				}
+				count++;
 			}
 		}
 		return union;
@@ -751,6 +758,14 @@ public class SetOperator {
 	 */
 	
 	
+	/**
+	 * Build a new variant from an original and add all alleles and genotypes
+	 * 
+	 * @param var
+	 * @param alleles
+	 * @param genos
+	 * @return
+	 */
 	private VariantContext buildVariant(VariantContext var, LinkedHashSet<Allele> alleles, ArrayList<Genotype> genos){
 		/* Start building the new VariantContext */
 		VariantContextBuilder vcBuilder = new VariantContextBuilder();
