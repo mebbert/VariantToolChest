@@ -309,7 +309,7 @@ public class SetOperatorEngine implements Engine{
 		printComparisonTable(resultingVPs);
 
 		/* Print summary tables for each operation */
-		new VarStats(resultingVPs, null, false, true, false);
+		new VarStats(resultingVPs, null, false, true, false, null);
 	}
 	
 	
