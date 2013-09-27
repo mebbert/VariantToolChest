@@ -148,7 +148,7 @@ public class Association {
         if (caseAlleleCount[0] == 0 || controlAlleleCount[1] == 0 || caseAlleleCount[1] == 0 || controlAlleleCount[0] == 0) {
             return -1;
         } else {
-            double oddsRatio = (caseAlleleCount[0] * controlAlleleCount[1]) / (caseAlleleCount[1] * controlAlleleCount[0]);
+            double oddsRatio = ((double) caseAlleleCount[0] * (double) controlAlleleCount[1]) / ((double) caseAlleleCount[1] * (double) controlAlleleCount[0]);
             return oddsRatio;
         }
     }
