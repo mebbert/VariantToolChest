@@ -57,7 +57,7 @@ public class VarStatsEngine implements Engine {
         Stats.addArgument("-s", "--summary").dest("Summary").action(Arguments.storeTrue()).help("Prints summary statistics to the console");
         Stats.addArgument("-c", "--combined").dest("Combined").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files in one block.  The default is will print each file separately.");
         Stats.addArgument("-a", "--association").action(Arguments.storeTrue()).dest("association")
-                .help("Performs an association test (also generates allele frequencies).  " + "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
+                .help("Performs an association test (also generates allele frequencies).  It only accepts one file. " + "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
         Stats.addArgument("-p", "--pheno").nargs("+").dest("pheno").type(String.class).help("Allows for multiple pheno files.");
 
         output.addArgument("-o", "--out").nargs("?").setDefault("variant_list.out.txt").dest("outfile").help("Specify the final output file name.");

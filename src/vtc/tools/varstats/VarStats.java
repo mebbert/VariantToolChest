@@ -121,6 +121,14 @@ public class VarStats {
                     double PVal = test.chiSquareTestDataSetsComparison(ControlAlleleCount, CaseAlleleCount);
                     // System.out.println(PVal);
                     Assoc.SetPValue(PVal);
+                    if (vc.getStart() == 20760474) {
+                        System.out.println(ControlAlleleCount[0] + " " + ControlAlleleCount[1] + '\n');
+                        System.out.println(CaseAlleleCount[0] + " " + CaseAlleleCount[1] + '\n');
+                    }
+
+                    // double OR = Assoc.calcOR(CaseAlleleCount,
+                    // ControlAlleleCount);
+
                     association.add(Assoc);
 
                 }
