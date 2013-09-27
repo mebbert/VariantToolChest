@@ -122,12 +122,14 @@ public class VarStats {
                     // System.out.println(PVal);
                     Assoc.SetPValue(PVal);
                     if (vc.getStart() == 20760474) {
-                        System.out.println(ControlAlleleCount[0] + " " + ControlAlleleCount[1] + '\n');
-                        System.out.println(CaseAlleleCount[0] + " " + CaseAlleleCount[1] + '\n');
+                        // System.out.println(ControlAlleleCount[0] + " " +
+                        // ControlAlleleCount[1] + '\n');
+                        // System.out.println(CaseAlleleCount[0] + " " +
+                        // CaseAlleleCount[1] + '\n');
                     }
 
-                    // double OR = Assoc.calcOR(CaseAlleleCount,
-                    // ControlAlleleCount);
+                    double OR = Assoc.calcOR(CaseAlleleCount, ControlAlleleCount);
+                    Assoc.SetOR(OR);
 
                     association.add(Assoc);
 
@@ -203,9 +205,9 @@ public class VarStats {
     private void printToFile(ArrayList<Association> A, String OutFile) {
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(OutFile));
-            out.write("Chr" + '\t' + "ID" + '\t' + "Pos" + '\t' + "Ref" + '\t' + "Alt" + '\t' + "CaseRefCount" + '\t' + "CaseAltCount" + '\t' + "ControlRefCount" + '\t' + "ControlAltCount" + '\t' + "P-Value" + '\n');
+            out.write("Chr" + '\t' + "ID" + '\t' + "Pos" + '\t' + "Ref" + '\t' + "Alt" + '\t' + "CaseRefCount" + '\t' + "CaseAltCount" + '\t' + "ControlRefCount" + '\t' + "ControlAltCount" + '\t' + "OR" + '\t' + "P-Value" + '\n');
             for (Association a : A) {
-                out.write(a.toString() + '\n');
+                out.write(a.toString());
             }
             out.close();
         } catch (IOException e) {

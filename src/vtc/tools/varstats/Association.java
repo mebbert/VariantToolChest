@@ -145,15 +145,24 @@ public class Association {
     }
 
     public double calcOR(long[] caseAlleleCount, long[] controlAlleleCount) {
-        double oddsRatio = 0;
-
-        return oddsRatio;
+        if (caseAlleleCount[0] == 0 || controlAlleleCount[1] == 0 || caseAlleleCount[1] == 0 || controlAlleleCount[0] == 0) {
+            return -1;
+        } else {
+            double oddsRatio = (caseAlleleCount[0] * controlAlleleCount[1]) / (caseAlleleCount[1] * controlAlleleCount[0]);
+            return oddsRatio;
+        }
     }
 
     @Override
     public String toString() {
         String PVal = String.format("%.4g%n", PValue);
-        String association = Chr + '\t' + Id + '\t' + Pos + '\t' + Ref + '\t' + Alt + '\t' + CaseRefCount + '\t' + CaseAltCount + '\t' + ControlRefCount + '\t' + ControlAltCount + '\t' + PVal;
+        String or;
+        if (OR == -1) {
+            or = "NA";
+        } else {
+            or = String.format("%.4g", OR);
+        }
+        String association = Chr + '\t' + Id + '\t' + Pos + '\t' + Ref + '\t' + Alt + '\t' + CaseRefCount + '\t' + CaseAltCount + '\t' + ControlRefCount + '\t' + ControlAltCount + '\t' + or + '\t' + PVal;
         return association;
     }
 }
