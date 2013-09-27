@@ -599,7 +599,7 @@ public class VarStats {
         System.out.format(rightalignFormatf, "Ti/Tv:", TiTv);
         System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", GenoTiTv);
         System.out.format(s + newLine);
-        System.out.format(rightalignFormati, "INDEls:    ", InDels);
+        System.out.format(rightalignFormati, "INDELs:    ", InDels);
         System.out.format(s + newLine);
         System.out.format(rightalignFormati, "StructVars:", StructVars);
         System.out.format(s + newLine);

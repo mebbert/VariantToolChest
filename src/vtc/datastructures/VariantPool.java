@@ -302,9 +302,21 @@ public class VariantPool implements Pool{
 		String chrPosRef = new String(v.getChr() + ":" + Integer.toString(v.getStart()) + ":" + v.getReference());
 		
 		/* If a variant already exists with this chr:pos:ref,
-		 * combine the two and replace the original
+		 * ignore subsequent variants and emit warning.
 		 */
 		if(hMap.containsKey(chrPosRef)){
+			/* TODO: Determine how to handle VCFs with multiple records
+			 * at the same location. Sometimes people represent multiple
+			 * alts on different lines. e.g.:
+			 * 
+			 * chr2 111 C A
+			 * chr2 111 C T
+			 * 
+			 * Or when there's an INDEL. e.g.:
+			 * 
+			 * chr2 110 CC C (Can be represented as chr2 111 C .)
+			 * chr2 111 C  A
+			 */
 //			VariantContext existingVar = hMap.get(chrPosRef);
 //			VariantContext newVar = combineVariants(v, existingVar);
 //			
@@ -385,7 +397,7 @@ public class VariantPool implements Pool{
 			int count = 0;
 			while ( it.hasNext() ) {
 				
-				if(count > 1 && count % 10000 == 0) logger.info("Parsed " + count + " variants so far...");
+				if(count > 1 && count % 10000 == 0) System.out.print("Parsed variants: " + count + "\r");
 
 				/* get next variation and save it */
 				vc = it.next();
@@ -398,13 +410,6 @@ public class VariantPool implements Pool{
 					this.setSamples(sp);
 				}
 				
-				/* Fully decode the variant. This should verify the variant is valid */
-				// TODO: Make sure this really validates the variant
-				// TODO: Determine if this is too much upfront overhead. Probably very costly.
-					// Decoding was very costly on /Users/markebbert/BYU/total.hg19.SNPs.capture.vcf! 4GB was not enough.
-				// TODO: Figure out what the 'lenientDecoding' actually does. Should we be 'lenient'?
-//				vc = vc.fullyDecode(header, false);
-
 				this.addVariant(vc);
 				count++;
 			}
