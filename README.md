@@ -102,7 +102,7 @@ If there is a "NaN" for either Ti/Tv or (Geno)Ti/Tv it means that there is divis
 The NaN for the quality scores and depth means that there were no Quality scores or read Depths, respectively, recorded. 
 	In this case the error output simply means that there were missing Quality and/or Read Depths in the file.
   
-**Association Test**
+**Association Test (-a)**
 
 This test calculates the p-value from the chi square test from the case-control allelic counts. 
 
