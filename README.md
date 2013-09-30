@@ -11,7 +11,7 @@
 
 
 
-###### VarStat (vs)
+### VarStat (vs)
 
 This portion of the program will output the the variant statistical report as a summary or the association test or both.
 
@@ -30,13 +30,13 @@ Sample inputs are as follow:
 </code></pre>
 
 
-### Statistical Summary (-s)
+**Statistical Summary (-s)**
 
 To run the summary multiple input file are allowed. The default print function will print one summary per file.
 The -c parameter will print a combined summary with all the files' names printed at the top.  The input files may only
 be .vcf files.
 
-**Sample terminal input**
+Sample terminal input:
 <pre><code>
 >vs -i input1.vcf -s
 # or
@@ -102,7 +102,7 @@ If there is a "NaN" for either Ti/Tv or (Geno)Ti/Tv it means that there is divis
 The NaN for the quality scores and depth means that there were no Quality scores or read Depths, respectively, recorded. 
 	In this case the error output simply means that there were missing Quality and/or Read Depths in the file.
   
-### Association Test
+**Association Test**
 
 This test calculates the p-value from the chi square test from the case-control allelic counts. 
 
