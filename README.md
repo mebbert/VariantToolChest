@@ -138,16 +138,16 @@ Chr	ID	Pos	Ref	Alt	CaseRefCount	CaseAltCount	ControlRefCount	ControlAltCount	OR	
 </code></pre>
 
 The columns are as follows:
-	* **Chr** is the chromosome number.
-	* **ID** is the variant ID (i.e. rs2228467).
-	* **Pos** is the position of the variant on the chromosome.
-	* **Ref** is the reference allele.
-	* **Alt** is the alternate allele. If there are more than one it is printed on another line.
-	* **CaseRefCount** is the count of of how many reference alleles are present in the case samples.
-	* **CaseAltCount** is the count of of how many alternate alleles are present in the case samples.
-	* **ControlRefCount** is the count of of how many reference alleles are present in the control samples.
-	* **ControlAltCount** is the count of of how many alternate alleles are present in the control samples.
-	* **OR** is the odds ratio calculated from the case and control allele counts.
-	* **P-Value** is the p-value calculated from the chi square test using the case and control allele counts.
+* **Chr** is the chromosome number.
+* **ID** is the variant ID (i.e. rs2228467).
+* **Pos** is the position of the variant on the chromosome.
+* **Ref** is the reference allele.
+* **Alt** is the alternate allele. If there are more than one it is printed on another line.
+* **CaseRefCount** is the count of of how many reference alleles are present in the case samples.
+* **CaseAltCount** is the count of of how many alternate alleles are present in the case samples.
+* **ControlRefCount** is the count of of how many reference alleles are present in the control samples.
+* **ControlAltCount** is the count of of how many alternate alleles are present in the control samples.
+* **OR** is the odds ratio calculated from the case and control allele counts.
+* **P-Value** is the p-value calculated from the chi square test using the case and control allele counts.
 
 
