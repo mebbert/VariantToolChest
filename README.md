@@ -51,38 +51,38 @@ The third will output individual summaries for each of the files.
 
 The Summary outputs the following statistics to the screen.
 	
-	<pre><code>
-	=================================
-                               
-	 Summary of v1: input.vcf         
-                               
-	=================================
+<pre><code>
+=================================
+                              
+ Summary of v1: input.vcf         
+                              
+=================================
 
-	+-------------------------------+
-	|TotalVars:                 195 |
-	+-------------------------------+
-	|    SNVs:                    0 |
-	|         Ti/Tv:            NaN |
-	|   (Geno)Ti/Tv:            NaN |
-	+-------------------------------+
-	|    INDELs:                195 |
-	+-------------------------------+
-	|    StructVars:              0 |
-	+-------------------------------+
-	|MultiAlts:                   0 |
-	+-------------------------------+
-	|AvgQualScore:              NaN |
-	|  MinQualScore:            NaN |
-	|  MaxQualScore:            NaN |
-	+-------------------------------+
-	|AvgDepth:                  NaN |
-	|      MinDepth:            NaN |
-	|      MaxDepth:            NaN |
-	+-------------------------------+
-	
-	There was an error in the Qual formatting of: 11.vcf  One or more variants had no Quality Score. It was excluded in the calculation.
- 	There was an error in the Depth formatting of: 11.vcf  One or more variants had no Read Depth. It was excluded in the calculation.
-	</code></pre>
++-------------------------------+
+|TotalVars:                 195 |
++-------------------------------+
+|    SNVs:                    0 |
+|         Ti/Tv:            NaN |
+|   (Geno)Ti/Tv:            NaN |
++-------------------------------+
+|    INDELs:                195 |
++-------------------------------+
+|    StructVars:              0 |
++-------------------------------+
+|MultiAlts:                   0 |
++-------------------------------+
+|AvgQualScore:              NaN |
+|  MinQualScore:            NaN |
+|  MaxQualScore:            NaN |
++-------------------------------+
+|AvgDepth:                  NaN |
+|      MinDepth:            NaN |
+|      MaxDepth:            NaN |
++-------------------------------+
+
+There was an error in the Qual formatting of: 11.vcf  One or more variants had no Quality Score. It was excluded in the calculation.
+There was an error in the Depth formatting of: 11.vcf  One or more variants had no Read Depth. It was excluded in the calculation.
+</code></pre>
 	
 * **TotalVars** counts the total number of variants in the file/files.
 * **SNVs** counts the number of Single Nucleotide Variants (SNVs) in the file/files.
