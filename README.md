@@ -11,7 +11,7 @@
 
 
 
-### VarStat (vs)
+###### VarStat (vs)
 
 This portion of the program will output the the variant statistical report as a summary or the association test or both.
 
