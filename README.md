@@ -49,7 +49,7 @@ The first option will output the summary for that file.
 The second will output the combined summary of the two files.
 The third will output individual summaries for each of the files.
 
-	The Summary outputs the following statistics to the screen.
+The Summary outputs the following statistics to the screen.
 	
 	<pre><code>
 	=================================
@@ -84,22 +84,22 @@ The third will output individual summaries for each of the files.
  	There was an error in the Depth formatting of: 11.vcf  One or more variants had no Read Depth. It was excluded in the calculation.
 	</code></pre>
 	
-		* **TotalVars** counts the total number of variants in the file/files.
-		* **SNVs** counts the number of Single Nucleotide Variants (SNVs) in the file/files.
-		* **Ti/Tv** outputs the ratio of Transition versus Transition SNVs. 
-		* **(Geno)Ti/Tv** outputs the genotypic ratio of Transition versus Tranversion SNVs.
-		* **INDELs** counts the number of Insertions & Deletions.
-		* **StructVars** counts the number of Structural Variants in the file.
-		* **MultiAlts** counts the number of variants that have multiple alternate alleles.
-		* **AvgQualScore** outputs the average quality score across all the variants in the file.
-		* **MinQualScore** outputs the lowest quality score found in the file.
-		* **MaxQualScore** outputs the highest quality score found in the file.
-		* **AvgDepth** outputs the average read depth across all the variants in the file.
-		* **MinDepth** outputs the lowest read depth for a variant found in the file.
-		* **MaxDepth** outputs the highest read depth for a variant found in the file.
-		If there is a "NaN" for either Ti/Tv or (Geno)Ti/Tv it means that there is division by zero.
-		The NaN for the quality scores and depth means that there were no Quality scores or read Depths, respectively, recorded. 
-			In this case the error output simply means that there were missing Quality and/or Read Depths in the file.
+	* **TotalVars** counts the total number of variants in the file/files.
+	* **SNVs** counts the number of Single Nucleotide Variants (SNVs) in the file/files.
+	* **Ti/Tv** outputs the ratio of Transition versus Transition SNVs. 
+	* **(Geno)Ti/Tv** outputs the genotypic ratio of Transition versus Tranversion SNVs.
+	* **INDELs** counts the number of Insertions & Deletions.
+	* **StructVars** counts the number of Structural Variants in the file.
+	* **MultiAlts** counts the number of variants that have multiple alternate alleles.
+	* **AvgQualScore** outputs the average quality score across all the variants in the file.
+	* **MinQualScore** outputs the lowest quality score found in the file.
+	* **MaxQualScore** outputs the highest quality score found in the file.
+	* **AvgDepth** outputs the average read depth across all the variants in the file.
+	* **MinDepth** outputs the lowest read depth for a variant found in the file.
+	* **MaxDepth** outputs the highest read depth for a variant found in the file.
+	If there is a "NaN" for either Ti/Tv or (Geno)Ti/Tv it means that there is division by zero.
+	The NaN for the quality scores and depth means that there were no Quality scores or read Depths, respectively, recorded. 
+		In this case the error output simply means that there were missing Quality and/or Read Depths in the file.
   
 ### Association Test
 
