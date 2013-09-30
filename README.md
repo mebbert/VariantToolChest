@@ -97,6 +97,7 @@ There was an error in the Depth formatting of: 11.vcf  One or more variants had 
 * **AvgDepth** outputs the average read depth across all the variants in the file.
 * **MinDepth** outputs the lowest read depth for a variant found in the file.
 * **MaxDepth** outputs the highest read depth for a variant found in the file.
+
 If there is a "NaN" for either Ti/Tv or (Geno)Ti/Tv it means that there is division by zero.
 The NaN for the quality scores and depth means that there were no Quality scores or read Depths, respectively, recorded. 
 	In this case the error output simply means that there were missing Quality and/or Read Depths in the file.
