@@ -123,12 +123,12 @@ public class VarStats {
                     double PVal = test.chiSquareTestDataSetsComparison(ControlAlleleCount, CaseAlleleCount);
                     // System.out.println(PVal);
                     Assoc.SetPValue(PVal);
-                    if (vc.getStart() == 20760474) {
-                        // System.out.println(ControlAlleleCount[0] + " " +
-                        // ControlAlleleCount[1] + '\n');
-                        // System.out.println(CaseAlleleCount[0] + " " +
-                        // CaseAlleleCount[1] + '\n');
-                    }
+                    // if (vc.getStart() == 20760474) {
+                    // // System.out.println(ControlAlleleCount[0] + " " +
+                    // // ControlAlleleCount[1] + '\n');
+                    // // System.out.println(CaseAlleleCount[0] + " " +
+                    // // CaseAlleleCount[1] + '\n');
+                    // }
 
                     double OR = Assoc.calcOR(CaseAlleleCount, ControlAlleleCount);
                     Assoc.SetOR(OR);
@@ -538,7 +538,7 @@ public class VarStats {
             if (s.length() > length)
                 length = s.length();
             if (s.length() + 15 > title.length() && s != title)
-                length = s.length() + 15;
+                length = s.length() + 20;
         }
         return length;
 
@@ -569,11 +569,15 @@ public class VarStats {
 
         // System.out.println(file);
 
-        int LeftColumn = 15;
+        Integer snvPercent = SNPs / NumVars * 100;
+        Integer InDelsPercent = InDels / NumVars * 100;
+        Integer StructPercent = StructVars / NumVars * 100;
+
+        int LeftColumn = 20;
 
         String leftalignFormatint = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + "d |" + newLine;
         String leftalignFormatd = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + ".2f |" + newLine;
-        String rightalignFormati = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "d |" + newLine;
+        String rightalignFormati = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "s |" + newLine;
         String rightalignFormatf = "|%" + LeftColumn + "s%" + (length - LeftColumn) + ".2f |" + newLine;
         String rightalignFormats = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "s |" + newLine;
         String leftalignFormats = " %-" + (length--) + "s" + newLine;
@@ -601,13 +605,13 @@ public class VarStats {
         System.out.format(s + newLine);
         System.out.format(leftalignFormatint, "TotalVars:", NumVars);
         System.out.format(s + newLine);
-        System.out.format(rightalignFormati, "SNVs:      ", SNPs);
+        System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(SNPs) + " (" + Integer.toString(snvPercent) + "%)");
         System.out.format(rightalignFormatf, "Ti/Tv:", TiTv);
         System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", GenoTiTv);
         System.out.format(s + newLine);
-        System.out.format(rightalignFormati, "INDELs:    ", InDels);
+        System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(InDels) + " (" + Integer.toString(InDelsPercent) + "%)");
         System.out.format(s + newLine);
-        System.out.format(rightalignFormati, "StructVars:", StructVars);
+        System.out.format(rightalignFormati, "StructVars:", Integer.toString(StructVars) + " (" + Integer.toString(StructPercent) + "%)");
         System.out.format(s + newLine);
         // System.out.format(leftalignFormatint, "Hets:", NumHets);
         // System.out.format(s + newLine);
