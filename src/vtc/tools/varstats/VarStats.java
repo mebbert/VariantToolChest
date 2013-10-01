@@ -569,9 +569,9 @@ public class VarStats {
 
         // System.out.println(file);
 
-        Integer snvPercent = SNPs / NumVars * 100;
-        Integer InDelsPercent = InDels / NumVars * 100;
-        Integer StructPercent = StructVars / NumVars * 100;
+        Integer snvPercent = (int) ((float) SNPs / (float) NumVars * 100);
+        Integer InDelsPercent = (int) ((float) InDels / (float) NumVars * 100);
+        Integer StructPercent = (int) ((float) StructVars / (float) NumVars * 100);
 
         int LeftColumn = 20;
 
