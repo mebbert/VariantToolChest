@@ -53,11 +53,11 @@ public class VarStats {
 
     // constructors
 
-    public VarStats(TreeMap<String, VariantPool> allVPs, ArrayList<Object> phenoArgs, boolean printMulti, boolean sum, boolean assoc, String Outfile) {
+    public VarStats(TreeMap<String, VariantPool> allVPs, ArrayList<Object> phenoArgs, boolean printMulti, boolean sum, boolean assoc) {
         if (sum)
             IterateAndCount(allVPs, printMulti);
         if (assoc)
-            doAssociation(allVPs, phenoArgs, Outfile);
+            doAssociation(allVPs, phenoArgs);
     }
 
     public VarStats() {
@@ -65,7 +65,7 @@ public class VarStats {
 
     // Functions
 
-    private void doAssociation(TreeMap<String, VariantPool> AllVPs, ArrayList<Object> phenoArgs, String OutFile) {
+    private void doAssociation(TreeMap<String, VariantPool> AllVPs, ArrayList<Object> phenoArgs) {
 
         if (phenoArgs != null) {
             // Make a structure to read in the phenotype information...
@@ -100,10 +100,12 @@ public class VarStats {
             Iterator<String> it = VP.getIterator();
             String currVarKey;
             int Num_SNPS = 0;
+            String OutFile = "temp.txt";
             while (it.hasNext()) {
 
                 currVarKey = it.next();
                 VariantContext vc = VP.getVariant(currVarKey);
+                OutFile = VP.getFile().getName();
                 // Its a SNP now calculate frequencies
                 Allele Ref = vc.getReference();
                 List<Allele> Alts = vc.getAlternateAlleles();
@@ -203,6 +205,8 @@ public class VarStats {
     }
 
     private void printToFile(ArrayList<Association> A, String OutFile) {
+        String[] outfile = OutFile.split(".");
+        OutFile = outfile[0];
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(OutFile));
             out.write("Chr" + '\t' + "ID" + '\t' + "Pos" + '\t' + "Ref" + '\t' + "Alt" + '\t' + "CaseRefCount" + '\t' + "CaseAltCount" + '\t' + "ControlRefCount" + '\t' + "ControlAltCount" + '\t' + "OR" + '\t' + "P-Value" + '\n');

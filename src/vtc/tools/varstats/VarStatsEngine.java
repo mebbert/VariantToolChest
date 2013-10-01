@@ -60,8 +60,6 @@ public class VarStatsEngine implements Engine {
                 .help("Performs an association test (also generates allele frequencies).  It only accepts one file. " + "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
         Stats.addArgument("-p", "--pheno").nargs("+").dest("pheno").type(String.class).help("Allows for multiple pheno files.");
 
-        output.addArgument("-o", "--out").nargs("?").setDefault("variant_list.out.txt").dest("outfile").help("Specify the final output file name.");
-
         try {
             parsedArgs = parser.parseArgs(args);
             logger.info(parsedArgs);
@@ -82,7 +80,6 @@ public class VarStatsEngine implements Engine {
 
         ArrayList<Object> vcfArgs = new ArrayList<Object>(parsedArgs.getList("VCF"));
         ArrayList<Object> phenoArgs = (ArrayList<Object>) parsedArgs.getList("pheno");
-        String Outputfile = parsedArgs.getString("outfile");
 
         try {
 
@@ -94,7 +91,7 @@ public class VarStatsEngine implements Engine {
             boolean PrintMulti = parsedArgs.getBoolean("Combined");
             boolean assoc = parsedArgs.getBoolean("association");
 
-            VarStats vstat = new VarStats(AllVPs, phenoArgs, PrintMulti, sum, assoc, Outputfile);
+            VarStats vstat = new VarStats(AllVPs, phenoArgs, PrintMulti, sum, assoc);
 
         } catch (InvalidInputFileException e) {
             UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
