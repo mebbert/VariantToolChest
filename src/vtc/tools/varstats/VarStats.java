@@ -205,8 +205,8 @@ public class VarStats {
     }
 
     private void printToFile(ArrayList<Association> A, String OutFile) {
-        String[] outfile = OutFile.split(".");
-        OutFile = outfile[0];
+        String outfile = OutFile.substring(0, OutFile.length() - 4);
+        OutFile = outfile + ".txt";
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(OutFile));
             out.write("Chr" + '\t' + "ID" + '\t' + "Pos" + '\t' + "Ref" + '\t' + "Alt" + '\t' + "CaseRefCount" + '\t' + "CaseAltCount" + '\t' + "ControlRefCount" + '\t' + "ControlAltCount" + '\t' + "OR" + '\t' + "P-Value" + '\n');
