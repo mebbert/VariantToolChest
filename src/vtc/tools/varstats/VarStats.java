@@ -38,7 +38,6 @@ import java.util.NavigableSet;
 import java.util.TreeMap;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
-import org.apache.log4j.Logger;
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
@@ -47,9 +46,9 @@ import vtc.datastructures.VariantPool;
 
 public class VarStats {
 
-    HashMap<String, String> phenoInfo = new HashMap<String, String>();
+    private static final String MaxInsertion = null;
 
-    Logger                  logger    = Logger.getLogger(VarStats.class);
+    HashMap<String, String>     phenoInfo    = new HashMap<String, String>();
 
     // constructors
 
@@ -71,11 +70,6 @@ public class VarStats {
             // Make a structure to read in the phenotype information...
             phenoInfo = ParsePhenoFile(phenoArgs);
         }
-
-        // float freqA = 0;
-        // float freqT = 0;
-        // float freqC = 0;
-        // float freqG = 0;
 
         for (VariantPool VP : AllVPs.values()) {
 
@@ -121,14 +115,8 @@ public class VarStats {
                     Assoc.SetControlAltCount(ControlAlleleCount[1]);
                     ChiSquareTest test = new ChiSquareTest();
                     double PVal = test.chiSquareTestDataSetsComparison(ControlAlleleCount, CaseAlleleCount);
-                    // System.out.println(PVal);
+
                     Assoc.SetPValue(PVal);
-                    // if (vc.getStart() == 20760474) {
-                    // // System.out.println(ControlAlleleCount[0] + " " +
-                    // // ControlAlleleCount[1] + '\n');
-                    // // System.out.println(CaseAlleleCount[0] + " " +
-                    // // CaseAlleleCount[1] + '\n');
-                    // }
 
                     double OR = Assoc.calcOR(CaseAlleleCount, ControlAlleleCount);
                     Assoc.SetOR(OR);
@@ -137,35 +125,6 @@ public class VarStats {
 
                 }
 
-                // if (vc.isSNP()) {
-                // Num_SNPS++;
-                // System.out.println(vc.toString());
-                // System.out.println("---------------------------");
-                // String[] alleles = { "A", "T", "C", "G" };
-                // for (String all : alleles) {
-                //
-                // if (all.equals("A")) {
-                // freqA = (float) vc.getCalledChrCount(vc.getAllele(all)) /
-                // vc.getCalledChrCount();
-                // } else if (all.equals("T")) {
-                // freqT = (float) vc.getCalledChrCount(vc.getAllele(all)) /
-                // vc.getCalledChrCount();
-                // } else if (all.equals("C")) {
-                // freqC = (float) vc.getCalledChrCount(vc.getAllele(all)) /
-                // vc.getCalledChrCount();
-                // } else if (all.equals("G")) {
-                // freqG = (float) vc.getCalledChrCount(vc.getAllele(all)) /
-                // vc.getCalledChrCount();
-                // r
-                //
-                // }
-                //
-                // System.out.printf("frequency of A: %.2f\n", freqA);
-                // System.out.printf("frequency of T: %.2f\n", freqT);
-                // System.out.printf("frequency of C: %.2f\n", freqC);
-                // System.out.printf("frequency of G: %.2f\n", freqG);
-                // }
-                // System.out.printf("Number of SNPS %d\n", Num_SNPS);
             }
             printToFile(association, OutFile);
 
@@ -205,7 +164,7 @@ public class VarStats {
     }
 
     private void printToFile(ArrayList<Association> A, String OutFile) {
-        String outfile = OutFile.substring(0, OutFile.length() - 4);
+        String outfile = OutFile.substring(0, OutFile.lastIndexOf("."));
         OutFile = outfile + ".txt";
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(OutFile));
@@ -241,6 +200,8 @@ public class VarStats {
         int TotalDPVars = 0;
         int TotalNumSNVs = 0;
         int TotalInDels = 0;
+        int TotalInsertions = 0;
+        int TotalDeletions = 0;
         int TotalStructVars = 0;
         int TotalNumHomoRef = 0;
         int TotalNumHomoVar = 0;
@@ -273,6 +234,14 @@ public class VarStats {
             int DPVars = 0;
             int NumSNVs = 0;
             int InDels = 0;
+            int Insertions = 0;
+            int Deletions = 0;
+            double minInsertion = 0;
+            double maxInsertion = 0;
+            double avgInsertion = 0;
+            double minDeletion = 0;
+            double maxDeletion = 0;
+            double avgDeletion = 0;
             int StructVars = 0;
             int NumHomoRef = 0;
             int NumHomoVar = 0;
@@ -316,8 +285,19 @@ public class VarStats {
                     GenoTiCount += temp[0];
                     GenoTvCount += temp[1];
                 } else if (var.isIndel()) {
-                    InDels++;
-                    TotalInDels++;
+                    List<Integer> indelLengths = var.getIndelLengths();
+                    for (int length : indelLengths) {
+                        InDels++;
+                        TotalInDels++;
+                        if (length > 0) {
+                            Insertions++;
+                            System.out.println("Insertion");
+                        } else if (length < 0) {
+                            Deletions++;
+                            System.out.println("Deletion");
+
+                        }
+                    }
                 } else if (var.isStructuralIndel()) {
                     StructVars++;
                     TotalStructVars++;
@@ -354,8 +334,7 @@ public class VarStats {
                     QualError = "There was an error in the Qual formatting of: " + FileName + "  One or more variants had no Quality Score. It was excluded in the calculation.";
                 }
                 int TempDepth = getDepth(var, names);
-                // System.out.println("TempDepth = " + TempDepth);
-                // logger.info("TempDepth = " + TempDepth);
+
                 if (TempDepth >= 0) {
                     if (TempDepth > MaxDepth)
                         MaxDepth = TempDepth;
@@ -391,7 +370,7 @@ public class VarStats {
                 printFiles(files, count, Files, NumVars, NumSNVs, InDels, StructVars, NumHet, NumHomoRef, NumHomoVar, NumMultiAlts, QualScore, Depth, TiTv, GenoTiTv, MinDepth, MaxDepth, MinQScore, MaxQScore, printMulti, DepthError,
                         QualError);
             }
-
+            // printToFile(FileName, numSamples, );
             count++;
         }
         TotalTiTv = TotalTiCount / TotalTvCount;
@@ -567,13 +546,11 @@ public class VarStats {
         Arrays.fill(ch, '=');
         String t = new String(ch);
 
-        // System.out.println(file);
+        double snvPercent = (double) SNPs / (double) NumVars * 100;
+        double InDelsPercent = (double) InDels / (double) NumVars * 100;
+        double StructPercent = (double) StructVars / (double) NumVars * 100;
 
-        Integer snvPercent = (int) ((float) SNPs / (float) NumVars * 100);
-        Integer InDelsPercent = (int) ((float) InDels / (float) NumVars * 100);
-        Integer StructPercent = (int) ((float) StructVars / (float) NumVars * 100);
-
-        int LeftColumn = 20;
+        int LeftColumn = 15;
 
         String leftalignFormatint = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + "d |" + newLine;
         String leftalignFormatd = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + ".2f |" + newLine;
@@ -605,20 +582,14 @@ public class VarStats {
         System.out.format(s + newLine);
         System.out.format(leftalignFormatint, "TotalVars:", NumVars);
         System.out.format(s + newLine);
-        System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(SNPs) + " (" + Integer.toString(snvPercent) + "%)");
+        System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(SNPs) + " (" + roundDouble(snvPercent) + "%)");
         System.out.format(rightalignFormatf, "Ti/Tv:", TiTv);
         System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", GenoTiTv);
         System.out.format(s + newLine);
-        System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(InDels) + " (" + Integer.toString(InDelsPercent) + "%)");
+        System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(InDels) + " (" + roundDouble(InDelsPercent) + "%)");
         System.out.format(s + newLine);
-        System.out.format(rightalignFormati, "StructVars:", Integer.toString(StructVars) + " (" + Integer.toString(StructPercent) + "%)");
+        System.out.format(rightalignFormati, "StructVars:", Integer.toString(StructVars) + " (" + roundDouble(StructPercent) + "%)");
         System.out.format(s + newLine);
-        // System.out.format(leftalignFormatint, "Hets:", NumHets);
-        // System.out.format(s + newLine);
-        // System.out.format(leftalignFormatint, "HomoRef:", NumHomoRef);
-        // System.out.format(s + newLine);
-        // System.out.format(leftalignFormatint, "HomoVar:", NumHomoVar);
-        // System.out.format(s + newLine);
         System.out.format(leftalignFormatint, "MultiAlts:", NumMultiAlts);
         System.out.format(s + newLine);
         System.out.format(leftalignFormatd, "AvgQualScore:", QualScore);
