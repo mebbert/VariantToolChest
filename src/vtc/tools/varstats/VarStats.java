@@ -268,10 +268,13 @@ public class VarStats {
             while (it.hasNext()) {
 
                 currVarKey = it.next();
-                NumVars++;
-                TotalNumVars++;
+
                 VariantContext var = VP.getVariant(currVarKey);
                 List<String> names = var.getSampleNamesOrderedByName();
+                if (var.isVariant()) {
+                    NumVars++;
+                    TotalNumVars++;
+                }
 
                 List<Allele> Alts = var.getAlternateAlleles();
                 Allele ref = var.getReference();
