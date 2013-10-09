@@ -140,7 +140,7 @@ public class SetOperator {
 	private VariantPool performAComplementB(String operationID, VariantPool vp1,
 			VariantPool vp2, ComplementType type) throws InvalidOperationException{
 		
-		VariantPool complement = new VariantPool();
+		VariantPool complement = new VariantPool(addChr());
 		complement.setFile(new File(operationID));
 		complement.setPoolID(operationID);	
 		complement.addSamples(vp1.getSamples());
@@ -172,8 +172,14 @@ public class SetOperator {
 					if(!allVariantPoolsContainVariant(vps, currVarKey, operationID)){
 						keep = true;
 					}
+					else{
+						if(verbose()){
+							String s = "Not all variant pools contained variant.";
+							emitExcludedVariantWarning(s, currVarKey, operationID, null);
+						}
+					}
 				}
-				else if(!subtractByGenotype(var1.getGenotypes(), var2.getGenotypes(), type)){
+				else if(!subtractByGenotype(var1.getGenotypes(), var2.getGenotypes(), type, currVarKey, operationID)){
 					keep = true;
 				}
 			}
@@ -189,7 +195,7 @@ public class SetOperator {
 				/* Build the VariantContext and add to the VariantPool */
 				complement.addVariant(buildVariant(var1,
 						new LinkedHashSet<Allele>(var1.getAlleles()),
-						new ArrayList<Genotype>(var1.getGenotypes())));			
+						new ArrayList<Genotype>(var1.getGenotypes())), false);			
 			}
 		}
 		
@@ -204,7 +210,8 @@ public class SetOperator {
 	 * @return
 	 * @throws InvalidOperationException 
 	 */
-	private boolean subtractByGenotype(GenotypesContext gc1, GenotypesContext gc2, ComplementType type) throws InvalidOperationException{
+	private boolean subtractByGenotype(GenotypesContext gc1, GenotypesContext gc2,
+			ComplementType type, String currVarKey, String operationID) throws InvalidOperationException{
 		
 		/* TODO: Add 'verbose' information */
 		
@@ -214,11 +221,19 @@ public class SetOperator {
 			if(genotypesHetOrHomoAlt(gc1) && genotypesHetOrHomoAlt(gc2)){
 				return true;
 			}
+			if(verbose()){
+				String s = "Not all genotypes were het or homo alt.";
+				emitExcludedVariantWarning(s, currVarKey, operationID, null);
+			}
 			return false;
 		}
 		else if(type == ComplementType.EXACT){
 			if(allGenotypesExact(gc1, gc2)){
 				return true;
+			}
+			if(verbose()){
+				String s = "Not all genotypes were identical.";
+				emitExcludedVariantWarning(s, currVarKey, operationID, null);
 			}
 			return false;
 		}
@@ -320,7 +335,7 @@ public class SetOperator {
 			throw new RuntimeException("Unable to identify the smallest VariantPool. Something is very wrong.");
 		}
 
-		VariantPool intersection = new VariantPool();
+		VariantPool intersection = new VariantPool(addChr());
 		intersection.setFile(new File(op.getOperationID()));
 		intersection.setPoolID(op.getOperationID());
 
@@ -348,6 +363,7 @@ public class SetOperator {
 		while(it.hasNext()){
 			currVarKey = it.next();
 			
+			var = null;
 			intersects = true;
 			genotypes = new ArrayList<Genotype>();
 			allAlleles = new LinkedHashSet<Allele>();
@@ -368,7 +384,9 @@ public class SetOperator {
 						break;
 					}
 					allAlleles.addAll(var.getAlternateAlleles());
-					genotypes.addAll(var.getGenotypes());
+					
+					/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
+					genotypes.addAll(getCorrectGenotypes(var, vp.getSamples()));
 				}
 			}
 			else{
@@ -408,12 +426,16 @@ public class SetOperator {
 						genoIt = gc.iterator();
 						while(genoIt.hasNext()){
 							geno = genoIt.next();
-							if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, op.getOperationID())){
+							if(!geno.isAvailable() && type != IntersectType.ALT){
+								String s = "Sample is missing genotypes! Cannot intersect by genotypes for position " + var.getStart();
+								emitExcludedVariantWarning(s, currVarKey, op.getOperationID(), null);
+							}
+							else if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, op.getOperationID())){
 								intersects = false;
 								break;
 							}
-							sampleGenotypes.put(geno.getSampleName(), geno);
-							genotypes.add(geno);
+							genotypes.add(getCorrectGenotype(var, geno.getSampleName()));
+							sampleGenotypes.put(geno.getSampleName(), getCorrectGenotype(var, geno.getSampleName()));
 						}
 	
 						if(!intersects)
@@ -430,7 +452,7 @@ public class SetOperator {
 				allAlleles.add(var.getReference());
 
 				// Build the VariantContext and add to the VariantPool
-				intersection.addVariant(buildVariant(var, allAlleles, genotypes));
+				intersection.addVariant(buildVariant(var, allAlleles, genotypes), false);
 			}
 		}
 		return intersection;
@@ -600,15 +622,15 @@ public class SetOperator {
 			 */
 			return true;
 		}
-		else if(type == IntersectType.POS){
-			 /* TODO: Create test case for this. I don't think this is working.
-			  * Should be placed in performIntersect
-			  */
-			/* If IntersectType.POS, always return true because
-			 * the user doesn't care about genotype.
-			 */
-			return true;
-		}
+//		else if(type == IntersectType.POS){
+//			 /* TODO: Create test case for this. I don't think this is working.
+//			  * Should be placed in performIntersect
+//			  */
+//			/* If IntersectType.POS, always return true because
+//			 * the user doesn't care about genotype.
+//			 */
+//			return true;
+//		}
 		return false;
 	}
 
@@ -646,7 +668,7 @@ public class SetOperator {
 		LinkedHashSet<Allele> alleles;
 //		Allele ref;
 		
-		VariantPool union = new VariantPool();
+		VariantPool union = new VariantPool(addChr());
 		union.setFile(new File(op.getOperationID()));
 		union.setPoolID(op.getOperationID());
 
@@ -680,7 +702,9 @@ public class SetOperator {
 					 * and add the samples to the new VariantPool
 					 */
 					var = vp.getVariant(currVarKey);
-					genotypes.addAll(var.getGenotypes());
+
+					/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
+					genotypes.addAll(getCorrectGenotypes(var, vp.getSamples()));
 					alleles.addAll(var.getAlleles());
 //					ref = var.getReference();
 					for(VariantPool vp2 : variantPools){
@@ -712,12 +736,13 @@ public class SetOperator {
 								break;
 							}
 							
-							genotypes.addAll(var2.getGenotypes());
+							/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
+							genotypes.addAll(getCorrectGenotypes(var2, vp2.getSamples()));
 							alleles.addAll(var2.getAlleles());						}
 						else{
 							genotypes.addAll(generateNoCallGenotypesForSamples(vp.getSamples(), vp2.getSamples()));
 						}
-						union.addVariant(buildVariant(var, alleles, genotypes));
+						union.addVariant(buildVariant(var, alleles, genotypes), true);
 					}
 				}
 				count++;
@@ -751,29 +776,22 @@ public class SetOperator {
 	}
 	
 	/**
-	 * Generate NO_CALL genotypes for samples that we don't have data for.
+	 * Generate NO_CALL genotypes for samples that we don't have data for. And verify
+	 * we don't overwrite an existing genotype. Probably only useful for unions where
+	 * we might get the same sample in multiple variant pools.
 	 * @param samples
 	 * @return
 	 */
 	private ArrayList<Genotype> generateNoCallGenotypesForSamples(TreeSet<String> var1Samples, TreeSet<String> var2Samples){
 		
 		ArrayList<Genotype> genotypes = new ArrayList<Genotype>();
-		ArrayList<Allele> alleles;
-		Genotype g;
-
 		for(String s : var2Samples){
 			
 			/* If var2 has the same samples, don't
 			 * overwrite genotypes from var1.
 			 */
 			if(!var1Samples.contains(s)){
-				alleles = new ArrayList<Allele>();
-				
-				/* Create to NO_Call alleles */
-				alleles.add(Allele.create(Allele.NO_CALL_STRING));
-				alleles.add(Allele.create(Allele.NO_CALL_STRING));
-				g = new GenotypeBuilder(s, alleles).make();
-				genotypes.add(g);
+				genotypes.add(generateNoCallGenotypeForSample(s));
 			}
 		}
 		return genotypes;
@@ -791,6 +809,65 @@ public class SetOperator {
 	 * Useful operations
 	 */
 	
+	/**
+	 * Determine whether a specific sample has a genotype for the given variant. If
+	 * missing, create NO_CALL genotype. Otherwise just return its genotype.
+	 * @param var
+	 * @param sample
+	 * @return
+	 */
+	private Genotype getCorrectGenotype(VariantContext var, String sample){
+		
+		/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
+		if(var.getGenotypes().size() > 0 && !var.getGenotypes().get(0).isAvailable()){
+			return generateNoCallGenotypeForSample(sample);
+		}
+		return var.getGenotype(sample);
+	}
+	
+	/**
+	 * Determine whether the variant has genotypes (not missing). If missing, create NO_CALL
+	 * genotypes. Otherwise just return the existing genotypes.
+	 * @param var
+	 * @param samples
+	 * @return
+	 */
+	private ArrayList<Genotype> getCorrectGenotypes(VariantContext var, TreeSet<String> samples){
+
+		/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
+		if(var.getGenotypes().size() > 0 && !var.getGenotypes().get(0).isAvailable()){
+			return generateNoCallGenotypesForSamples(samples);
+		}
+		return new ArrayList<Genotype>(var.getGenotypes());
+	}
+	
+	/**
+	 * Generate NO_CALL genotypes for samples that we don't have data for.
+	 * @param samples
+	 * @return
+	 */
+	private ArrayList<Genotype> generateNoCallGenotypesForSamples(TreeSet<String> varSamples){
+		
+		ArrayList<Genotype> genotypes = new ArrayList<Genotype>();
+		for(String s : varSamples){
+			genotypes.add(generateNoCallGenotypeForSample(s));
+		}
+		return genotypes;
+	}
+	
+	/**
+	 * Generate NO_CALL genotype for a single sample
+	 * @param sample
+	 * @return
+	 */
+	private Genotype generateNoCallGenotypeForSample(String sample){
+		
+		ArrayList<Allele> alleles = new ArrayList<Allele>();
+		alleles.add(Allele.NO_CALL);
+		alleles.add(Allele.NO_CALL);
+		return new GenotypeBuilder(sample, alleles).make();
+	}
+	
 	
 	/**
 	 * Build a new variant from an original and add all alleles and genotypes
@@ -803,7 +880,7 @@ public class SetOperator {
 	private VariantContext buildVariant(VariantContext var, LinkedHashSet<Allele> alleles, ArrayList<Genotype> genos){
 		/* Start building the new VariantContext */
 		VariantContextBuilder vcBuilder = new VariantContextBuilder();
-		vcBuilder.chr(generateChrString(var.getChr()));
+		vcBuilder.chr(var.getChr());
 		vcBuilder.start(var.getStart());
 		vcBuilder.stop(var.getEnd());
 		vcBuilder.alleles(alleles);
@@ -814,23 +891,6 @@ public class SetOperator {
 		return vcBuilder.make();
 	}
 
-	
-	/**
-	 * Add or remove 'chr' to chromosome if user requests
-	 * @param chr
-	 * @return
-	 */
-	private String generateChrString(String chr){
-		if(this.addChr()){
-			if(!chr.toLowerCase().startsWith("chr")){
-				return "chr" + chr;
-			}
-		}
-		else if(chr.toLowerCase().startsWith("chr")){
-			return chr.substring(3);
-		}
-		return chr;
-	}
 	
 	/**
 	 * Iterate over alleles in the genotype and verify if any

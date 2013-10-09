@@ -294,10 +294,10 @@ public class VarStats {
                         TotalInDels++;
                         if (length > 0) {
                             Insertions++;
-                            System.out.println("Insertion");
+//                            System.out.println("Insertion");
                         } else if (length < 0) {
                             Deletions++;
-                            System.out.println("Deletion");
+//                            System.out.println("Deletion");
 
                         }
                     }

@@ -48,7 +48,7 @@ public class SetOperatorEngine implements Engine {
     private static Logger         logger = Logger.getLogger(SetOperatorEngine.class);
 
     private static ArgumentParser parser;
-
+    
     private Namespace             parsedArgs;
 
     public SetOperatorEngine(String[] args) {
@@ -76,15 +76,25 @@ public class SetOperatorEngine implements Engine {
 
         // MutuallyExclusiveGroup group = parser.addMutuallyExclusiveGroup();
 
-        operation.addArgument("--compare").dest("COMPARE").action(Arguments.storeTrue()).help("Automagically perform intersect and complements " + "between two input files.");
+        operation
+        		.addArgument("--compare")
+        		.dest("COMPARE")
+        		.action(Arguments.storeTrue())
+        		.help("Automagically perform intersect and complements " +
+        				"between two input files.");
         operation
                 .addArgument("-s", "--set-operation")
                 .nargs("+")
                 .dest("OP")
                 .type(String.class)
-                .help("Specify a set operation between one or more " + "input files. Set operations are formatted as follows: " + operFormat + operDesc + " If only file IDs (i.e. 'fId') are "
-                        + "provided in the operation, all samples within those " + "files will be used. If operation IDs (i.e. 'oId') are excluded, set " + "IDs will be assigned as 's0', 's1', " + "etc. " + exampleOper
-                        + " An 'fId' refers to a " + "file ID (see --input) and an 'sId' refers to a " + "sample within a file (or other variant set).");
+                .help("Specify a set operation between one or more " +
+                		"input files. Set operations are formatted as follows: " +
+                		operFormat + operDesc + " If only file IDs (i.e. 'fId') are " +
+                		"provided in the operation, all samples within those " +
+                		"files will be used. If operation IDs (i.e. 'oId') are excluded, set " +
+                		"IDs will be assigned as 's0', 's1', " + "etc. " + exampleOper +
+                		" An 'fId' refers to a " + "file ID (see --input) and an 'sId' refers to a " +
+                		"sample within a file (or other variant set).");
 
         operationOptions
                 .addArgument("-i", "--input")
@@ -92,43 +102,77 @@ public class SetOperatorEngine implements Engine {
                 .dest("VCF")
                 .required(true)
                 .type(String.class)
-                .help("Specify a VCF input file. Multiple files may be " + "specified at once. An ID may be provided for the input file " + "for use in --set-operation as follows: '--input " + "fId=input.vcf fId2=input2.vcf', where "
-                        + "'fId' and 'fId2' are the new IDs. If IDs " + "are excluded, IDs will be assigned as 'v0', " + "'v1', etc. by default.");
+                .help("Specify a VCF input file. Multiple files may be " +
+                		"specified at once. An ID may be provided for the input file " +
+                		"for use in --set-operation as follows: '--input " +
+                		"fId=input.vcf fId2=input2.vcf', where " +
+                		"'fId' and 'fId2' are the new IDs. If IDs " +
+                		"are excluded, IDs will be assigned as 'v0', " +
+                		"'v1', etc. by default.");
 
         operationOptions
                 .addArgument("-g", "--genotype-intersect-type")
                 .dest("INTER_TYPE")
                 .type(String.class)
                 .setDefault(IntersectType.HET_OR_HOMO_ALT.getCommand())
-                .help("Specify the type of intersect to perform for a" + " variant across samples (e.g. require all samples" + " be heterozygous or require all samples be homozygous" + " for the alternate allele). Possible options are: "
+                .help("Specify the type of intersect to perform for a" +
+                		" variant across samples (e.g. require all samples" +
+                		" be heterozygous or require all samples be homozygous" +
+                		" for the alternate allele). Possible options are: "
                         + createIntersectTypeCommandLineToString());
 
-        operationOptions.addArgument("-c", "--genotype-complement-type").dest("COMP_TYPE").type(String.class).setDefault(IntersectType.HET_OR_HOMO_ALT.getCommand())
-                .help("Specify the type of complement to perform for a" + " variant across samples (e.g. require all samples" + " be heterozygous). Possible options are: " + createComplementTypeCommandLineToString());
+        operationOptions
+        		.addArgument("-c", "--genotype-complement-type")
+        		.dest("COMP_TYPE").type(String.class)
+        		.setDefault(ComplementType.HET_OR_HOMO_ALT.getCommand())
+                .help("Specify the type of complement to perform for a" +
+                		" variant across samples (e.g. require all samples" +
+                		" be heterozygous). Possible options are: " +
+                		createComplementTypeCommandLineToString());
 
-        output.addArgument("-o", "--out").dest("OUT").setDefault("variant_list.out.vcf").help("Specify the final output file name.");
+        output.addArgument("-o", "--out")
+        		.dest("OUT").setDefault("variant_list.out.vcf")
+        		.help("Specify the final output file name.");
 
-        output.addArgument("-f", "--output-file-format").dest("FORMAT").type(String.class).setDefault(SupportedFileType.VCF.getName())
-                .help("Specify the output file format. Possible options are: " + createSupportedFileTypeCommandLineToString());
+        output.addArgument("-f", "--output-file-format")
+        		.dest("FORMAT")
+        		.type(String.class)
+        		.setDefault(SupportedFileType.VCF.getName())
+                .help("Specify the output file format. Possible options are: " +
+        		createSupportedFileTypeCommandLineToString());
 
-        output.addArgument("-R", "--reference-genome").dest("REF").type(String.class).help("Specify path to the reference genome associated with the data." + " This is required if output format is 'VCF'");
+        output.addArgument("-R", "--reference-genome")
+        		.dest("REF")
+        		.type(String.class)
+        		.help("Specify path to the reference genome associated with the data." +
+        				" This is required if output format is 'VCF'");
 
         output.addArgument("-I", "--intermediate-files")
                 .dest("INTERMEDIATE")
                 .action(Arguments.storeTrue())
-                .help("Print intermediate files such as when" + " performing multiple set operations. Intermediate" + " files will be named according to the --set-operation"
-                        + " IDs (e.g. the user-provided IDs or \'s0.vcf\', \'s1.vcf\', etc.)");
+                .help("Print intermediate files such as when" +
+                		" performing multiple set operations. Intermediate" +
+                		" files will be named according to the --set-operation" +
+                		" IDs (e.g. the user-provided IDs or \'s0.vcf\', \'s1.vcf\', etc.)");
 
         output.addArgument("-r", "--repair-header")
                 .dest("REPAIR")
                 .action(Arguments.storeTrue())
-                .help("(EXPERIMENTAL) Add missing header lines to the VCF. This is useful to make the output VCF" + " comply with requirements. INFO and FORMAT annotations must be specified"
-                        + " in the VCF header to be valid. If a header line is missing, a dummy line will be inserted" + " to satisfy requirements. This is not the recommended solution, but can be useful if"
-                        + " necessary. If false, missing header lines will be ignored.");
+                .help("(EXPERIMENTAL) Add missing header lines to the VCF. This is useful to make the output VCF" +
+                		" comply with requirements. INFO and FORMAT annotations must be specified" +
+                		" in the VCF header to be valid. If a header line is missing, a dummy line will be inserted" +
+                		" to satisfy requirements. This is not the recommended solution, but can be useful if" +
+                		" necessary. If false, missing header lines will be ignored.");
 
-        output.addArgument("-v", "--verbose").dest("VERBOSE").action(Arguments.storeTrue()).help("Print useful information to 'debug.txt'.");
+        output.addArgument("-v", "--verbose")
+        		.dest("VERBOSE")
+        		.action(Arguments.storeTrue())
+        		.help("Print useful information to 'debug.txt'.");
 
-        output.addArgument("-a", "--add-chr").dest("CHR").action(Arguments.storeTrue()).help("Add 'chr' to chromosome (e.g. 'chr20' instead of '20'");
+        output.addArgument("-a", "--add-chr")
+        		.dest("CHR")
+        		.action(Arguments.storeTrue())
+        		.help("Add 'chr' to chromosome (e.g. 'chr20' instead of '20'");
 
         try {
             parsedArgs = parser.parseArgs(args);
@@ -189,16 +233,16 @@ public class SetOperatorEngine implements Engine {
             boolean printIntermediateFiles = parsedArgs.getBoolean("INTERMEDIATE");
             boolean repairHeader = parsedArgs.getBoolean("REPAIR");
             boolean verbose = parsedArgs.getBoolean("VERBOSE");
-            boolean chr = parsedArgs.getBoolean("CHR");
+            boolean addChr = parsedArgs.getBoolean("CHR");
             boolean compare = parsedArgs.getBoolean("COMPARE");
 
             if (compare) {
                 if (vcfArgs.size() > 2) {
                     throw new InvalidOperationException("Error: cannot perform auto comparison on more " + "than two input files.");
                 }
-                performComparison(vcfArgs, verbose, chr, complementType, intersectType, outputFormat, outFile, refGenome, repairHeader);
+                performComparison(vcfArgs, verbose, addChr, complementType, intersectType, outputFormat, outFile, refGenome, repairHeader);
             } else {
-                performOperations(vcfArgs, operations, verbose, chr, complementType, intersectType, printIntermediateFiles, outputFormat, outFile, refGenome, repairHeader);
+                performOperations(vcfArgs, null, operations, verbose, addChr, complementType, intersectType, printIntermediateFiles, outputFormat, outFile, refGenome, repairHeader);
             }
 
         } catch (ArgumentParserException e) {
@@ -235,10 +279,10 @@ public class SetOperatorEngine implements Engine {
      * @throws IOException
      * @throws URISyntaxException
      */
-    private void performComparison(ArrayList<Object> vcfArgs, boolean verbose, boolean chr, ComplementType complementType, IntersectType intersectType, SupportedFileType outputFormat, File outFile, String refGenome, boolean repairHeader)
+    private void performComparison(ArrayList<Object> vcfArgs, boolean verbose, boolean addChr, ComplementType complementType, IntersectType intersectType, SupportedFileType outputFormat, File outFile, String refGenome, boolean repairHeader)
             throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
 
-        TreeMap<String, VariantPool> allVPs = UtilityBelt.createVariantPools(vcfArgs);
+        TreeMap<String, VariantPool> allVPs = UtilityBelt.createVariantPools(vcfArgs, addChr);
         ArrayList<String> allVPIDs = new ArrayList<String>(allVPs.keySet());
 
         /* create operations. Need to do an intersect and two complements */
@@ -260,7 +304,7 @@ public class SetOperatorEngine implements Engine {
         File complement2Outfile = new File(complement2OutPath + complement2OperID);
 
         /* perform the operations */
-        TreeMap<String, VariantPool> resultingVPs = performOperations(vcfArgs, operations, verbose, chr, complementType, intersectType, printIntermediateFiles, outputFormat, complement2Outfile, refGenome, repairHeader);
+        TreeMap<String, VariantPool> resultingVPs = performOperations(vcfArgs, allVPs, operations, verbose, addChr, complementType, intersectType, printIntermediateFiles, outputFormat, complement2Outfile, refGenome, repairHeader);
 
         /* Print table showing results of intersect, union, and complements */
         printComparisonTable(resultingVPs);
@@ -289,11 +333,16 @@ public class SetOperatorEngine implements Engine {
      * @throws IOException
      * @throws URISyntaxException
      */
-    private TreeMap<String, VariantPool> performOperations(ArrayList<Object> vcfArgs, ArrayList<Object> operations, boolean verbose, boolean chr, ComplementType complementType, IntersectType intersectType, boolean printIntermediateFiles,
+    private TreeMap<String, VariantPool> performOperations(ArrayList<Object> vcfArgs, TreeMap<String, VariantPool> allVPs,
+    		ArrayList<Object> operations, boolean verbose, boolean addChr, ComplementType complementType, IntersectType intersectType, boolean printIntermediateFiles,
             SupportedFileType outputFormat, File outFile, String refGenome, boolean repairHeader) throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
 
         TreeMap<String, VariantPool> resultingVPs = new TreeMap<String, VariantPool>();
-        TreeMap<String, VariantPool> allVPs = UtilityBelt.createVariantPools(vcfArgs);
+        
+        if(allVPs == null){
+	        allVPs = UtilityBelt.createVariantPools(vcfArgs, addChr);
+        }
+
         ArrayList<Operation> ops = createOperations(operations, allVPs);
 
         ArrayList<VariantPool> associatedVPs;
@@ -303,16 +352,19 @@ public class SetOperatorEngine implements Engine {
         String intermediateOut, canonicalPath;
         VCFHeader header;
         for (Operation op : ops) {
-            SetOperator so = new SetOperator(verbose, chr);
+            SetOperator so = new SetOperator(verbose, addChr);
             associatedVPs = getAssociatedVariantPoolsAsArrayList(op, allVPs);
             result = null;
 
             o = op.getOperator();
             if (o == Operator.COMPLEMENT) {
+            	System.out.println("\nPerforming complement...");
                 result = so.performComplement((ComplementOperation) op, associatedVPs, complementType);
             } else if (o == Operator.INTERSECT) {
+            	System.out.println("\nPerforming intersect...");
                 result = so.performIntersect((IntersectOperation) op, associatedVPs, intersectType);
             } else if (o == Operator.UNION) {
+            	System.out.println("\nPerforming union...");
                 result = so.performUnion(op, associatedVPs);
             } else {
                 throw new RuntimeException("Something is very wrong! Received an invalid operator: " + o);
@@ -363,6 +415,7 @@ public class SetOperatorEngine implements Engine {
                  * resulting VariantPool to file.
                  */
                 if (printIntermediateFiles) {
+	            	System.out.println("\nPrinting intermediate file for " + op.getOperationID());
                     intermediateOut = op.getOperationID() + outputFormat.getDefaultExtension();
                     canonicalPath = outFile.getCanonicalPath();
                     VariantPool.printVariantPool(intermediateOut, canonicalPath.substring(0, canonicalPath.lastIndexOf(File.separator) + 1), result, refGenome, outputFormat, repairHeader);
@@ -427,12 +480,14 @@ public class SetOperatorEngine implements Engine {
         if (acompbCount + bcompaCount + intersectCount == unionCount) {
             System.out.format(" Status: OK! Counts are consistent " + newLine);
         } else {
-            System.out.format(" Status: ERR! Counts inconsistent  " + newLine);
+            System.out.format(" Status: ERR! Counts inconsistent  " + newLine +
+            				  " Verify inters. and comp. options" + newLine);
         }
 
         System.out.format("+------------------+--------------+" + newLine + newLine + newLine);
 
     }
+    
 
     /**
      * Will create Operation objects from command line-provided operation

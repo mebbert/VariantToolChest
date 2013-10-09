@@ -29,11 +29,11 @@ public class UtilityBelt {
 	 * @return
 	 * @throws InvalidInputFileException
 	 */
-	public static TreeMap<String, VariantPool> createVariantPools(ArrayList<Object> inputFiles) throws InvalidInputFileException{
+	public static TreeMap<String, VariantPool> createVariantPools(ArrayList<Object> inputFiles, boolean addChr) throws InvalidInputFileException{
 		
 		TreeMap<String, VariantPool> vpMap = new TreeMap<String, VariantPool>();
 		for(Object o : inputFiles){
-			VariantPool vp = new VariantPool(o.toString(), false);
+			VariantPool vp = new VariantPool(o.toString(), false, addChr);
 			vpMap.put(vp.getPoolID(), vp);
 		}
 		return vpMap;

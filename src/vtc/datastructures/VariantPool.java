@@ -39,6 +39,8 @@ import org.broadinstitute.variant.vcf.VCFHeaderVersion;
 import org.broadinstitute.variant.vcf.VCFInfoHeaderLine;
 import org.broadinstitute.variant.vcf.VCFUtils;
 
+import vtc.tools.setoperator.SetOperatorEngine;
+
 
 /**
  * @author markebbert
@@ -67,6 +69,7 @@ public class VariantPool implements Pool{
 	private File file;
 	private VCFHeader header;
 	private Boolean hasGenotypeData;
+	private boolean addChr;
 
 	
 	/****************************************************
@@ -77,35 +80,35 @@ public class VariantPool implements Pool{
 	 * Create an empty VariantPool. Use this for building a
 	 * VariantPool from scratch rather than reading from a file.
 	 */
-	public VariantPool(){
-		init();
+	public VariantPool(boolean addChr){
+		init(addChr);
 	}
 
 	public VariantPool(VariantPool vp){
-		this(vp.file, vp.poolID);
+		this(vp.file, vp.poolID, vp.addChr());
 	}
 	
-	public VariantPool(String filePath, String poolID){
-		this(new File(filePath), poolID);
+	public VariantPool(String filePath, String poolID, boolean addChr){
+		this(new File(filePath), poolID, addChr);
 	}
 	
-	public VariantPool(File file, String poolID){
-		this(file, poolID, false);
+	public VariantPool(File file, String poolID, boolean addChr){
+		this(file, poolID, false, addChr);
 	}
 
-	public VariantPool(File file, String poolID, boolean requireIndex){
+	public VariantPool(File file, String poolID, boolean requireIndex, boolean addChr){
 		logger.info("Creating new VariantPool from " + file.getName() + " with poolID " + poolID);
-		init(file, poolID, requireIndex);
+		init(file, poolID, requireIndex, addChr);
 				
 	}
 	
-	public VariantPool(String inputString, boolean requireIndex) throws InvalidInputFileException{
+	public VariantPool(String inputString, boolean requireIndex, boolean addChr) throws InvalidInputFileException{
 		HashMap<String, String> fileAndPoolIDMap = this.parseInputString(inputString);
-		init(new File(fileAndPoolIDMap.get("file")), fileAndPoolIDMap.get("poolID"), requireIndex);
+		init(new File(fileAndPoolIDMap.get("file")), fileAndPoolIDMap.get("poolID"), requireIndex, addChr);
 	}
 
-	private void init(File file, String poolID, boolean requireIndex){
-		init();
+	private void init(File file, String poolID, boolean requireIndex, boolean addChr){
+		init(addChr);
 
 		this.setFile(file);
 		this.setPoolID(poolID);
@@ -113,10 +116,11 @@ public class VariantPool implements Pool{
 		this.parseVCF(file.getPath(), requireIndex);
 	}
 	
-	private void init(){
+	private void init(boolean addChr){
 		this.tMap = new TreeMap<String, VariantContext>(new NaturalOrderComparator());
 		this.hMap = new HashMap<String, VariantContext>();
 		this.contigs = new TreeSet<String>();
+		this.addChr = addChr;
 	}
 	
 	
@@ -126,6 +130,10 @@ public class VariantPool implements Pool{
 	 *  Getters
 	 */
 	
+	public boolean addChr(){
+		return this.addChr;
+	}
+
 	public String getPoolID(){
 		return this.poolID;
 	}
@@ -296,15 +304,24 @@ public class VariantPool implements Pool{
 	/**
 	 * Add a VariantContext object to the pool
 	 * @param v
+	 * @param union
 	 */
-	public void addVariant(VariantContext v){
-		this.addContig(v.getChr());
-		String chrPosRef = new String(v.getChr() + ":" + Integer.toString(v.getStart()) + ":" + v.getReference());
+	public void addVariant(VariantContext v, boolean union){
+		String currChr = v.getChr();
+		String newChr = generateChrString(currChr);
+		
+		if(!currChr.equals(newChr)){
+			currChr = newChr;
+			v = buildNewVariantWithChr(newChr, v);
+		}
+
+		this.addContig(currChr);
+		String chrPosRef = currChr + ":" + Integer.toString(v.getStart()) + ":" + v.getReference();
 		
 		/* If a variant already exists with this chr:pos:ref,
-		 * ignore subsequent variants and emit warning.
+		 * ignore subsequent variants and emit warning. 
 		 */
-		if(hMap.containsKey(chrPosRef)){
+		if(hMap.containsKey(chrPosRef) && !union ){
 			/* TODO: Determine how to handle VCFs with multiple records
 			 * at the same location. Sometimes people represent multiple
 			 * alts on different lines. e.g.:
@@ -325,9 +342,8 @@ public class VariantPool implements Pool{
 //			tMap.put(chrPosRef, newVar);
 			
 			try{
-			throw new VariantPoolException("Found separate variant records with the same Chr, pos, and ref. Ignoring " +
-					"subsequent variants at: "  
-					+ v.getChr() + ":" + v.getStart() + ":" + v.getReference());
+				throw new VariantPoolException("Found separate variant records with the same Chr, pos, and ref. Ignoring " +
+					"subsequent variants at: " + v.getChr() + ":" + v.getStart());
 			} catch (VariantPoolException e){
 				logger.error(e.getMessage());
 			}
@@ -338,6 +354,45 @@ public class VariantPool implements Pool{
 		}
 	}
 	
+	/**
+	 * Add or remove 'chr' to chromosome if user requests
+	 * @param chr
+	 * @return
+	 */
+	private String generateChrString(String chr){
+		if(this.addChr()){
+			if(!chr.toLowerCase().startsWith("chr")){
+				return "chr" + chr;
+			}
+		}
+		else if(chr.toLowerCase().startsWith("chr")){
+			return chr.substring(3);
+		}
+		return chr;
+	}
+	
+	/**
+	 * Build a new variant with the updated 'chr'
+	 * 
+	 * @param chr
+	 * @param var
+	 * @return
+	 */
+	private VariantContext buildNewVariantWithChr(String chr, VariantContext var){
+		
+		VariantContextBuilder vcBuilder = new VariantContextBuilder();
+		vcBuilder.alleles(var.getAlleles());
+		vcBuilder.attributes(var.getAttributes());
+		vcBuilder.chr(chr);
+		vcBuilder.filters(var.getFilters());
+		vcBuilder.genotypes(var.getGenotypes());
+		vcBuilder.id(var.getID());
+		vcBuilder.log10PError(var.getLog10PError());
+		vcBuilder.source(var.getSource());
+		vcBuilder.start(var.getStart());
+		vcBuilder.stop(var.getEnd());
+		return vcBuilder.make();
+	}
 	
 	/**
 	 * Combine variants with the same chr, pos, and ref found in the same VariantPool
@@ -410,7 +465,7 @@ public class VariantPool implements Pool{
 					this.setSamples(sp);
 				}
 				
-				this.addVariant(vc);
+				this.addVariant(vc, false);
 				count++;
 			}
 

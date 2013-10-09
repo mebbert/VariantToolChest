@@ -85,7 +85,7 @@ public class VarStatsEngine implements Engine {
 
             TreeMap<String, VariantPool> AllVPs;
 
-            AllVPs = UtilityBelt.createVariantPools(vcfArgs);
+            AllVPs = UtilityBelt.createVariantPools(vcfArgs, true);
 
             boolean sum = parsedArgs.getBoolean("Summary");
             boolean PrintMulti = parsedArgs.getBoolean("Combined");
