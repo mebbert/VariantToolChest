@@ -3,6 +3,7 @@
  */
 package vtc.tools.utilitybelt;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -22,6 +23,12 @@ public class UtilityBelt {
 	public UtilityBelt(){
 		return;
 	}
+	
+	 public static String roundDouble(double d) {
+	        DecimalFormat df = new DecimalFormat("#.##");
+	        return String.valueOf(df.format(d));
+	    }
+	
 	
 	/**
 	 * Will create VariantPool objects from command line-provided input file strings and return as ArrayList<VariantPool>
