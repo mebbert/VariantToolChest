@@ -34,7 +34,7 @@ public class Summary {
 		while (i.hasNext()) {
 			files.add(i.next());
 		}
-
+/*
 		int TotalNumVars = 0;
 		int TotalQVars = 0;
 		int TotalDPVars = 0;
@@ -59,17 +59,19 @@ public class Summary {
 		double TotalTiTv = 0;
 		double TotalGenoTiCount = 0;
 		double TotalGenoTvCount = 0;
-		double TotalGenoTiTv = 0;
+		double TotalGenoTiTv = 0;*/
 		int numsamples = 0;
 
-		String QualError = "";
-		String DepthError = "";
+//		String QualError = "";
+//		String DepthError = "";
 
 		ArrayList<String> Files = new ArrayList<String>();
 
+		VariantCalculator TotalVC = new VariantCalculator();
+		
 		int count = 0;
 		for (VariantPool VP : allVPs.values()) {
-
+/*
 			int NumVars = 0;
 			int QVars = 0;
 			int DPVars = 0;
@@ -100,10 +102,12 @@ public class Summary {
 			double TiTv = 0;
 			double GenoTiCount = 0;
 			double GenoTvCount = 0;
-			double GenoTiTv = 0;
+			double GenoTiTv = 0;*/
 			String FileName = VP.getFile().getName();
 			Files.add(FileName);
 
+			VariantCalculator VC = new VariantCalculator();
+			
 			ArrayList<String> varinfo = new ArrayList<String>();
 			Object[] Samples = VP.getSamples().toArray();
 			numsamples += Samples.length;
@@ -115,7 +119,17 @@ public class Summary {
 				VariantContext var = VP.getVariant(currVarKey);
 				List<String> names = var.getSampleNamesOrderedByName();
 				if (var.isVariant()) {
-					NumVars++;
+					
+					
+					VC.Calculator(var, names);
+					
+					
+					
+					
+					
+					
+					
+					/*NumVars++;
 					TotalNumVars++;
 
 					List<Allele> Alts = var.getAlternateAlleles();
@@ -164,7 +178,10 @@ public class Summary {
 					}
 
 					NumMultiAlts += AltCounter(Alts);
-
+					
+					*/
+	/*				
+//*****************Check the code between here with Mark
 					double tempQualScore = var.getPhredScaledQual();
 					if (tempQualScore >= 0) {
 						if (tempQualScore > MaxQScore)
@@ -192,7 +209,11 @@ public class Summary {
 					} else {
 						DepthError = "There was an error in the Depth formatting of: " + FileName + "  One or more variants had no Read Depth. It was excluded in the calculation.";
 					}
-
+//*****************Check with Mark
+					
+					*/
+					
+					
 					String temp = getStatsforFile(var, Samples);
 					varinfo.add(temp + '\n');
 
@@ -200,7 +221,22 @@ public class Summary {
 					// add it to the varinfo arraylist.
 				}
 			}
-			TotalNumMultiAlts += NumMultiAlts;
+			
+			TotalVC.setNumVars(TotalVC.getNumVars()+VC.getNumVars());
+			
+			TotalVC.setNumSNVs(TotalVC.getNumSNVs()+VC.getNumSNVs());
+			TotalVC.setGenoTiCount(TotalVC.getGenoTiCount()+VC.getGenoTiCount());
+			TotalVC.setGenoTvCount(TotalVC.getGenoTvCount()+VC.getGenoTvCount());
+			
+			TotalVC.setInDels(TotalVC.getInDels()+VC.getInDels());
+			TotalVC.setStructVars(TotalVC.getStructVars()+VC.getStructVars());
+			
+			TotalVC.setNumMultiAlts(TotalVC.getNumMultiAlts()+VC.getNumMultiAlts());
+			
+			//TotalNumMultiAlts += NumMultiAlts;
+			
+/*			
+//**********check with mark			
 			if (TotalMinQScore > MinQScore)
 				TotalMinQScore = MinQScore;
 			if (TotalMaxQScore < MaxQScore)
@@ -209,35 +245,66 @@ public class Summary {
 				TotalMinDepth = MinDepth;
 			if (TotalMaxDepth < MaxDepth)
 				TotalMaxDepth = MaxDepth;
+			Depth = Depth / DPVars;
+			QualScore = QualScore / QVars;
+//**********check with mark
+			
+			*/
+			
+			VC.CalcTiTv();
+			VC.CalcGenoTiTv();
+			
+			
+			
+		/*	
 			TotalTiCount += TiCount;
 			TotalTvCount += TvCount;
 			TotalGenoTiCount += GenoTiCount;
 			TotalGenoTvCount += GenoTvCount;
 			TiTv = TiCount / TvCount;
 			GenoTiTv = GenoTiCount / GenoTvCount;
-			Depth = Depth / DPVars;
-			QualScore = QualScore / QVars;
-
+			*/
+			
+/*
 			if (!printMulti) {
 				printFiles(files, count, Files, NumVars, NumSNVs, InDels, StructVars, NumHet, NumHomoRef, NumHomoVar, NumMultiAlts, QualScore, Depth, TiTv, GenoTiTv, MinDepth, MaxDepth, MinQScore, MaxQScore, printMulti, DepthError,
 						QualError, Samples.length);
 			}
+*/			
+			if (!printMulti) {
+				printFiles(files, count, Files, VC, Samples.length, printMulti);
+			}
 
 			
-			printSummaryFile(varinfo, FileName, NumVars, Samples.length);
+			printSummaryFile(varinfo, FileName);
 			varinfo.clear();
 			count++;
 
 		}
 		
+		TotalVC.CalcTiTv();
+		TotalVC.CalcGenoTiTv();
+		
+/*		
 		TotalTiTv = TotalTiCount / TotalTvCount;
 		TotalGenoTiTv = TotalGenoTiCount / TotalGenoTvCount;
+	*/	
+	/*	
+//******check with mark		
 		TotalDepth = TotalDepth / TotalDPVars;
 		TotalQualScore = TotalQualScore / TotalQVars;
-
+//******check with mark
+		*/
+		
+		/*
 		if (printMulti) {
 			printFiles(files, count, Files, TotalNumVars, TotalNumSNVs, TotalInDels, TotalStructVars, TotalNumHet, TotalNumHomoRef, TotalNumHomoVar, TotalNumMultiAlts, TotalQualScore, TotalDepth, TotalTiTv, TotalGenoTiTv, TotalMinDepth,
 					TotalMaxDepth, TotalMinQScore, TotalMaxQScore, printMulti, DepthError, QualError, numsamples);
+		}
+		*/
+		
+		if (printMulti) {
+			printFiles(files, count, Files, TotalVC, numsamples, printMulti);
 		}
 
 	}
@@ -331,7 +398,7 @@ public class Summary {
 		return alts;
 	}
 
-	private void printSummaryFile(ArrayList<String> S, String OutFile, int numVars, int samples) {
+	private void printSummaryFile(ArrayList<String> S, String OutFile) {
 		String outfile = OutFile.substring(0, OutFile.lastIndexOf("."));
 		OutFile = outfile + "_Summary.txt";
 		try {
@@ -357,7 +424,7 @@ public class Summary {
 		}
 		return count;
 	}
-
+/*
 	private double[] testTiTv(VariantContext var, List<String> names, Allele ref) {
 		double countTi = 0;
 		double countTv = 0;
@@ -437,8 +504,41 @@ public class Summary {
 		return 0;
 	}
 
+*/
+
+	private int FindLength(int NumVars, int SNPs, int InDels, int StructVars, int NumMultiAlts, double TiTv, double GenoTiTv, String title) {
 
 
+
+		ArrayList<String> find = new ArrayList<String>();
+		String numvars = Integer.toString(NumVars);
+		find.add(numvars);
+		String snps = Integer.toString(SNPs);
+		find.add(snps);
+		String indels = Integer.toString(InDels);
+		find.add(indels);
+		String structvars = Integer.toString(StructVars);
+		find.add(structvars);
+	
+		String nummultialts = Integer.toString(NumMultiAlts);
+		find.add(nummultialts);
+		
+		find.add(UtilityBelt.roundDouble(TiTv));
+		find.add(UtilityBelt.roundDouble(GenoTiTv));
+		find.add(title);
+
+		int length = 0;
+		for (String s : find) {
+			if (s.length() > length)
+				length = s.length();
+			if (s.length() + 15 > title.length() && s != title)
+				length = s.length() + 20;
+		}
+		return length;
+
+	}
+	
+	/*
 	private int FindLength(int NumVars, int SNPs, int InDels, int StructVars, int NumHets, int NumHomoRef, int NumHomoVar, int NumMultiAlts, double QualScore, double Depth, double TiTv, double GenoTiTv, int MinDepth, int MaxDepth,
 			double MinQScore, double MaxQScore, String title) {
 
@@ -483,7 +583,11 @@ public class Summary {
 		return length;
 
 	}
-
+	*/
+	
+	
+	
+/*
 	private void printFiles(ArrayList<String> file, int count, ArrayList<String> FileName, int NumVars, int SNPs, int InDels, int StructVars, int NumHets, int NumHomoRef, int NumHomoVar, int NumMultiAlts, double QualScore, double Depth,
 			double TiTv, double GenoTiTv, int MinDepth, int MaxDepth, double MinQScore, double MaxQScore, boolean printmulti, String DepthError, String QualError, int NumSamples) {
 
@@ -588,5 +692,89 @@ public class Summary {
 			System.out.format(leftAlignError, DepthError);
 
 	}
+*/
+	
+	
+	
+	private void printFiles(ArrayList<String> file, int count, ArrayList<String> FileName, VariantCalculator vc, int NumSamples, boolean printmulti) {
 
+		String newLine = System.getProperty("line.separator");
+
+		String title;
+
+		if (printmulti)
+			title = "Summary of " + file.get(0) + ": " + FileName.get(0);
+		else
+			title = "Summary of " + file.get(count) + ": " + FileName.get(count);
+
+		int length = FindLength(vc.getNumVars(), vc.getNumSNVs(), vc.getInDels(), vc.getStructVars(),  vc.getNumMultiAlts(), vc.getTiTv(), vc.getGenoTiTv(), title) + 5;
+		
+		//int length = FindLength(NumVars, SNPs, InDels, StructVars, NumHets, NumHomoRef, NumHomoVar, NumMultiAlts, QualScore, Depth, TiTv, GenoTiTv, MinDepth, MaxDepth, MinQScore, MaxQScore, title) + 5;
+
+		char[] chars = new char[length + 1];
+		Arrays.fill(chars, '-');
+		String s = new String(chars);
+		s = "+" + s + "+";
+
+		char[] ch = new char[length + 3];
+		Arrays.fill(ch, '=');
+		String t = new String(ch);
+
+		double snvPercent = (double) vc.getNumSNVs() / (double) vc.getNumVars() * 100;
+		double InDelsPercent = (double) vc.getInDels() / (double) vc.getNumVars() * 100;
+		double StructPercent = (double) vc.getStructVars() / (double) vc.getNumVars() * 100;
+
+		int LeftColumn = 15;
+
+		String leftalignFormatint = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + "d |" + newLine;
+		String leftalignFormatd = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + ".2f |" + newLine;
+		String rightalignFormati = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "s |" + newLine;
+		String rightalignFormatf = "|%" + LeftColumn + "s%" + (length - LeftColumn) + ".2f |" + newLine;
+		String rightalignFormats = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "s |" + newLine;
+		String leftalignFormats = " %-" + (length--) + "s" + newLine;
+		String leftAlignError = " %-" + length + "s" + newLine;
+
+		if (printmulti) {
+			System.out.format(t + newLine);
+			int pos = 0;
+
+			System.out.format(leftalignFormats, "");
+			for (String vpfile : file) {
+				if (pos > 0)
+					title = "           " + vpfile + ": " + FileName.get(pos);
+				pos++;
+				System.out.format(leftalignFormats, title);
+			}
+		} else {
+			System.out.format(t + newLine);
+			System.out.format(leftalignFormats, "");
+			System.out.format(leftalignFormats, title);
+		}
+		System.out.format(leftalignFormats, "");
+		System.out.format(t + newLine);
+		System.out.format(newLine);
+		System.out.format(s + newLine);
+		System.out.format(leftalignFormatint, "TotalVars:", vc.getNumVars());
+		System.out.format(leftalignFormatint, "Total Samples:", NumSamples);
+		System.out.format(s + newLine);
+		System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(vc.getNumSNVs()) + " (" + UtilityBelt.roundDouble(snvPercent) + "%)");
+		System.out.format(rightalignFormatf, "Ti/Tv:", vc.getTiTv());
+		System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", vc.getGenoTiTv());
+		System.out.format(s + newLine);
+		System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(vc.getInDels()) + " (" + UtilityBelt.roundDouble(InDelsPercent) + "%)");
+		System.out.format(s + newLine);
+		System.out.format(rightalignFormati, "StructVars:", Integer.toString(vc.getStructVars()) + " (" + UtilityBelt.roundDouble(StructPercent) + "%)");
+		System.out.format(s + newLine);
+		System.out.format(leftalignFormatint, "MultiAlts:", vc.getNumMultiAlts());
+		System.out.format(s + newLine);
+	
+		System.out.format(newLine + newLine);
+
+	
+	}
+	
+	
+	
+	
+	
 }

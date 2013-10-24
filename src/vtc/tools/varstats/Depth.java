@@ -13,7 +13,7 @@ public class Depth {
 	private String error = "";
 	
 	
-	Depth(){};
+	Depth(){}
 	
 	public double getAvgDepth(){
 		return avgDepth;
