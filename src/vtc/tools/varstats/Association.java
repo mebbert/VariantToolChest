@@ -32,7 +32,8 @@ public class Association {
 
     private double  PValue          = 0;
 
-    private double  correctedPValue = 0;
+    @SuppressWarnings("unused")
+	private double  correctedPValue = 0;
 
     /*
      * Constructors

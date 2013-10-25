@@ -6,8 +6,6 @@ import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
-import vtc.datastructures.VariantPool;
-
 public class VariantCalculator {
 	
 
@@ -213,13 +211,13 @@ public class VariantCalculator {
 	
 	public void CalcTiTv() {
 		TiTv = TiCount/TvCount;
-		// TODO Auto-generated method stub
+		
 	}
 
 
 	public void CalcGenoTiTv() {
 		GenoTiTv = GenoTiCount/GenoTvCount;
-		// TODO Auto-generated method stub
+		
 	}
 	
 	

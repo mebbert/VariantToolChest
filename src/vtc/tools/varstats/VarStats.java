@@ -42,7 +42,8 @@ import vtc.datastructures.VariantPool;
 
 public class VarStats {
 
-    private static final String MaxInsertion = null;
+    @SuppressWarnings("unused")
+	private static final String MaxInsertion = null;
 
     HashMap<String, String>     phenoInfo    = new HashMap<String, String>();
 
@@ -60,7 +61,8 @@ public class VarStats {
 
     // Functions
 
-    private void doAssociation(TreeMap<String, VariantPool> AllVPs, ArrayList<Object> phenoArgs) {
+    @SuppressWarnings("unused")
+	private void doAssociation(TreeMap<String, VariantPool> AllVPs, ArrayList<Object> phenoArgs) {
 
         if (phenoArgs != null) {
             // Make a structure to read in the phenotype information...
@@ -143,10 +145,8 @@ public class VarStats {
                 }
                 br.close();
             } catch (FileNotFoundException e2) {
-                // TODO Auto-generated catch block
                 e2.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -170,7 +170,6 @@ public class VarStats {
             }
             out.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -182,7 +181,8 @@ public class VarStats {
      * Association functions above, Summary functions below
      */
 
-    private void IterateAndCount(TreeMap<String, VariantPool> allVPs, boolean printMulti) {
+    @SuppressWarnings("unused")
+	private void IterateAndCount(TreeMap<String, VariantPool> allVPs, boolean printMulti) {
 
         Summary s = new Summary(allVPs, printMulti);
 
