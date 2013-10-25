@@ -93,11 +93,11 @@ public class VariantCalculator {
 			GenoTiCount += temp[0];
 			GenoTvCount += temp[1];
 		} else if (var.isIndel()) {
-			List<Integer> indelLengths = var.getIndelLengths();
-			for (int length : indelLengths) {
+			//List<Integer> indelLengths = var.getIndelLengths();
+			//for (int length : indelLengths) {
 				InDels++;
 				
-				if (length > 0) {
+				/*if (length > 0) {
 					Insertions++;
 					// System.out.println("Insertion");
 				} else if (length < 0) {
@@ -105,7 +105,7 @@ public class VariantCalculator {
 					// System.out.println("Deletion");
 
 				}
-			}
+			}*/
 		} else if (var.isStructuralIndel()) {
 			StructVars++;
 			
