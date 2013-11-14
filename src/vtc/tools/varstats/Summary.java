@@ -35,8 +35,7 @@ public class Summary {
 
 		int numsamples = 0;
 
-//		String QualError = "";
-//		String DepthError = "";
+
 
 		ArrayList<String> Files = new ArrayList<String>();
 
@@ -62,38 +61,7 @@ public class Summary {
 				List<String> names = var.getSampleNamesOrderedByName();
 				if (var.isVariant()) {
 					VC.Calculator(var, names);
-	/*				
-//*****************Check the code between here with Mark
-					double tempQualScore = var.getPhredScaledQual();
-					if (tempQualScore >= 0) {
-						if (tempQualScore > MaxQScore)
-							MaxQScore = tempQualScore;
-						if (tempQualScore < MinQScore)
-							MinQScore = tempQualScore;
-						QualScore += tempQualScore;
-						TotalQualScore += tempQualScore;
-						TotalQVars++;
-						QVars++;
-					} else {
-						QualError = "There was an error in the Qual formatting of: " + FileName + "  One or more variants had no Quality Score. It was excluded in the calculation.";
-					}
-					int TempDepth = getDepth(var, names);
 
-					if (TempDepth >= 0) {
-						if (TempDepth > MaxDepth)
-							MaxDepth = TempDepth;
-						if (TempDepth < MinDepth)
-							MinDepth = TempDepth;
-						Depth += TempDepth;
-						TotalDepth += TempDepth;
-						TotalDPVars++;
-						DPVars++;
-					} else {
-						DepthError = "There was an error in the Depth formatting of: " + FileName + "  One or more variants had no Read Depth. It was excluded in the calculation.";
-					}
-//*****************Check with Mark
-					
-					*/
 					String temp = getStatsforFile(var, Samples);
 					varinfo.add(temp + '\n');
 
@@ -114,21 +82,7 @@ public class Summary {
 			TotalVC.setStructVars(TotalVC.getStructVars()+VC.getStructVars());
 			
 			TotalVC.setNumMultiAlts(TotalVC.getNumMultiAlts()+VC.getNumMultiAlts());
-/*			
-//**********check with mark			
-			if (TotalMinQScore > MinQScore)
-				TotalMinQScore = MinQScore;
-			if (TotalMaxQScore < MaxQScore)
-				TotalMaxQScore = MaxQScore;
-			if (TotalMinDepth > MinDepth)
-				TotalMinDepth = MinDepth;
-			if (TotalMaxDepth < MaxDepth)
-				TotalMaxDepth = MaxDepth;
-			Depth = Depth / DPVars;
-			QualScore = QualScore / QVars;
-//**********check with mark
-			
-			*/
+
 			VC.CalcTiTv();
 			VC.CalcGenoTiTv();
 
@@ -147,12 +101,7 @@ public class Summary {
 		TotalVC.CalcGenoTiTv();
 		
 
-	/*	
-//******check with mark		
-		TotalDepth = TotalDepth / TotalDPVars;
-		TotalQualScore = TotalQualScore / TotalQVars;
-//******check with mark
-		*/
+
 	
 		
 		if (printMulti) {
@@ -259,7 +208,7 @@ public class Summary {
 		OutFile = outfile + "_Summary.txt";
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(OutFile));
-			out.write("Chr" + '\t' + "ID" + '\t' + "Pos" + '\t' + "Ref" + '\t' + "Alts" + '\t' + "RefCount" + '\t' + "AltCount" + "\t" + "AvgDepth" + '\t' + "MinDepth" + '\t' + "MaxDepth" + '\t' + "Qual" + '\t'+"Errors"+'\n');
+			out.write("Chr" + '\t' + "Pos" + '\t' + "ID" + '\t' + "Ref" + '\t' + "Alts" + '\t' + "RefCount" + '\t' + "AltCount" + "\t" + "AvgDepth" + '\t' + "MinDepth" + '\t' + "MaxDepth" + '\t' + "Qual" + '\t'+"Errors"+'\n');
 			for (String s : S) {
 				out.write(s);
 			}
@@ -269,16 +218,7 @@ public class Summary {
 		}
 	}
 
-//	private int getDepth(VariantContext var, List<String> names) {
-//
-//		int count = 0;
-//		for (String s : names) {
-//			Genotype geno = var.getGenotypes().get(s);
-//			count += geno.getDP();
-//
-//		}
-//		return count;
-//	}
+
 
 
 	private int FindLength(int NumVars, int SNPs, int InDels, int StructVars, int NumMultiAlts, double TiTv, double GenoTiTv, String title) {

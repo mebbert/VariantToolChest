@@ -53,55 +53,63 @@ The Summary outputs the following statistics to the screen.
 	
 <pre><code>
 =================================
-                              
- Summary of v1: input.vcf         
-                              
+                               
+ Summary of v1: input1.vcf     
+                               
 =================================
 
 +-------------------------------+
-|TotalVars:                 195 |
+|TotalVars:                   4 |
+|Total Samples:               3 |
 +-------------------------------+
-|    SNVs:                    0 |
-|         Ti/Tv:            NaN |
-|   (Geno)Ti/Tv:            NaN |
+|    SNVs:              3 (75%) |
+|         Ti/Tv:           1.00 |
+|   (Geno)Ti/Tv:           0.83 |
 +-------------------------------+
-|    INDELs:                195 |
+|    INDELs:            1 (25%) |
 +-------------------------------+
-|    StructVars:              0 |
+|    StructVars:         0 (0%) |
 +-------------------------------+
-|MultiAlts:                   0 |
+|MultiAlts:                   2 |
 +-------------------------------+
-|AvgQualScore:              NaN |
-|  MinQualScore:            NaN |
-|  MaxQualScore:            NaN |
-+-------------------------------+
-|AvgDepth:                  NaN |
-|      MinDepth:            NaN |
-|      MaxDepth:            NaN |
-+-------------------------------+
-
-There was an error in the Qual formatting of: 11.vcf  One or more variants had no Quality Score. It was excluded in the calculation.
-There was an error in the Depth formatting of: 11.vcf  One or more variants had no Read Depth. It was excluded in the calculation.
 </code></pre>
 	
 * **TotalVars** counts the total number of variants in the file/files.
+* **Total Samples** gives the count of the total number of samples in the file/files.
 * **SNVs** counts the number of Single Nucleotide Variants (SNVs) in the file/files.
 * **Ti/Tv** outputs the ratio of Transition versus Transition SNVs. 
 * **(Geno)Ti/Tv** outputs the genotypic ratio of Transition versus Tranversion SNVs.
 * **INDELs** counts the number of Insertions & Deletions.
 * **StructVars** counts the number of Structural Variants in the file.
 * **MultiAlts** counts the number of variants that have multiple alternate alleles.
-* **AvgQualScore** outputs the average quality score across all the variants in the file.
-* **MinQualScore** outputs the lowest quality score found in the file.
-* **MaxQualScore** outputs the highest quality score found in the file.
-* **AvgDepth** outputs the average read depth across all the variants in the file.
-* **MinDepth** outputs the lowest read depth for a variant found in the file.
-* **MaxDepth** outputs the highest read depth for a variant found in the file.
+
 
 If there is a "NaN" for either Ti/Tv or (Geno)Ti/Tv it means that there is division by zero.
-The NaN for the quality scores and depth means that there were no Quality scores or read Depths, respectively, recorded. 
-	In this case the error output simply means that there were missing Quality and/or Read Depths in the file.
-  
+
+A tab delimited file is written per variant that is named filename_summary.txt.  In this case input1_summary.txt:
+
+</pre></code>
+Chr	Pos	ID	Ref	Alts	RefCount	AltCount	AvgDepth	MinDepth	MaxDepth	Qual	Errors
+chr20	14370	rs6054257	G	A	3	3	4.67	1	8	29.0
+chr20	17330	.	T	A	4	2	3.67	3	5	3.0
+chr20	1110696	rs6040355	A	G,T	0	2,4	5	4	6	67.0	Incorrect depth calls in samples: NA00002.
+...
+</code></pre>
+
+* **Chr** is the chromosome number.
+* **Pos** is the start position of the variant.
+* **ID** is the SNP identification number.
+* **Ref** is the reference allele.
+* **Alts** is the comma delimited list of alternate alleles.
+* **RefCount** is the total count of the reference alleles per variant.
+* **AltCount** is the comma delimited list of the alternate allele counts (in the same order as the Alts column).
+* **AvgDepth** is the average read depth per variant.
+* **MinDepth** is the minimum read depth per variant. 
+* **MaxDepth** is the maximum read depth per variant.
+* **Qual** is the quality score per variant. If there is a "NA" it means that there was no quality score or a quality score of 0.
+* **Errors** is a list of sample IDs that had no read depth score for that particular variant.
+
+
 **Association Test (-a)**
 
 This test calculates the p-value from the chi square test from the case-control allelic counts. 
@@ -125,7 +133,7 @@ The first column is the sample ID, and the second column is the case (2) control
 between the Pheno file and the VCF file will be analyzed in the association test.  There may be Samples that are not in one or the other, 
 but these will not be included in the analysis and will not throw an error.
 
-The output file has the following format:
+The tab delimited output file is named filename_Assoc.txt has the following format:
 <pre><code>
 Chr	ID	Pos	Ref	Alt	CaseRefCount	CaseAltCount	ControlRefCount	ControlAltCount	OR	P-Value
 20	.	669442	TG	T	389	33	323	21	0.7664	0.3563

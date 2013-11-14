@@ -43,7 +43,8 @@ public class VarStatsEngine implements Engine {
         parser.description("Variant Stats will perform basic statistical analysis.");
         parser.defaultHelp(true); // Add default values to help menu
         ArgumentGroup Stats = parser.addArgumentGroup("statistical arguments");
-        ArgumentGroup output = parser.addArgumentGroup("output arguments");
+        @SuppressWarnings("unused")
+		ArgumentGroup output = parser.addArgumentGroup("output arguments");
 
         // MutuallyExclusiveGroup group = parser.addMutuallyExclusiveGroup();
 
@@ -91,7 +92,8 @@ public class VarStatsEngine implements Engine {
             boolean PrintMulti = parsedArgs.getBoolean("Combined");
             boolean assoc = parsedArgs.getBoolean("association");
 
-            VarStats vstat = new VarStats(AllVPs, phenoArgs, PrintMulti, sum, assoc);
+            @SuppressWarnings("unused")
+			VarStats vstat = new VarStats(AllVPs, phenoArgs, PrintMulti, sum, assoc);
 
         } catch (InvalidInputFileException e) {
             UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
