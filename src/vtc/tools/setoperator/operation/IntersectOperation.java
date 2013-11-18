@@ -3,12 +3,9 @@
  */
 package vtc.tools.setoperator.operation;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import vtc.datastructures.SamplePool;
 import vtc.datastructures.VariantPool;
