@@ -965,7 +965,7 @@ public class SetOperator {
 		}
 		else{
 			message = "Variant at (chr:pos) " + varKey + " in operation " + operationID + " excluded " +
-							"because sample " + sampleName + " " + reason;
+							"because sample '" + sampleName + "' " + reason;
 		}
 		logger.warn(message);
 		System.out.println("Warning: " + message);	

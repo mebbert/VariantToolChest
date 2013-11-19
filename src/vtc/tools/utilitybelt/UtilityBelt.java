@@ -48,14 +48,25 @@ public class UtilityBelt {
 	
 	
 	/**
-	 * Print the error to stdout and log. Then print the usage and help
+	 * Print the error. Then print the usage and help
 	 * information and exit
 	 * @param e
 	 */
 	public static void printErrorUsageHelpAndExit(ArgumentParser parser, Logger logger, Exception e){
-		System.err.println(e.getMessage());
-		logger.error(e.getMessage());
+		System.err.println("\nERROR: " + e.getMessage() + "\n");
+//		logger.error(e.getMessage());
 		printUsageHelpAndExit(parser);
+	}
+	
+	/**
+	 * Print the error. Then print the usage
+	 * information and exit
+	 * @param e
+	 */
+	public static void printErrorUsageAndExit(ArgumentParser parser, Logger logger, Exception e){
+		System.err.println("\nERROR: " + e.getMessage() + "\n");
+		parser.printUsage();
+		System.exit(1);
 	}
 	
 	/**
@@ -66,4 +77,5 @@ public class UtilityBelt {
 		parser.printHelp();
 		System.exit(1);		
 	}
+	
 }

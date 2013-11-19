@@ -176,7 +176,7 @@ public class SetOperatorEngine implements Engine {
 
         try {
             parsedArgs = parser.parseArgs(args);
-            logger.info(parsedArgs);
+//            logger.info(parsedArgs);
         } catch (ArgumentParserException e) {
             parser.handleError(e);
             System.exit(1);
@@ -246,15 +246,15 @@ public class SetOperatorEngine implements Engine {
             }
 
         } catch (ArgumentParserException e) {
-            UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
+            UtilityBelt.printErrorUsageAndExit(parser, logger, e);
         } catch (InvalidOperationException e) {
-            UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
+            UtilityBelt.printErrorUsageAndExit(parser, logger, e);
         } catch (InvalidInputFileException e) {
-            UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
+            UtilityBelt.printErrorUsageAndExit(parser, logger, e);
         } catch (FileNotFoundException e) {
-            UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
+            UtilityBelt.printErrorUsageAndExit(parser, logger, e);
         } catch (TribbleException e) {
-            UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
+            UtilityBelt.printErrorUsageAndExit(parser, logger, e);
         } catch (Exception e) {
             logger.error("Caught unexpected exception, something is very wrong!");
             e.printStackTrace();
