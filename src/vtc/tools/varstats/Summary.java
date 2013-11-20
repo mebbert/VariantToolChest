@@ -35,8 +35,6 @@ public class Summary {
 
 		int numsamples = 0;
 
-
-
 		ArrayList<String> Files = new ArrayList<String>();
 
 		VariantCalculator TotalVC = new VariantCalculator();
@@ -52,7 +50,7 @@ public class Summary {
 			ArrayList<String> varinfo = new ArrayList<String>();
 			Object[] Samples = VP.getSamples().toArray();
 			numsamples += Samples.length;
-			Iterator<String> it = VP.getIterator();
+			Iterator<String> it = VP.getVariantIterator();
 			String currVarKey;
 			while (it.hasNext()) {
 				currVarKey = it.next();
@@ -100,9 +98,6 @@ public class Summary {
 		TotalVC.CalcTiTv();
 		TotalVC.CalcGenoTiTv();
 		
-
-
-	
 		
 		if (printMulti) {
 			printFiles(files, count, Files, TotalVC, numsamples, printMulti);
@@ -254,7 +249,8 @@ public class Summary {
 	}
 	
 	
-	private void printFiles(ArrayList<String> file, int count, ArrayList<String> FileName, VariantCalculator vc, int NumSamples, boolean printmulti) {
+	private void printFiles(ArrayList<String> file, int count, ArrayList<String> FileName,
+			VariantCalculator vc, int NumSamples, boolean printmulti) {
 
 		String newLine = System.getProperty("line.separator");
 
@@ -265,7 +261,8 @@ public class Summary {
 		else
 			title = "Summary of " + file.get(count) + ": " + FileName.get(count);
 
-		int length = FindLength(vc.getNumVars(), vc.getNumSNVs(), vc.getInDels(), vc.getStructVars(),  vc.getNumMultiAlts(), vc.getTiTv(), vc.getGenoTiTv(), title) + 5;
+		int length = FindLength(vc.getNumVars(), vc.getNumSNVs(), vc.getInDels(), vc.getStructVars(),
+				vc.getNumMultiAlts(), vc.getTiTv(), vc.getGenoTiTv(), title) + 5;
 		
 
 		char[] chars = new char[length + 1];

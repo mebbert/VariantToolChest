@@ -145,7 +145,7 @@ public class SetOperator {
 		complement.setPoolID(operationID);	
 		complement.addSamples(vp1.getSamples());
 		
-		Iterator<String> it = vp1.getIterator();
+		Iterator<String> it = vp1.getVariantIterator();
 		String currVarKey;
 		LinkedHashSet<Allele> allAlleles;
 		VariantContext var1 = null, var2 = null;
@@ -344,7 +344,7 @@ public class SetOperator {
 			intersection.addSamples(vp.getSamples());
 		}
 
-		Iterator<String> it = smallest.getIterator();
+		Iterator<String> it = smallest.getVariantIterator();
 		String currVarKey;
 		VariantContext var = null;
 		SamplePool sp;
@@ -681,7 +681,7 @@ public class SetOperator {
 		for(VariantPool vp : variantPools){
 			logger.info("Processing variant pool '" + vp.getPoolID() + "'...");
 			int nVars = vp.getCount();
-			it = vp.getIterator();
+			it = vp.getVariantIterator();
 			
 			/* Iterate over each variant in this pool */
 			int count = 0;

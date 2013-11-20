@@ -179,11 +179,11 @@ public class VariantPool implements Pool{
 	}
 	
 	/**
-	 * Return an Iterator<String> object to an ordered key set. The
-	 * keys are formatted as 'chr:pos' and ordered 'naturally'.
+	 * Return an Iterator<String> object to an ordered key set for 
+	 * the variants. The keys are formatted as 'chr:pos' and ordered 'naturally'.
 	 * @return
 	 */
-	public Iterator<String> getIterator(){
+	public Iterator<String> getVariantIterator(){
 		return this.tMap.keySet().iterator();
 	}	
 	
@@ -194,7 +194,7 @@ public class VariantPool implements Pool{
 	public boolean hasGenotypeData(){
 
 		if(this.hasGenotypeData == null){
-			Iterator<String> it = this.getIterator();
+			Iterator<String> it = this.getVariantIterator();
 
 			if(!it.hasNext()){
 				/* The set is empty. Return false. */
@@ -508,7 +508,7 @@ public class VariantPool implements Pool{
 	 * @throws URISyntaxException 
 	 * @throws FileNotFoundException 
 	 */
-	public static void printVariantPool(String file, VariantPool vp, String refDict,
+	public static void printVariantPool(String file, VariantPool vp, File refDict,
 			SupportedFileType fileType, boolean repairHeader) throws URISyntaxException, FileNotFoundException{
 		printVariantPool(file, null, vp, refDict, fileType, repairHeader);
 	}
@@ -528,7 +528,7 @@ public class VariantPool implements Pool{
 	 * @throws FileNotFoundException
 	 */
 	public static void printVariantPool(String fileName, String outputDirectory,
-			VariantPool vp, String refDict, SupportedFileType fileType, boolean repairHeader) throws URISyntaxException, FileNotFoundException{
+			VariantPool vp, File refDict, SupportedFileType fileType, boolean repairHeader) throws URISyntaxException, FileNotFoundException{
 		
 		File file;
 		String normalizedPath;
@@ -557,7 +557,7 @@ public class VariantPool implements Pool{
 	 * @param repairHeader
 	 * @throws FileNotFoundException
 	 */
-	private static void printVariantPoolToVCF(File file, VariantPool vp, String refDict, boolean repairHeader) throws FileNotFoundException{
+	private static void printVariantPoolToVCF(File file, VariantPool vp, File refDict, boolean repairHeader) throws FileNotFoundException{
 		
 		if(refDict == null){
 			throw new RuntimeException("Received a 'null' SAMSequenceDictionary. Something is very wrong!");
@@ -570,7 +570,7 @@ public class VariantPool implements Pool{
 		else{
 			es = EnumSet.of(Options.INDEX_ON_THE_FLY, Options.ALLOW_MISSING_FIELDS_IN_HEADER);
 		}
-		SAMSequenceDictionary dict = new IndexedFastaSequenceFile( new File(refDict)).getSequenceDictionary();
+		SAMSequenceDictionary dict = new IndexedFastaSequenceFile(refDict).getSequenceDictionary();
 		VariantContextWriter writer = VariantContextWriterFactory.create(file, dict, es);
 		
 		if(vp.getHeader() == null){
@@ -580,7 +580,7 @@ public class VariantPool implements Pool{
 		writer.writeHeader(vp.getHeader());
 		
 		boolean rewrite = false;
-		Iterator<String> it = vp.getIterator();
+		Iterator<String> it = vp.getVariantIterator();
 		VariantContext vc;
 		while(it.hasNext()){
 			vc = vp.getVariant(it.next());

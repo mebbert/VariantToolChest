@@ -224,10 +224,19 @@ public class SetOperatorEngine implements Engine {
             }
 
             SupportedFileType outputFormat = getSupportedFileTypeByName(parsedArgs.getString("FORMAT"));
-            String refGenome = parsedArgs.getString("REF");
+            String refGenomeString = parsedArgs.getString("REF");
 
-            if (outputFormat == SupportedFileType.VCF && refGenome == null) {
-                throw new ArgumentParserException("No reference genome specified." + " A reference genome must be provided if output format is VCF", parser);
+            File refGenome = null;
+            if (outputFormat == SupportedFileType.VCF && refGenomeString == null) {
+                throw new ArgumentParserException("No reference genome specified." +
+                		" A reference genome must be provided if output format is VCF", parser);
+            }
+            else{
+	            refGenome = new File(refGenomeString);
+	            
+	            if(!refGenome.exists()){
+	            	throw new ArgumentParserException(refGenomeString + " not found.", parser);
+	            }
             }
 
             boolean printIntermediateFiles = parsedArgs.getBoolean("INTERMEDIATE");
@@ -240,9 +249,11 @@ public class SetOperatorEngine implements Engine {
                 if (vcfArgs.size() > 2) {
                     throw new InvalidOperationException("Error: cannot perform auto comparison on more " + "than two input files.");
                 }
-                performComparison(vcfArgs, verbose, addChr, complementType, intersectType, outputFormat, outFile, refGenome, repairHeader);
+                performComparison(vcfArgs, verbose, addChr, complementType, intersectType,
+                		outputFormat, outFile, refGenome, repairHeader);
             } else {
-                performOperations(vcfArgs, null, operations, verbose, addChr, complementType, intersectType, printIntermediateFiles, outputFormat, outFile, refGenome, repairHeader);
+                performOperations(vcfArgs, null, operations, verbose, addChr, complementType,
+                		intersectType, printIntermediateFiles, outputFormat, outFile, refGenome, repairHeader);
             }
 
         } catch (ArgumentParserException e) {
@@ -279,7 +290,9 @@ public class SetOperatorEngine implements Engine {
      * @throws IOException
      * @throws URISyntaxException
      */
-    private void performComparison(ArrayList<Object> vcfArgs, boolean verbose, boolean addChr, ComplementType complementType, IntersectType intersectType, SupportedFileType outputFormat, File outFile, String refGenome, boolean repairHeader)
+    private void performComparison(ArrayList<Object> vcfArgs, boolean verbose, boolean addChr,
+    		ComplementType complementType, IntersectType intersectType, SupportedFileType outputFormat,
+    		File outFile, File refGenome, boolean repairHeader)
             throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
 
         TreeMap<String, VariantPool> allVPs = UtilityBelt.createVariantPools(vcfArgs, addChr);
@@ -304,7 +317,9 @@ public class SetOperatorEngine implements Engine {
         File complement2Outfile = new File(complement2OutPath + complement2OperID);
 
         /* perform the operations */
-        TreeMap<String, VariantPool> resultingVPs = performOperations(vcfArgs, allVPs, operations, verbose, addChr, complementType, intersectType, printIntermediateFiles, outputFormat, complement2Outfile, refGenome, repairHeader);
+        TreeMap<String, VariantPool> resultingVPs = performOperations(vcfArgs, allVPs, operations,
+        		verbose, addChr, complementType, intersectType, printIntermediateFiles, outputFormat,
+        		complement2Outfile, refGenome, repairHeader);
 
         /* Print table showing results of intersect, union, and complements */
         printComparisonTable(resultingVPs);
@@ -335,7 +350,7 @@ public class SetOperatorEngine implements Engine {
      */
     private TreeMap<String, VariantPool> performOperations(ArrayList<Object> vcfArgs, TreeMap<String, VariantPool> allVPs,
     		ArrayList<Object> operations, boolean verbose, boolean addChr, ComplementType complementType, IntersectType intersectType, boolean printIntermediateFiles,
-            SupportedFileType outputFormat, File outFile, String refGenome, boolean repairHeader) throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
+            SupportedFileType outputFormat, File outFile, File refGenome, boolean repairHeader) throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
 
         TreeMap<String, VariantPool> resultingVPs = new TreeMap<String, VariantPool>();
         
@@ -418,7 +433,9 @@ public class SetOperatorEngine implements Engine {
 	            	System.out.println("\nPrinting intermediate file for " + op.getOperationID());
                     intermediateOut = op.getOperationID() + outputFormat.getDefaultExtension();
                     canonicalPath = outFile.getCanonicalPath();
-                    VariantPool.printVariantPool(intermediateOut, canonicalPath.substring(0, canonicalPath.lastIndexOf(File.separator) + 1), result, refGenome, outputFormat, repairHeader);
+                    VariantPool.printVariantPool(intermediateOut,
+                    		canonicalPath.substring(0, canonicalPath.lastIndexOf(File.separator) + 1),
+                    		result, refGenome, outputFormat, repairHeader);
 
                     logger.info(result.getCount() + " variants written for operation: '" + op.getOperationID() + "'");
                 }

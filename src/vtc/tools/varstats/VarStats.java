@@ -89,7 +89,7 @@ public class VarStats {
                 }
             }
 
-            Iterator<String> it = VP.getIterator();
+            Iterator<String> it = VP.getVariantIterator();
             String currVarKey;
             int Num_SNPS = 0;
             String OutFile = "temp.txt";
@@ -181,7 +181,6 @@ public class VarStats {
      * Association functions above, Summary functions below
      */
 
-    @SuppressWarnings("unused")
 	private void IterateAndCount(TreeMap<String, VariantPool> allVPs, boolean printMulti) {
 
         Summary s = new Summary(allVPs, printMulti);

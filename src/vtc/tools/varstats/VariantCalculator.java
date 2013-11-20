@@ -77,12 +77,65 @@ public class VariantCalculator {
 		GenoTiTv = 0;
 	}
 	
+    private final static int MAX_ALLELE_SIZE_FOR_NON_SV = 150;
+	private AltType getAltType(Allele ref, Allele alt){
+		if(ref.length() == 1 && alt.length() == 1 && !ref.equals(alt, true)){
+			return AltType.SNP;
+		}
+		else if(ref.length() > 1 && ref.length() == alt.length()){
+			int diffCount = getDiffCount(ref, alt);
+			if(diffCount == 0){
+                throw new RuntimeException("Something is very wrong! Expected differences in variant record. Ref: " + ref + " Alt: " + alt);
+			}
+			else if(diffCount == 1){
+				return AltType.SNP;
+			}
+			else{
+				return AltType.MNP;
+			}
+		}
+		else if(ref.length() > alt.length()){ // Deletion
+			if(ref.length() > MAX_ALLELE_SIZE_FOR_NON_SV){
+				return AltType.STRUCTURAL_DELETION;
+			}
+			return AltType.DELETION;
+		}
+		else if(ref.length() < alt.length()){
+			if(alt.length() > MAX_ALLELE_SIZE_FOR_NON_SV){
+				return AltType.STRUCTURAL_INSERTION;
+			}
+			return AltType.INSERTION;
+		}
+        throw new RuntimeException("Something is very wrong! Could not determine variant type! Ref: " + ref + " Alt: " + alt);
+	}
 	
+	private int getDiffCount(Allele ref, Allele alt){
+		String refNucs = ref.getBaseString();
+		String altNucs = alt.getBaseString();
+		int count = 0;
+		for(int i = 0; i < refNucs.length(); i++){
+			if(refNucs.charAt(i) != altNucs.charAt(i)){
+				count++;
+			}
+		}
+		return count;
+	}
 	public void Calculator(VariantContext var, List<String> names){
 		NumVars++;
 
 		List<Allele> Alts = var.getAlternateAlleles();
 		Allele ref = var.getReference();
+		int snpCount = 0;
+		if(var.isVariant()){
+
+			for(Allele alt : Alts){
+				AltType type = getAltType(ref, alt);
+				if(type == AltType.SNP){
+					snpCount++;
+				}
+			}
+			totalCount += Alts.size() - 1;
+		}
 
 		if (var.isSNP()) {
 			NumSNVs++;
