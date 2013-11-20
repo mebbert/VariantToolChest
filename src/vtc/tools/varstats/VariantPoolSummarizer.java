@@ -69,7 +69,7 @@ public class VariantPoolSummarizer {
 				totalVarCount += var.getAlternateAlleles().size() - 1; 
 
 				// Count the different types of alternates for a single record
-				altTypeCounts = countVariantTypes(var);
+				altTypeCounts = collectVariantStatistics(var);
 				
 				snpCount += altTypeCounts.get(AltType.SNV);
 				mnpCount += altTypeCounts.get(AltType.MNP);
@@ -153,19 +153,26 @@ public class VariantPoolSummarizer {
      * @param var
      * @return
      */
-    private static HashMap<AltType, Integer> countVariantTypes(VariantContext var){
+    private static HashMap<AltType, Integer> collectVariantStatistics(VariantContext var){
 
     	Allele ref = var.getReference();
     	List<Allele> alts = var.getAlternateAlleles();
     	
     	Integer snpCount = 0, mnpCount = 0, indelCount = 0, insCount = 0,
-    			delCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0;
+    			delCount = 0, structIndelCount = 0, structInsCount = 0,
+    			structDelCount = 0, tiCount = 0, tvCount = 0;
 		AltType type;
     	for(Allele alt : alts){
     		type = getAltType(ref, alt);
     		
     		if(type == AltType.SNV){
     			snpCount++;
+    			if(isTransition(ref.getBaseString(), alt.getBaseString())){
+    				tiCount++;
+    			}
+    			else{
+    				tvCount++;
+    			}
     		}
     		else if(type == AltType.MNP){
     			mnpCount++;
@@ -216,7 +223,8 @@ public class VariantPoolSummarizer {
 		else if(ref.length() > 1 && ref.length() == alt.length()){
 			int diffCount = getDiffCount(ref, alt);
 			if(diffCount == 0){
-                throw new RuntimeException("Something is very wrong! Expected differences in variant record. Ref: " + ref + " Alt: " + alt);
+                throw new RuntimeException("Something is very wrong! Expected differences in variant record. Ref: " +
+											ref + " Alt: " + alt);
 			}
 			else if(diffCount == 1){
 				return AltType.SNV;
@@ -278,5 +286,30 @@ public class VariantPoolSummarizer {
 			}
 		}
 		return altString.toString();
+	}
+	
+	/**
+	 * Determine if the SNV is a transition.
+	 * 
+	 * @param ref
+	 * @param alt
+	 * @return
+	 */
+	private static boolean isTransition(String ref, String alt){
+		if(ref.length() > 1 || alt.length() > 1){
+	        throw new RuntimeException("Something is very wrong! Expected single nucleotide" +
+	        		" reference and alternate! Got: " + ref + ">" + alt);
+		}
+			
+		if (alt.equals("G") && ref.equals("A")) {
+			return true;
+		} else if (alt.equals("A") && ref.equals("G")) {
+			return true;
+		} else if (alt.equals("T") && ref.equals("C")) {
+			return true;
+		} else if (alt.equals("C") && ref.equals("T")) {
+			return true;
+		}
+		return false;
 	}
 }
