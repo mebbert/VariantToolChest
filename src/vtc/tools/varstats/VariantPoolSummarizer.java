@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.broadinstitute.variant.variantcontext.Allele;
@@ -14,6 +15,10 @@ import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.datastructures.VariantPool;
+import vtc.tools.varstats.AltType;
+import vtc.tools.varstats.Depth;
+import vtc.tools.varstats.VariantPoolSummary;
+import vtc.tools.varstats.VariantRecordSummary;
 
 /**
  * @author markebbert
@@ -293,4 +298,36 @@ public class VariantPoolSummarizer {
 		}
 		return false;
 	}
+	
+	public static void printSummary(HashMap<String, VariantPoolSummary> VPSummary, boolean PrintCombined){
+		Object[] keys = VPSummary.keySet().toArray();
+		VariantPoolSummary vps = new VariantPoolSummary();
+		for(Object o : keys){
+			if(PrintCombined == false){
+				PrintIndividualFiles(o.toString(), VPSummary.get(o));
+			}
+			else{
+				vps.addition(VPSummary.get(o));
+			}
+			
+			
+		}
+		if(PrintCombined == true){
+			PrintCombinedStats(keys, vps);
+		}
+		
+	}
+
+	private static void PrintCombinedStats(Object[] keys, VariantPoolSummary vps) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private static void PrintIndividualFiles(String string,	VariantPoolSummary variantPoolSummary) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
+	
 }

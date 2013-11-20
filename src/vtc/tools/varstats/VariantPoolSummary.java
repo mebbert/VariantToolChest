@@ -87,6 +87,30 @@ public class VariantPoolSummary {
 	}
 	
 	
+	public VariantPoolSummary() {
+		numVars = 0;
+		numSNVs = 0;
+		numMNVs = 0;	
+		numIndels = 0;
+		numInsertions = 0;
+		numDeletions = 0;
+		smallestInsertion = 0;
+		largestInsertion = 0;
+		avgInsertionSize = 0;
+		smallestDeletion = 0;
+		largestDeletion = 0;
+		avgDeletionSize = 0;
+		numStructVars = 0;
+		numStructIns = 0;
+		numStructDels = 0;
+		numMultiAlts = 0;
+		tiCount = 0;
+		tvCount = 0;
+		genoTiCount = 0;
+		genoTvCount = 0;
+	}
+
+
 	/**
 	 * @return the numVars
 	 */
@@ -395,4 +419,30 @@ public class VariantPoolSummary {
 		this.genoTiTv = genoTiTv;
 	}
 
+
+	public void addition(VariantPoolSummary vps) {
+		numVars += vps.getNumVars();
+		numSNVs += vps.getNumSNVs();
+		numMNVs += vps.getNumMNVs();	
+		numIndels += vps.getNumIndels();
+		numInsertions += vps.getNumInsertions();
+		numDeletions += vps.getNumDeletions();
+		smallestInsertion += vps.getSmallestInsertion();
+		largestInsertion += vps.getLargestInsertion();
+		avgInsertionSize += vps.getAvgInsertionSize();
+		smallestDeletion += vps.getSmallestDeletion();
+		largestDeletion += vps.getLargestDeletion();
+		avgDeletionSize += vps.getAvgDeletionSize();
+		numStructVars += vps.getNumStructVars();
+		numStructIns += vps.getNumStructIns();
+		numStructDels += vps.getNumStructDels();
+		numMultiAlts += vps.getNumMultiAlts();
+		tiCount += vps.getTiCount();
+		tvCount += vps.getTvCount();
+		genoTiCount += vps.getGenoTiCount();
+		genoTvCount += vps.getGenoTvCount();
+		
+	}
+
 }
+	
