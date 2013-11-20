@@ -4,7 +4,6 @@
 package vtc.tools.varstats;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,12 +29,13 @@ public class VariantPoolSummarizer {
      * @param allVPs
      * @return
      */
-    public static HashMap<String, VariantPoolSummary> summarizeVariantPools(TreeMap<String, VariantPool> allVPs){
+    public static HashMap<String, VariantPoolSummary> summarizeVariantPools(TreeMap<String, VariantPool> allVPs,
+    		boolean generateDetailedStatistics){
     	
     	VariantPoolSummary vpSummary;
     	HashMap<String, VariantPoolSummary> vpSummaries = new HashMap<String, VariantPoolSummary>();
     	for(VariantPool vp : allVPs.values()){
-    		vpSummary = summarizeVariantPool(vp);
+    		vpSummary = summarizeVariantPool(vp, generateDetailedStatistics);
     		vpSummaries.put(vp.getPoolID(), vpSummary);
     	}
     	return vpSummaries;
@@ -53,13 +53,12 @@ public class VariantPoolSummarizer {
 		String currVarKey;
 		VariantContext var;
 		HashMap<AltType, Integer> altTypeCounts;
-    	int totalVarCount = 0, snpCount = 0, mnpCount = 0, insCount = 0,
-    			delCount = 0, structInsCount = 0, structDelCount = 0;
+    	int totalVarCount = 0, snpCount = 0, mnpCount = 0, indelCount = 0, insCount = 0,
+    			delCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0;
 		while (varIT.hasNext()) {
 			currVarKey = varIT.next();
 
 			var = vp.getVariant(currVarKey);
-			List<String> names = var.getSampleNamesOrderedByName();
 			if (var.isVariant()) {
 				totalVarCount++; // Increment the total var counts by one for every record
 
@@ -72,10 +71,12 @@ public class VariantPoolSummarizer {
 				// Count the different types of alternates for a single record
 				altTypeCounts = countVariantTypes(var);
 				
-				snpCount += altTypeCounts.get(AltType.SNP);
+				snpCount += altTypeCounts.get(AltType.SNV);
 				mnpCount += altTypeCounts.get(AltType.MNP);
+				indelCount += altTypeCounts.get(AltType.INDEL);
 				insCount += altTypeCounts.get(AltType.INSERTION);
 				delCount += altTypeCounts.get(AltType.DELETION);
+				structIndelCount += altTypeCounts.get(AltType.STRUCTURAL_INDEL);
 				structInsCount += altTypeCounts.get(AltType.STRUCTURAL_INSERTION);
 				structDelCount += altTypeCounts.get(AltType.STRUCTURAL_DELETION);
 				
@@ -84,11 +85,10 @@ public class VariantPoolSummarizer {
 					String temp = generateDetailedStatsForVariantRecord(var, (String[])vp.getSamples().toArray());
 					detailedStats.add(temp);
 				}
-
-				// Concatenate all the info into a string.
-				// add it to the varinfo arraylist.
 			}
 		}
+		return new VariantPoolSummary(totalVarCount, snpCount, mnpCount, indelCount, insCount, delCount, 0, 0, 0, 0, 0, 0,
+				structIndelCount, structInsCount, structDelCount, 0, 0, 0, 0, 0, 0, 0);
     }
     
 	/**
@@ -98,52 +98,56 @@ public class VariantPoolSummarizer {
 	 * @param Samples
 	 * @return
 	 */
-	private static String generateDetailedStatsForVariantRecord(VariantContext var, String[] Samples) {
+	private static String generateDetailedStatsForVariantRecord(VariantContext var, String[] samples) {
 		String temp = var.getChr() + '\t' + var.getStart() + '\t' +
 				var.getID() + '\t' + var.getReference().getBaseString() + '\t';
+		Allele ref = var.getReference();
 		List<Allele> alts = var.getAlternateAlleles();
+
 		temp += generateAltString(alts) + '\t';
 		
+		int refCount = 0, tmpAltCount, i = 0;
+		String altCounts = "";
 		Iterator<Genotype> genoIT = var.getGenotypes().iterator();
 		Genotype geno;
-		while(genoIT.hasNext()){
-			geno = genoIT.next();
-			geno.countAllele(ref);
+		for(Allele alt : alts){
+			tmpAltCount = 0;
+			while(genoIT.hasNext()){
+				geno = genoIT.next();
+				refCount += geno.countAllele(ref);
+				tmpAltCount += geno.countAllele(alt);
+			}
+			if(i == 0){
+				altCounts = altCounts + tmpAltCount;
+			}
+			else{
+				altCounts = altCounts + "," + tmpAltCount;
+			}
+			i++;
 		}
 		
+		temp += Integer.toString(refCount) + "\t" + altCounts;
 		
-		int refcount = 0;
-		String altcount = "";
-		ArrayList<String> genotypes = new ArrayList<String>();
-		var.getGenotypes().get(0).
-		String geno;
-		for (Object s : Samples) {
-			geno = var.getGenotype((String) s).getGenotypeString();
-			genotypes.addAll(Arrays.asList(geno.split("/|\\|")));
-		}
+		Depth depth = new Depth();
+		depth.getDepths(var, samples);
+		
+		temp += depth.toString();
 
-		refcount = getrefcounts(genotypes, var.getReference().getBaseString());
-		altcount = getaltcounts(genotypes, alts);
-		//System.out.println(refcount + "  "+altcount);
-
-		temp += Integer.toString(refcount) + "\t" + altcount;
-		Depth d = new Depth();
-		d.getDepths(var, Samples);
-		temp += d.toString();
 		double qual = var.getPhredScaledQual();
 		if(qual>0)
 			temp += "\t"+qual;
 		else
-			temp+="\t"+"NA";
-		String depthError = d.getError();
+			temp += "\t"+"NA";
+		String depthError = depth.getError();
 		if(!depthError.isEmpty())
 			temp += "\tIncorrect depth calls in samples: "+depthError+".";
 		return temp;
+
 	}
     
     /**
      * Count the different alternate types for a single record. i.e., count the
-     * number of SNPs, MNPs, insertions, deletions, structural insertions, and
+     * number of SNVs, MNPs, insertions, deletions, structural insertions, and
      * structural deletions in a given record.
      * 
      * @param var
@@ -154,37 +158,43 @@ public class VariantPoolSummarizer {
     	Allele ref = var.getReference();
     	List<Allele> alts = var.getAlternateAlleles();
     	
-    	Integer snpCount = 0, mnpCount = 0, insCount = 0,
-    			delCount = 0, structInsCount = 0, structDelCount = 0;
+    	Integer snpCount = 0, mnpCount = 0, indelCount = 0, insCount = 0,
+    			delCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0;
 		AltType type;
     	for(Allele alt : alts){
     		type = getAltType(ref, alt);
     		
-    		if(type == AltType.SNP){
+    		if(type == AltType.SNV){
     			snpCount++;
     		}
     		else if(type == AltType.MNP){
     			mnpCount++;
     		}
     		else if(type == AltType.INSERTION){
+    			indelCount++;
     			insCount++;
     		}
     		else if(type == AltType.DELETION){
+    			indelCount++;
     			delCount++;
     		}
     		else if(type == AltType.STRUCTURAL_INSERTION){
+    			structIndelCount++;
     			structInsCount++;
     		}
     		else if(type == AltType.STRUCTURAL_DELETION){
+    			structIndelCount++;
     			structDelCount++;
     		}
     	}
     	
     	HashMap<AltType, Integer> typeCounts = new HashMap<AltType, Integer>();
-    	typeCounts.put(AltType.SNP, snpCount);
+    	typeCounts.put(AltType.SNV, snpCount);
     	typeCounts.put(AltType.MNP, mnpCount);
+    	typeCounts.put(AltType.INDEL, indelCount);
     	typeCounts.put(AltType.INSERTION, insCount);
     	typeCounts.put(AltType.DELETION, delCount);
+    	typeCounts.put(AltType.STRUCTURAL_INDEL, structIndelCount);
     	typeCounts.put(AltType.STRUCTURAL_INSERTION, structInsCount);
     	typeCounts.put(AltType.STRUCTURAL_DELETION, structDelCount);
     	
@@ -192,7 +202,7 @@ public class VariantPoolSummarizer {
     }
     
 	/**
-	 * Determine whether the alt is a SNP, MNP, insertion, deletion
+	 * Determine whether the alt is a SNV, MNP, insertion, deletion
 	 * or structural insertion or deletion.
 	 * 
 	 * @param ref
@@ -201,7 +211,7 @@ public class VariantPoolSummarizer {
 	 */
 	private static AltType getAltType(Allele ref, Allele alt){
 		if(ref.length() == 1 && alt.length() == 1 && !ref.equals(alt, true)){
-			return AltType.SNP;
+			return AltType.SNV;
 		}
 		else if(ref.length() > 1 && ref.length() == alt.length()){
 			int diffCount = getDiffCount(ref, alt);
@@ -209,7 +219,7 @@ public class VariantPoolSummarizer {
                 throw new RuntimeException("Something is very wrong! Expected differences in variant record. Ref: " + ref + " Alt: " + alt);
 			}
 			else if(diffCount == 1){
-				return AltType.SNP;
+				return AltType.SNV;
 			}
 			else{
 				return AltType.MNP;
@@ -269,15 +279,4 @@ public class VariantPoolSummarizer {
 		}
 		return altString.toString();
 	}
-	
-	private static int countRefGenotypes(ArrayList<String> genotypes, String ref){
-		int count = 0;
-		for(String s : genotypes){
-			if(s.equals(ref)){
-				count++;
-			}
-		}
-		return count;
-	}
-
 }
