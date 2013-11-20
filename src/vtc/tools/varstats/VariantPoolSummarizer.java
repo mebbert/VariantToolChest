@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 import org.broadinstitute.variant.variantcontext.Allele;
+import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.datastructures.VariantPool;
@@ -102,6 +103,15 @@ public class VariantPoolSummarizer {
 				var.getID() + '\t' + var.getReference().getBaseString() + '\t';
 		List<Allele> alts = var.getAlternateAlleles();
 		temp += generateAltString(alts) + '\t';
+		
+		Iterator<Genotype> genoIT = var.getGenotypes().iterator();
+		Genotype geno;
+		while(genoIT.hasNext()){
+			geno = genoIT.next();
+			geno.countAllele(ref);
+		}
+		
+		
 		int refcount = 0;
 		String altcount = "";
 		ArrayList<String> genotypes = new ArrayList<String>();
