@@ -46,21 +46,25 @@ public class VariantPoolSummarizer {
      * @param vp
      * @return
      */
-    public static VariantPoolSummary summarizeVariantPool(VariantPool vp, boolean generateDetailedStatistics){
+    public static VariantPoolSummary summarizeVariantPool(VariantPool vp, boolean generateDetailedStats){
     	
 		Iterator<String> varIT = vp.getVariantIterator();
-		ArrayList<String> detailedStats = new ArrayList<String>();
 		String currVarKey;
 		VariantContext var;
-		HashMap<AltType, Integer> altTypeCounts;
-    	int totalVarCount = 0, snpCount = 0, mnpCount = 0, indelCount = 0, insCount = 0,
-    			delCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0;
+		VariantRecordSummary vrs;
+    	int totalVarCount = 0, snvCount = 0, mnvCount = 0, indelCount = 0, insCount = 0,
+    			delCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0,
+    			multiAltCount = 0, tiCount = 0, tvCount = 0;
 		while (varIT.hasNext()) {
 			currVarKey = varIT.next();
 
 			var = vp.getVariant(currVarKey);
 			if (var.isVariant()) {
 				totalVarCount++; // Increment the total var counts by one for every record
+				
+				if(var.getAlternateAlleles().size() > 1){
+					multiAltCount++;
+				}
 
 				/* Increment the total var count by the number of alts - 1. This
 				 * will keep the total count equal to the number of counted alts
@@ -69,81 +73,24 @@ public class VariantPoolSummarizer {
 				totalVarCount += var.getAlternateAlleles().size() - 1; 
 
 				// Count the different types of alternates for a single record
-				altTypeCounts = collectVariantStatistics(var);
+				vrs = collectVariantStatistics(var, generateDetailedStats);
 				
-				snpCount += altTypeCounts.get(AltType.SNV);
-				mnpCount += altTypeCounts.get(AltType.MNP);
-				indelCount += altTypeCounts.get(AltType.INDEL);
-				insCount += altTypeCounts.get(AltType.INSERTION);
-				delCount += altTypeCounts.get(AltType.DELETION);
-				structIndelCount += altTypeCounts.get(AltType.STRUCTURAL_INDEL);
-				structInsCount += altTypeCounts.get(AltType.STRUCTURAL_INSERTION);
-				structDelCount += altTypeCounts.get(AltType.STRUCTURAL_DELETION);
-				
+				snvCount += vrs.getSnvCount();
+				mnvCount += vrs.getMnvCount();
+				indelCount += vrs.getIndelCount();
+				insCount += vrs.getInsCount();
+				delCount += vrs.getDelCount();
+				structIndelCount += vrs.getStructIndelCount();
+				structInsCount += vrs.getStructInsCount();
+				structDelCount += vrs.getStructDelCount();
+				tiCount += vrs.getTiCount();
+				tvCount += vrs.getTvCount();
 
-				if(generateDetailedStatistics){
-					String temp = generateDetailedStatsForVariantRecord(var, (String[])vp.getSamples().toArray());
-					detailedStats.add(temp);
-				}
 			}
 		}
-		return new VariantPoolSummary(totalVarCount, snpCount, mnpCount, indelCount, insCount, delCount, 0, 0, 0, 0, 0, 0,
-				structIndelCount, structInsCount, structDelCount, 0, 0, 0, 0, 0, 0, 0);
+		return new VariantPoolSummary(totalVarCount, snvCount, mnvCount, indelCount, insCount, delCount, 0, 0, 0, 0, 0, 0,
+				structIndelCount, structInsCount, structDelCount, multiAltCount, tiCount, tvCount, 0, 0, 0, 0);
     }
-    
-	/**
-	 * Generate a detailed stat summary for a given variant.
-	 * 
-	 * @param var
-	 * @param Samples
-	 * @return
-	 */
-	private static String generateDetailedStatsForVariantRecord(VariantContext var, String[] samples) {
-		String temp = var.getChr() + '\t' + var.getStart() + '\t' +
-				var.getID() + '\t' + var.getReference().getBaseString() + '\t';
-		Allele ref = var.getReference();
-		List<Allele> alts = var.getAlternateAlleles();
-
-		temp += generateAltString(alts) + '\t';
-		
-		int refCount = 0, tmpAltCount, i = 0;
-		String altCounts = "";
-		Iterator<Genotype> genoIT = var.getGenotypes().iterator();
-		Genotype geno;
-		for(Allele alt : alts){
-			tmpAltCount = 0;
-			while(genoIT.hasNext()){
-				geno = genoIT.next();
-				refCount += geno.countAllele(ref);
-				tmpAltCount += geno.countAllele(alt);
-			}
-			if(i == 0){
-				altCounts = altCounts + tmpAltCount;
-			}
-			else{
-				altCounts = altCounts + "," + tmpAltCount;
-			}
-			i++;
-		}
-		
-		temp += Integer.toString(refCount) + "\t" + altCounts;
-		
-		Depth depth = new Depth();
-		depth.getDepths(var, samples);
-		
-		temp += depth.toString();
-
-		double qual = var.getPhredScaledQual();
-		if(qual>0)
-			temp += "\t"+qual;
-		else
-			temp += "\t"+"NA";
-		String depthError = depth.getError();
-		if(!depthError.isEmpty())
-			temp += "\tIncorrect depth calls in samples: "+depthError+".";
-		return temp;
-
-	}
     
     /**
      * Count the different alternate types for a single record. i.e., count the
@@ -153,12 +100,12 @@ public class VariantPoolSummarizer {
      * @param var
      * @return
      */
-    private static HashMap<AltType, Integer> collectVariantStatistics(VariantContext var){
+    private static VariantRecordSummary collectVariantStatistics(VariantContext var, boolean generateDetailedStats){
 
     	Allele ref = var.getReference();
     	List<Allele> alts = var.getAlternateAlleles();
     	
-    	Integer snpCount = 0, mnpCount = 0, indelCount = 0, insCount = 0,
+    	Integer snvCount = 0, mnpCount = 0, indelCount = 0, insCount = 0,
     			delCount = 0, structIndelCount = 0, structInsCount = 0,
     			structDelCount = 0, tiCount = 0, tvCount = 0;
 		AltType type;
@@ -166,7 +113,7 @@ public class VariantPoolSummarizer {
     		type = getAltType(ref, alt);
     		
     		if(type == AltType.SNV){
-    			snpCount++;
+    			snvCount++;
     			if(isTransition(ref.getBaseString(), alt.getBaseString())){
     				tiCount++;
     			}
@@ -195,19 +142,73 @@ public class VariantPoolSummarizer {
     		}
     	}
     	
-    	HashMap<AltType, Integer> typeCounts = new HashMap<AltType, Integer>();
-    	typeCounts.put(AltType.SNV, snpCount);
-    	typeCounts.put(AltType.MNP, mnpCount);
-    	typeCounts.put(AltType.INDEL, indelCount);
-    	typeCounts.put(AltType.INSERTION, insCount);
-    	typeCounts.put(AltType.DELETION, delCount);
-    	typeCounts.put(AltType.STRUCTURAL_INDEL, structIndelCount);
-    	typeCounts.put(AltType.STRUCTURAL_INSERTION, structInsCount);
-    	typeCounts.put(AltType.STRUCTURAL_DELETION, structDelCount);
+    	VariantRecordSummary vrs = new VariantRecordSummary(var.getChr(), var.getStart(), var.getReference(),
+    			new ArrayList<Allele>(var.getAlternateAlleles()), snvCount, mnpCount, indelCount,
+    			insCount, delCount, structIndelCount, structInsCount, structDelCount, tiCount,
+    			tvCount);
     	
-    	return typeCounts;
+		if(generateDetailedStats){
+			generateDetailedStatsForVariantRecord(vrs, var, (String[])var.getSampleNamesOrderedByName().toArray());
+		}
+		return vrs;
     }
     
+    
+	/**
+	 * Generate a detailed stat summary for a given variant.
+	 * 
+	 * @param var
+	 * @param Samples
+	 * @return
+	 */
+	private static void generateDetailedStatsForVariantRecord(VariantRecordSummary vrs, VariantContext var, String[] samples) {
+
+		Allele ref = var.getReference();
+		List<Allele> alts = var.getAlternateAlleles();
+
+		int refCount = 0, tmpAltCount;
+		ArrayList<Integer> altCounts = new ArrayList<Integer>();
+		Iterator<Genotype> genoIT = var.getGenotypes().iterator();
+		Genotype geno;
+		int iterCount = 0;
+		
+		// Loop over all of the genotypes in the record
+		while(genoIT.hasNext()){
+			geno = genoIT.next();
+			
+			// Get the reference allele count
+			refCount += geno.countAllele(ref);
+
+			// Get the count for each alternate allele
+			for(int i = 0; i < alts.size(); i++){
+				if(iterCount == 0){
+					tmpAltCount = 0;
+					altCounts.add(tmpAltCount);
+				}
+				else{
+					tmpAltCount = altCounts.get(i);
+				}
+				tmpAltCount += geno.countAllele(alts.get(i));
+				altCounts.set(i, tmpAltCount);
+			}
+		}
+		
+		vrs.setRefGenotypeCount(refCount);
+		vrs.setAltGenotypeCounts(altCounts);
+		
+		Depth depth = new Depth();
+		depth.getDepths(var, samples);
+		
+		vrs.setDepth(depth);
+		
+		double qual = var.getPhredScaledQual();
+		if(qual>0)
+			vrs.setQuality(Double.toString(qual));
+		else
+			vrs.setQuality("NA");
+	}
+    
+
 	/**
 	 * Determine whether the alt is a SNV, MNP, insertion, deletion
 	 * or structural insertion or deletion.
@@ -266,27 +267,7 @@ public class VariantPoolSummarizer {
 		}
 		return count;
 	}
-	
-	/**
-	 * Given a list of alt alleles, create a comma-separated string
-	 * with all alts
-	 * 
-	 * @param alts
-	 * @return
-	 */
-	private static String generateAltString(List<Allele> alts){
-		
-		StringBuilder altString = new StringBuilder();
-		for(int i = 0; i < alts.size(); i++){
-			if(i == 0){
-				altString.append(alts.get(i));
-			}
-			else{
-				altString.append("," + alts.get(i));
-			}
-		}
-		return altString.toString();
-	}
+
 	
 	/**
 	 * Determine if the SNV is a transition.
