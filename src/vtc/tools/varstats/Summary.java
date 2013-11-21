@@ -138,7 +138,7 @@ public class Summary {
 
 		temp += Integer.toString(refcount) + "\t" + altcount;
 		Depth d = new Depth();
-		d.getDepths(var, Samples);
+		d.getDepths(var, new ArrayList<String>(Arrays.asList((String[])Samples)));
 		temp += d.toString();
 		double qual = var.getPhredScaledQual();
 		if(qual>0)
