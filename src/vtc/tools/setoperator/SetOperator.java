@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -26,6 +27,8 @@ import vtc.tools.setoperator.operation.ComplementOperation;
 import vtc.tools.setoperator.operation.IntersectOperation;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.setoperator.operation.Operation;
+import vtc.tools.utilitybelt.UtilityBelt;
+import vtc.tools.varstats.AltType;
 
 /**
  * @author markebbert
@@ -151,6 +154,19 @@ public class SetOperator {
 		VariantContext var1 = null, var2 = null;
 		boolean keep = false;
 		
+		/* Track the number of indels that may be the same
+		 * but aligned differently.
+		 * 
+		 * potentialMatchingIndelAlleles: The number of alleles that
+		 * may overlap. This will count all alternate alleles in
+		 * a record
+		 * 
+		 * potentialMatchinIndelRecords: The number of variant
+		 * records (i.e. lines) in a VariantPool that may overlap
+		 */
+		int potentialMatchingIndelAlleles = 0;
+		int potentialMatchingIndelRecords = 0;
+		
 		/* Iterate over variants in vp1. If found in vp2,
 		 * subtract from vp1
 		 */
@@ -186,6 +202,18 @@ public class SetOperator {
 			else{
 				/* Not found in vp2, so add to complement */
 				keep = true;
+				
+				/* If this variant is an indel, check if there are
+				 * overlapping indels that may match but align differently.
+				 */
+				var1 = vp1.getVariant(currVarKey);
+				if(var1.isIndel() || var1.isMixed()){ // At least one alternate is an indel
+					int matches = vp2.getOverlappingIndelAlleleCount(var1);
+					if(matches > 0){
+						potentialMatchingIndelAlleles += matches;
+						potentialMatchingIndelRecords++;
+					}
+				}
 			}
 			
 			if(keep){
@@ -199,6 +227,8 @@ public class SetOperator {
 			}
 		}
 		
+		complement.setPotentialMatchingIndelAlleles(potentialMatchingIndelAlleles);
+		complement.setPotentialMatchingIndelRecords(potentialMatchingIndelRecords);
 		return complement;
 	}
 	
@@ -212,9 +242,6 @@ public class SetOperator {
 	 */
 	private boolean subtractByGenotype(GenotypesContext gc1, GenotypesContext gc2,
 			ComplementType type, String currVarKey, String operationID) throws InvalidOperationException{
-		
-		/* TODO: Add 'verbose' information */
-		
 		
 		if(type == ComplementType.HET_OR_HOMO_ALT){
 
@@ -443,6 +470,12 @@ public class SetOperator {
 					}
 
 				}
+				else{
+					var = smallest.getVariant(currVarKey);
+					if(var.isIndel() || var.isMixed()){
+						boolean fuzzyMatch = allVariantPoolsContainINDELFuzzyMatching(variantPools, var, currVarKey);
+					}
+				}
 			}
 
 			// If all VariantPools contain var and they intersect by IntersectTypes, add it to the new pool
@@ -537,6 +570,31 @@ public class SetOperator {
 			}
 			count++;
 		}	
+		return true;
+	}
+	
+	
+	private boolean allVariantPoolsContainINDELFuzzyMatching(ArrayList<VariantPool> variantPools, VariantContext var, String varKey){
+		
+		VariantContext tmpVar;
+		int matches;
+		for(VariantPool vp : variantPools){
+
+			tmpVar = vp.getVariant(varKey);
+
+			/* if tmpVar != null, just continue. It matched perfectly */
+			if(tmpVar != null){
+				continue;
+			}
+			
+			/* count how many overlapping indels match
+			 * but align differently.
+			 */
+			matches = vp.getOverlappingIndelAlleleCount(var);
+			if(matches == 0){
+				return false;
+			}
+		}
 		return true;
 	}
 	

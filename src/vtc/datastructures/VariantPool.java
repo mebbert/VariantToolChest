@@ -10,6 +10,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -22,6 +23,7 @@ import net.sf.samtools.SAMSequenceDictionary;
 import org.apache.log4j.Logger;
 import org.broad.tribble.AbstractFeatureReader;
 import org.broad.tribble.FeatureReader;
+import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.broadinstitute.variant.variantcontext.VariantContextBuilder;
 import org.broadinstitute.variant.variantcontext.writer.Options;
@@ -36,6 +38,9 @@ import org.broadinstitute.variant.vcf.VCFHeaderLineType;
 import org.broadinstitute.variant.vcf.VCFHeaderVersion;
 import org.broadinstitute.variant.vcf.VCFInfoHeaderLine;
 import org.broadinstitute.variant.vcf.VCFUtils;
+
+import vtc.tools.utilitybelt.UtilityBelt;
+import vtc.tools.varstats.AltType;
 
 
 /**
@@ -58,6 +63,7 @@ public class VariantPool implements Pool{
 	private static Logger logger = Logger.getLogger(VariantPool.class);
 
 	private HashMap<String, VariantContext> hMap;
+	private HashMap<String, HashMap<String, VariantContext>> hMapChrPos;
 	private TreeMap<String, VariantContext> tMap;
 	private TreeSet<String> contigs;
 	private SamplePool samples;
@@ -66,6 +72,8 @@ public class VariantPool implements Pool{
 	private VCFHeader header;
 	private Boolean hasGenotypeData;
 	private boolean addChr;
+	private int potentialMatchingIndelAlleles;
+	private int potentialMatchingIndelRecords;
 
 	
 	/****************************************************
@@ -115,6 +123,7 @@ public class VariantPool implements Pool{
 	private void init(boolean addChr){
 		this.tMap = new TreeMap<String, VariantContext>(new NaturalOrderComparator());
 		this.hMap = new HashMap<String, VariantContext>();
+		this.hMapChrPos = new HashMap<String, HashMap<String,VariantContext>>();
 		this.contigs = new TreeSet<String>();
 		this.addChr = addChr;
 	}
@@ -150,6 +159,10 @@ public class VariantPool implements Pool{
 	 */
 	public VariantContext getVariant(String chr, int pos, String ref){
 		return getVariant(chr + ":" + Integer.toString(pos) + ":" + ref);
+	}
+	
+	private HashMap<String, VariantContext> getVariantsByChrPos(String chr, int pos){
+		return hMapChrPos.get(chr + ":" + Integer.toString(pos));
 	}
 
 	/**
@@ -212,6 +225,36 @@ public class VariantPool implements Pool{
 		return this.hasGenotypeData;
 	}
 	
+	/**
+	 * Set the number of potential matching indel alleles
+	 * between the VariantPools being compared when
+	 * this VariantPool was created. This is only used when
+	 * this VariantPool is the result of a Set Operation.
+	 * For example, if the number of potential matches in
+	 * this VariantPool is 100, and this VariantPool is the
+	 * result of an intersect, that means there were 100 
+	 * potentially matching INDELs across the VariantPools
+	 * compared.
+	 */
+	public int getPotentialMatchingIndelAlleles(){
+		return this.potentialMatchingIndelAlleles;
+	}
+	
+	/**
+	 * Set the number of potential matching indel records
+	 * between the VariantPools being compared when
+	 * this VariantPool was created. This is only used when
+	 * this VariantPool is the result of a Set Operation.
+	 * For example, if the number of potential matches in
+	 * this VariantPool is 100, and this VariantPool is the
+	 * result of an intersect, that means there were 100 
+	 * potentially matching INDELs across the VariantPools
+	 * compared.
+	 */
+	public int getPotentialMatchingIndelRecords(){
+		return this.potentialMatchingIndelRecords;
+	}
+	
 	
 	
 	
@@ -250,6 +293,40 @@ public class VariantPool implements Pool{
 			this.samples = new SamplePool();
 			this.samples.setPoolID(this.poolID); // VariantPools and SamplePools must have same ID
 		}		
+	}
+	
+	/**
+	 * Set the number of potential matching indel alleles
+	 * between the VariantPools being compared when
+	 * this VariantPool was created. This is only used when
+	 * this VariantPool is the result of a Set Operation.
+	 * For example, if the number of potential matches in
+	 * this VariantPool is 100, and this VariantPool is the
+	 * result of an intersect, that means there were 100 
+	 * potentially matching INDELs across the VariantPools
+	 * compared.
+	 * 
+	 * @param count
+	 */
+	public void setPotentialMatchingIndelAlleles(int count){
+		this.potentialMatchingIndelAlleles = count;
+	}
+	
+	/**
+	 * Set the number of potential matching indel records
+	 * between the VariantPools being compared when
+	 * this VariantPool was created. This is only used when
+	 * this VariantPool is the result of a Set Operation.
+	 * For example, if the number of potential matches in
+	 * this VariantPool is 100, and this VariantPool is the
+	 * result of an intersect, that means there were 100 
+	 * potentially matching INDELs across the VariantPools
+	 * compared.
+	 * 
+	 * @param count
+	 */
+	public void setPotentialMatchingIndelRecords(int count){
+		this.potentialMatchingIndelRecords = count;
 	}
 	
 	
@@ -313,6 +390,7 @@ public class VariantPool implements Pool{
 
 		this.addContig(currChr);
 		String chrPosRef = currChr + ":" + Integer.toString(v.getStart()) + ":" + v.getReference();
+		String chrPos = currChr + ":" + Integer.toString(v.getStart());
 		
 		/* If a variant already exists with this chr:pos:ref,
 		 * ignore subsequent variants and emit warning. 
@@ -347,6 +425,14 @@ public class VariantPool implements Pool{
 		else{
 			hMap.put(chrPosRef, v);
 			tMap.put(chrPosRef, v);
+			if(!hMapChrPos.containsKey(chrPos)){
+				HashMap<String, VariantContext> newHMap = new HashMap<String, VariantContext>();
+				newHMap.put(chrPosRef, v);
+				hMapChrPos.put(chrPos, newHMap);
+			}
+			else{
+				hMapChrPos.get(chrPos).put(chrPosRef, v);
+			}
 		}
 	}
 	
@@ -680,6 +766,82 @@ public class VariantPool implements Pool{
 				addMissingHeaderLineAndWriteVariant(ex, vp, writer, vc);
 			}
 		}
+	}
+	
+	/**
+	 * Count how many of the alternate alleles in var overlap with any alternate
+	 * in this VariantPool within +/- indelLength.
+	 * The INDELs must be of the same type (i.e., both are insertions or both are
+	 * deletions, etc.) and length.
+	 * @param var
+	 * @return
+	 */
+	public int getOverlappingIndelAlleleCount(VariantContext var){
+		int overlappingIndelAlleleCount = 0;
+		Allele ref = var.getReference();
+		List<Allele> alts = var.getAlternateAlleles();
+		for(Allele alt : alts){
+			AltType type = UtilityBelt.determineAltType(ref, alt);
+			if(hasOverlappingIndel(var.getChr(), var.getStart(), alt.length(), type)){
+				overlappingIndelAlleleCount++;
+			}
+		}
+		return overlappingIndelAlleleCount;
+	}
+	
+	/**
+	 * Test if any variants in this pool overlap within +/- indelLength.
+	 * The INDELs must be of the same type (i.e., both are insertions or both are
+	 * deletions, etc.) and length.
+	 * @param chr
+	 * @param pos
+	 * @param indelLength
+	 * @param type
+	 * @return
+	 */
+	private boolean hasOverlappingIndel(String chr, int pos, int indelLength, AltType type){
+		
+		/* For each variant within +/- indelLength, check if there's another
+		 * indel with the same length. The indels must be of the same type.
+		 * i.e., they must both be insertions or both be deletions, etc.
+		 */
+		for(int i = pos - indelLength; i < pos + indelLength; i++){
+
+			/* Get all variants at a given chr and pos */
+			HashMap<String,VariantContext> vars = this.getVariantsByChrPos(chr, i);
+			
+			/* Continue if null */
+			if(vars == null){
+				continue;
+			}
+
+			Iterator<String> it = vars.keySet().iterator();
+			VariantContext var;
+			String key;
+			Allele ref;
+			List<Allele> alts;
+			
+			/* For each variant record at chr:pos */
+			while(it.hasNext()){
+				key = it.next();
+				var = vars.get(key);
+				
+				ref = var.getReference();
+				alts = var.getAlternateAlleles();
+				
+				/* If any alternate is of the same type and length,
+				 * return true
+				 */
+				for(Allele alt : alts){
+					if(UtilityBelt.determineAltType(ref, alt) == type
+							&& alt.length() == indelLength){
+//						System.out.println("\nvar1: " + var.getChr() + ":" + var.getStart() + ":" + ref + ":" + alt);
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 	
 	/**

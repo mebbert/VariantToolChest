@@ -456,22 +456,30 @@ public class SetOperatorEngine implements Engine {
         return resultingVPs;
     }
 
+    /**
+     * Print the resulting comparison table
+     * 
+     * @param resultingVPs
+     */
     private void printComparisonTable(TreeMap<String, VariantPool> resultingVPs) {
         Iterator<String> it = resultingVPs.keySet().iterator();
 
         String poolID;
         int acompbCount = 0, bcompaCount = 0, intersectCount = 0, unionCount = 0;
+        VariantPool result;
         while (it.hasNext()) {
             poolID = it.next();
-
+            result = resultingVPs.get(poolID);
+            System.out.println("PotentialMatchingINDELAlleles: " + result.getPotentialMatchingIndelAlleles());
+            System.out.println("PotentialMatchingINDELRecords: " + result.getPotentialMatchingIndelRecords());
             if ("AcompB".equals(poolID)) {
-                acompbCount = resultingVPs.get(poolID).getCount();
+                acompbCount = result.getCount();
             } else if ("BcompA".equals(poolID)) {
-                bcompaCount = resultingVPs.get(poolID).getCount();
+                bcompaCount = result.getCount();
             } else if ("intersect".equals(poolID)) {
-                intersectCount = resultingVPs.get(poolID).getCount();
+                intersectCount = result.getCount();
             } else if ("union".equals(poolID)) {
-                unionCount = resultingVPs.get(poolID).getCount();
+                unionCount = result.getCount();
             }
         }
 
