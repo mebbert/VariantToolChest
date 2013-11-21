@@ -4,9 +4,10 @@
 package vtc.tools.varstats;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.broadinstitute.variant.variantcontext.Allele;
+
+import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
  * @author markebbert
@@ -14,16 +15,17 @@ import org.broadinstitute.variant.variantcontext.Allele;
  */
 public class VariantRecordSummary {
 
-	String chr;
-	int position;
-	Allele ref;
-	ArrayList<Allele> alts;
-	int snvCount, mnvCount, indelCount, insCount,
+	private String chr;
+	private int position;
+	private Allele ref;
+	private ArrayList<Allele> alts, insertions, deletions;
+	private int snvCount, mnvCount, indelCount, insCount,
 		delCount, structIndelCount, structInsCount,
-		structDelCount, tiCount, tvCount, refGenotypeCount;
-	String quality;
-	ArrayList<Integer> altGenotypeCounts;
-	Depth depth;
+		structDelCount, tiCount, tvCount, genoTiCount,
+		genoTvCount, refGenotypeCount;
+	private String quality;
+	private ArrayList<Integer> altGenotypeCounts;
+	private Depth depth;
 	
 
 	/**
@@ -38,6 +40,7 @@ public class VariantRecordSummary {
 		this.position = position;
 		this.ref = ref;
 		this.alts = alts;
+		init();
 	}
 
 	/**
@@ -70,6 +73,68 @@ public class VariantRecordSummary {
 		this.structDelCount = structDelCount;
 		this.tiCount = tiCount;
 		this.tvCount = tvCount;
+		init();
+	}
+	
+	private void init(){
+		this.insertions = new ArrayList<Allele>();
+		this.deletions = new ArrayList<Allele>();
+	}
+
+	/**
+	 * @return the chr
+	 */
+	public String getChr() {
+		return chr;
+	}
+
+	/**
+	 * @param chr the chr to set
+	 */
+	public void setChr(String chr) {
+		this.chr = chr;
+	}
+
+	/**
+	 * @return the position
+	 */
+	public int getPosition() {
+		return position;
+	}
+
+	/**
+	 * @param position the position to set
+	 */
+	public void setPosition(int position) {
+		this.position = position;
+	}
+
+	/**
+	 * @return the ref
+	 */
+	public Allele getRef() {
+		return ref;
+	}
+
+	/**
+	 * @param ref the ref to set
+	 */
+	public void setRef(Allele ref) {
+		this.ref = ref;
+	}
+
+	/**
+	 * @return the alts
+	 */
+	public ArrayList<Allele> getAlts() {
+		return alts;
+	}
+
+	/**
+	 * @param alts the alts to set
+	 */
+	public void setAlts(ArrayList<Allele> alts) {
+		this.alts = alts;
 	}
 
 	/**
@@ -96,8 +161,8 @@ public class VariantRecordSummary {
 	/**
 	 * @param mnpCount the mnpCount to set
 	 */
-	public void setMnvCount(int mnpCount) {
-		this.mnvCount = mnpCount;
+	public void setMnvCount(int mnvCount) {
+		this.mnvCount = mnvCount;
 	}
 
 	/**
@@ -213,6 +278,34 @@ public class VariantRecordSummary {
 	}
 
 	/**
+	 * @return the genoTiCount
+	 */
+	public int getGenoTiCount() {
+		return genoTiCount;
+	}
+
+	/**
+	 * @param genoTiCount the genoTiCount to set
+	 */
+	public void setGenoTiCount(int genoTiCount) {
+		this.genoTiCount = genoTiCount;
+	}
+
+	/**
+	 * @return the genoTvCount
+	 */
+	public int getGenoTvCount() {
+		return genoTvCount;
+	}
+
+	/**
+	 * @param genoTvCount the genoTvCount to set
+	 */
+	public void setGenoTvCount(int genoTvCount) {
+		this.genoTvCount = genoTvCount;
+	}
+
+	/**
 	 * @return the refGenotypeCount
 	 */
 	public int getRefGenotypeCount() {
@@ -268,6 +361,69 @@ public class VariantRecordSummary {
 		this.depth = depth;
 	}
 	
+	public ArrayList<Allele> getInsertions(){
+		return this.insertions;
+	}
+	
+	public void addInsertion(Allele insertion){
+		this.insertions.add(insertion);
+	}
+	
+	/**
+	 * Get the smallest insertion length
+	 * @return
+	 */
+	public int getSmallestInsertionLength(){
+		return UtilityBelt.getSmallestLength(this.insertions);
+	}
+	
+	/**
+	 * Get the largest insertion length
+	 * @return
+	 */
+	public int getLargestInsertionLength(){
+		return UtilityBelt.getLargestLength(this.insertions);
+	}
+	
+	/**
+	 * Get the average insertion length
+	 * @return
+	 */
+	public double getAverageInsertionLength(){
+		return UtilityBelt.getAverageLength(this.insertions);
+	}
+	
+	public ArrayList<Allele> getDeletions(){
+		return this.deletions;
+	}
+	
+	public void addDeletion(Allele deletion){
+		this.deletions.add(deletion);
+	}
+	
+		/**
+	 * Get the smallest deletion length
+	 * @return
+	 */
+	public int getSmallestDeletionLength(){
+		return UtilityBelt.getSmallestLength(this.deletions);
+	}
+	
+	/**
+	 * Get the largest deletion length
+	 * @return
+	 */
+	public int getLargestDeletionLength(){
+		return UtilityBelt.getLargestLength(this.deletions);
+	}
+	
+	/**
+	 * Get average deletion length
+	 * @return
+	 */
+	public double getAverageDeletionLength(){
+		return UtilityBelt.getAverageLength(this.deletions);
+	}
 	
 	/**
 	 * Create a comma-separated string

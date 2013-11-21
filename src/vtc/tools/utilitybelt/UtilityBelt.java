@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 
 import org.apache.log4j.Logger;
+import org.broadinstitute.variant.variantcontext.Allele;
 
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.VariantPool;
@@ -46,6 +47,63 @@ public class UtilityBelt {
 		return vpMap;
 	}
 	
+	/**
+	 * Determine the smallest length of alleles
+	 * 
+	 * @param alleles
+	 * @return
+	 */
+	public static int getSmallestLength(ArrayList<Allele> alleles){
+		int currSize, smallest = -1;
+		for(Allele al : alleles){
+			currSize = al.length();
+			if(smallest == -1){
+				smallest = currSize;
+			}
+			else if(currSize < smallest){
+				smallest = currSize;
+			}
+		}
+		return smallest;	
+	}
+	
+	/**
+	 * Determine largest length of alleles
+	 * @param alleles
+	 * @return
+	 */
+	public static int getLargestLength(ArrayList<Allele> alleles){
+		int currSize, largest = -1;
+		for(Allele al : alleles){
+			currSize = al.length();
+			if(largest == -1){
+				largest = currSize;
+			}
+			else if(currSize > largest){
+				largest = currSize;
+			}
+		}
+		return largest;
+	}
+	
+	/**
+	 * Get average length of alleles.
+	 * 
+	 * @param alleles
+	 * @return Returns -1 if alleles is empty
+	 */
+	public static double getAverageLength(ArrayList<Allele> alleles){
+		if(alleles.size() == 0){
+			return -1;
+		}
+
+		int cumLength = 0;
+		for(Allele al : alleles){
+			cumLength += al.length();
+		}
+		
+		return cumLength / alleles.size();
+	}
 	
 	/**
 	 * Print the error. Then print the usage and help

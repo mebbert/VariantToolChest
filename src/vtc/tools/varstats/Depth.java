@@ -1,5 +1,7 @@
 package vtc.tools.varstats;
 
+import java.util.ArrayList;
+
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.tools.utilitybelt.UtilityBelt;
@@ -32,12 +34,12 @@ public class Depth {
 	}
 	
 	
-	public void getDepths(VariantContext var, Object[] samples) {
+	public void getDepths(VariantContext var, ArrayList<String> samples) {
 		
 		int numSamples = 0;
-		for(Object s : samples){
+		for(String s : samples){
 			
-			int depth = var.getGenotypes().get((String) s).getDP();
+			int depth = var.getGenotypes().get(s).getDP();
 			if(depth>0){
 				numSamples++;
 				avgDepth+=(double)depth;

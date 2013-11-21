@@ -38,6 +38,7 @@ import vtc.tools.setoperator.operation.Operation;
 import vtc.tools.setoperator.operation.OperationFactory;
 import vtc.tools.utilitybelt.UtilityBelt;
 import vtc.tools.varstats.VarStats;
+import vtc.tools.varstats.VariantPoolSummarizer;
 
 /**
  * @author markebbert
@@ -325,7 +326,8 @@ public class SetOperatorEngine implements Engine {
         printComparisonTable(resultingVPs);
 
         /* Print summary tables for each operation */
-        new VarStats(resultingVPs, null, false, true, false);
+        VariantPoolSummarizer.summarizeVariantPools(resultingVPs);
+//        new VarStats(resultingVPs, null, false, true, false);
     }
 
     /**

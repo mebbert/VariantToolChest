@@ -15,11 +15,11 @@ public class VariantPoolSummary {
 	private int numIndels;
 	private int numInsertions;
 	private int numDeletions;
-	private double smallestInsertion;
-	private double largestInsertion;
+	private int smallestInsertion;
+	private int largestInsertion;
 	private double avgInsertionSize;
-	private double smallestDeletion;
-	private double largestDeletion;
+	private int smallestDeletion;
+	private int largestDeletion;
 	private double avgDeletionSize;
 	private int numStructVars;
 	private int numStructIns;
@@ -56,9 +56,9 @@ public class VariantPoolSummary {
 	 * @param genoTiTv
 	 */
 	public VariantPoolSummary(int numVars, int numSNVs, int numMNVs, int numIndels,
-			int numInsertions, int numDeletions, double smallestInsertion,
-			double largestInsertion, double avgInsertionSize,
-			double smallestDeletion, double largestDeletion,
+			int numInsertions, int numDeletions, int smallestInsertion,
+			int largestInsertion, double avgInsertionSize,
+			int smallestDeletion, int largestDeletion,
 			double avgDeletionSize, int numStructVars, int numStructIns, int numStructDels, int numMultiAlts,
 			double tiCount, double tvCount, double tiTv, double genoTiCount,
 			double genoTvCount, double genoTiTv) {
@@ -181,7 +181,7 @@ public class VariantPoolSummary {
 	/**
 	 * @param smallestInsertion the smallestInsertion to set
 	 */
-	public void setSmallestInsertion(double smallestInsertion) {
+	public void setSmallestInsertion(int smallestInsertion) {
 		this.smallestInsertion = smallestInsertion;
 	}
 
@@ -195,7 +195,7 @@ public class VariantPoolSummary {
 	/**
 	 * @param largestInsertion the largestInsertion to set
 	 */
-	public void setLargestInsertion(double largestInsertion) {
+	public void setLargestInsertion(int largestInsertion) {
 		this.largestInsertion = largestInsertion;
 	}
 
@@ -223,7 +223,7 @@ public class VariantPoolSummary {
 	/**
 	 * @param smallestDeletion the smallestDeletion to set
 	 */
-	public void setSmallestDeletion(double smallestDeletion) {
+	public void setSmallestDeletion(int smallestDeletion) {
 		this.smallestDeletion = smallestDeletion;
 	}
 
@@ -237,7 +237,7 @@ public class VariantPoolSummary {
 	/**
 	 * @param largestDeletion the largestDeletion to set
 	 */
-	public void setLargestDeletion(double largestDeletion) {
+	public void setLargestDeletion(int largestDeletion) {
 		this.largestDeletion = largestDeletion;
 	}
 

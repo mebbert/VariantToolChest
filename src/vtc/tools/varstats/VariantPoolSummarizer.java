@@ -14,6 +14,7 @@ import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.datastructures.VariantPool;
+import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
  * @author markebbert
@@ -22,20 +23,20 @@ import vtc.datastructures.VariantPool;
 public class VariantPoolSummarizer {
     private final static int MAX_ALLELE_SIZE_FOR_NON_SV = 150;
     
+    public VariantPoolSummarizer(){}
     
     /**
      * Summarize statistics for a set of VariantPools.
      * 
      * @param allVPs
-     * @return
+     * @return HashMap<String, VariantPoolSummary>
      */
-    public static HashMap<String, VariantPoolSummary> summarizeVariantPools(TreeMap<String, VariantPool> allVPs,
-    		boolean generateDetailedStatistics){
+    public static HashMap<String, VariantPoolSummary> summarizeVariantPools(TreeMap<String, VariantPool> allVPs){
     	
     	VariantPoolSummary vpSummary;
     	HashMap<String, VariantPoolSummary> vpSummaries = new HashMap<String, VariantPoolSummary>();
     	for(VariantPool vp : allVPs.values()){
-    		vpSummary = summarizeVariantPool(vp, generateDetailedStatistics);
+    		vpSummary = summarizeVariantPool(vp);
     		vpSummaries.put(vp.getPoolID(), vpSummary);
     	}
     	return vpSummaries;
@@ -46,15 +47,16 @@ public class VariantPoolSummarizer {
      * @param vp
      * @return
      */
-    public static VariantPoolSummary summarizeVariantPool(VariantPool vp, boolean generateDetailedStats){
+    public static VariantPoolSummary summarizeVariantPool(VariantPool vp){
     	
 		Iterator<String> varIT = vp.getVariantIterator();
 		String currVarKey;
 		VariantContext var;
 		VariantRecordSummary vrs;
+		ArrayList<Allele> allInsertions = new ArrayList<Allele>(), allDeletions = new ArrayList<Allele>();
     	int totalVarCount = 0, snvCount = 0, mnvCount = 0, indelCount = 0, insCount = 0,
     			delCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0,
-    			multiAltCount = 0, tiCount = 0, tvCount = 0;
+    			multiAltCount = 0, tiCount = 0, tvCount = 0, genoTiCount = 0, genoTvCount = 0;
 		while (varIT.hasNext()) {
 			currVarKey = varIT.next();
 
@@ -73,7 +75,7 @@ public class VariantPoolSummarizer {
 				totalVarCount += var.getAlternateAlleles().size() - 1; 
 
 				// Count the different types of alternates for a single record
-				vrs = collectVariantStatistics(var, generateDetailedStats);
+				vrs = collectVariantStatistics(var);
 				
 				snvCount += vrs.getSnvCount();
 				mnvCount += vrs.getMnvCount();
@@ -85,11 +87,31 @@ public class VariantPoolSummarizer {
 				structDelCount += vrs.getStructDelCount();
 				tiCount += vrs.getTiCount();
 				tvCount += vrs.getTvCount();
+				genoTiCount += vrs.getGenoTiCount();
+				genoTvCount += vrs.getGenoTvCount();
+				
+				// Keep track of all alternates that were insertions and deletions
+				// to calculate shortest, longest, and average length
+				allInsertions.addAll(vrs.getInsertions());
+				allDeletions.addAll(vrs.getDeletions());
 
 			}
 		}
-		return new VariantPoolSummary(totalVarCount, snvCount, mnvCount, indelCount, insCount, delCount, 0, 0, 0, 0, 0, 0,
-				structIndelCount, structInsCount, structDelCount, multiAltCount, tiCount, tvCount, 0, 0, 0, 0);
+		int smallestIns = UtilityBelt.getSmallestLength(allInsertions);
+		int longestIns = UtilityBelt.getLargestLength(allInsertions);
+		double avgIns = UtilityBelt.getAverageLength(allInsertions);
+
+		int smallestDel = UtilityBelt.getSmallestLength(allDeletions);
+		int longestDel = UtilityBelt.getLargestLength(allDeletions);
+		double avgDel = UtilityBelt.getAverageLength(allDeletions);
+		
+		double tiTv = (double)tiCount/(double)tvCount;
+		double genoTiTv = (double)genoTiCount/(double)genoTvCount;
+
+		return new VariantPoolSummary(totalVarCount, snvCount, mnvCount, indelCount, insCount, delCount,
+				smallestIns, longestIns, avgIns, smallestDel, longestDel, avgDel,
+				structIndelCount, structInsCount, structDelCount, multiAltCount,
+				tiCount, tvCount, tiTv, genoTiCount, genoTvCount, genoTiTv);
     }
     
     /**
@@ -100,15 +122,17 @@ public class VariantPoolSummarizer {
      * @param var
      * @return
      */
-    private static VariantRecordSummary collectVariantStatistics(VariantContext var, boolean generateDetailedStats){
+    private static VariantRecordSummary collectVariantStatistics(VariantContext var){
 
     	Allele ref = var.getReference();
     	List<Allele> alts = var.getAlternateAlleles();
     	
-    	Integer snvCount = 0, mnpCount = 0, indelCount = 0, insCount = 0,
+    	Integer snvCount = 0, mnvCount = 0, indelCount = 0, insCount = 0,
     			delCount = 0, structIndelCount = 0, structInsCount = 0,
     			structDelCount = 0, tiCount = 0, tvCount = 0;
 		AltType type;
+		VariantRecordSummary vrs = new VariantRecordSummary(var.getChr(), var.getStart(),
+				var.getReference(), new ArrayList<Allele>(var.getAlternateAlleles()));
     	for(Allele alt : alts){
     		type = getAltType(ref, alt);
     		
@@ -122,34 +146,42 @@ public class VariantPoolSummarizer {
     			}
     		}
     		else if(type == AltType.MNP){
-    			mnpCount++;
+    			mnvCount++;
     		}
     		else if(type == AltType.INSERTION){
     			indelCount++;
     			insCount++;
+    			vrs.addInsertion(alt);
     		}
     		else if(type == AltType.DELETION){
     			indelCount++;
     			delCount++;
+    			vrs.addDeletion(alt);
     		}
     		else if(type == AltType.STRUCTURAL_INSERTION){
     			structIndelCount++;
     			structInsCount++;
+    			vrs.addInsertion(alt);
     		}
     		else if(type == AltType.STRUCTURAL_DELETION){
     			structIndelCount++;
     			structDelCount++;
+    			vrs.addDeletion(alt);
     		}
     	}
     	
-    	VariantRecordSummary vrs = new VariantRecordSummary(var.getChr(), var.getStart(), var.getReference(),
-    			new ArrayList<Allele>(var.getAlternateAlleles()), snvCount, mnpCount, indelCount,
-    			insCount, delCount, structIndelCount, structInsCount, structDelCount, tiCount,
-    			tvCount);
+    	vrs.setSnvCount(snvCount);
+    	vrs.setMnvCount(mnvCount);
+    	vrs.setIndelCount(indelCount);
+    	vrs.setInsCount(insCount);
+    	vrs.setDelCount(delCount);
+    	vrs.setStructIndelCount(structIndelCount);
+    	vrs.setStructInsCount(structInsCount);
+    	vrs.setStructDelCount(structDelCount);
+    	vrs.setTiCount(tiCount);
+    	vrs.setTvCount(tvCount);
     	
-		if(generateDetailedStats){
-			generateDetailedStatsForVariantRecord(vrs, var, (String[])var.getSampleNamesOrderedByName().toArray());
-		}
+		generateGenotypeStatsForVariantRecord(vrs, var, new ArrayList<String>(var.getSampleNamesOrderedByName()));
 		return vrs;
     }
     
@@ -161,12 +193,12 @@ public class VariantPoolSummarizer {
 	 * @param Samples
 	 * @return
 	 */
-	private static void generateDetailedStatsForVariantRecord(VariantRecordSummary vrs, VariantContext var, String[] samples) {
+	private static void generateGenotypeStatsForVariantRecord(VariantRecordSummary vrs, VariantContext var, ArrayList<String> samples) {
 
 		Allele ref = var.getReference();
 		List<Allele> alts = var.getAlternateAlleles();
 
-		int refCount = 0, tmpAltCount;
+		int refCount = 0, tmpAltCount, genoTiCount = 0, genoTvCount = 0;
 		ArrayList<Integer> altCounts = new ArrayList<Integer>();
 		Iterator<Genotype> genoIT = var.getGenotypes().iterator();
 		Genotype geno;
@@ -190,11 +222,23 @@ public class VariantPoolSummarizer {
 				}
 				tmpAltCount += geno.countAllele(alts.get(i));
 				altCounts.set(i, tmpAltCount);
+				
+				// Get ti/tv info too, but only vor SNVs
+				if(getAltType(ref, alts.get(i)) == AltType.SNV){
+					if(isTransition(ref.getBaseString(), alts.get(i).getBaseString())){
+						genoTiCount++;
+					}
+					else{
+						genoTvCount++;
+					}
+				}
 			}
 		}
 		
 		vrs.setRefGenotypeCount(refCount);
 		vrs.setAltGenotypeCounts(altCounts);
+		vrs.setGenoTiCount(genoTiCount);
+		vrs.setGenoTvCount(genoTvCount);
 		
 		Depth depth = new Depth();
 		depth.getDepths(var, samples);
