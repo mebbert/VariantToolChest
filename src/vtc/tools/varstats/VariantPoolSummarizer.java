@@ -4,6 +4,7 @@
 package vtc.tools.varstats;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -41,7 +42,9 @@ public class VariantPoolSummarizer {
     	HashMap<String, VariantPoolSummary> vpSummaries = new HashMap<String, VariantPoolSummary>();
     	for(VariantPool vp : allVPs.values()){
     		vpSummary = summarizeVariantPool(vp);
+    		vpSummary.setNumSamples(vp.getSamples().size());
     		vpSummaries.put(vp.getPoolID(), vpSummary);
+    		
     	}
     	return vpSummaries;
     }
@@ -287,33 +290,144 @@ public class VariantPoolSummarizer {
 	
 	public static void printSummary(HashMap<String, VariantPoolSummary> VPSummary, boolean PrintCombined){
 		Object[] keys = VPSummary.keySet().toArray();
-//		VariantPoolSummary vps = new VariantPoolSummary();
+		VariantPoolSummary vps = new VariantPoolSummary();
 		for(Object o : keys){
 			if(PrintCombined == false){
 				PrintIndividualFiles(o.toString(), VPSummary.get(o));
 			}
 			else{
-//				vps.addition(VPSummary.get(o));
-			}
+				vps.addition(VPSummary.get(o));
 			
+			}
+			double ti = vps.getTiTv();
+			double tv = vps.getTvCount();
+			vps.setTiTv(ti/tv);
+			double genoti = vps.getGenoTiCount();
+			double genotv = vps.getGenoTvCount();
+			vps.setGenoTiTv(genoti/genotv);
+
 			
 		}
 		if(PrintCombined == true){
-//			PrintCombinedStats(keys, vps);
+			PrintCombinedStats(keys, vps);
 		}
 		
 	}
 
 	private static void PrintCombinedStats(Object[] keys, VariantPoolSummary vps) {
-		// TODO Auto-generated method stub
+		int length = vps.longest_length();
+		String newLine = System.getProperty("line.separator");
+
+		String title;
+		title = "Summary of: " + keys[0];
 		
+		char[] ch = new char[length + 3];
+		Arrays.fill(ch, '=');
+		String t = new String(ch);
+		int LeftColumn = 15;
+		String leftalignFormats = " %-" + (length--) + "s" + newLine;
+		System.out.format(t + newLine);
+		int pos = 0;
+
+		System.out.format(leftalignFormats, "");
+		for (Object vpfile : keys) {
+			if (pos > 0)
+				title = "           " + vpfile + ": " + keys[pos];
+			pos++;
+			System.out.format(leftalignFormats, title);
+		}
+		System.out.format(leftalignFormats, "");
+		System.out.format(t + newLine);
+		System.out.format(newLine);
 	}
 
-	private static void PrintIndividualFiles(String string,	VariantPoolSummary variantPoolSummary) {
-		// TODO Auto-generated method stub
-		
+	private static void PrintIndividualFiles(String string,	VariantPoolSummary vps) {
+		int length = vps.longest_length();
+		String newLine = System.getProperty("line.separator");
+
+		String title;
+		//title = "Summary of " + file.get(count) + ": " + FileName.get(count);
 	}
 	
+	//this is not a functional print functions
+/*
+	private static void printFiles(Object[] fileName, int pos, VariantPoolSummary vps) {
+
+		String newLine = System.getProperty("line.separator");
+
+		String title;
+
+		if (printmulti)
+			title = "Summary of " + file.get(0) + ": " + FileName.get(0);
+		else
+			title = "Summary of " + file.get(count) + ": " + FileName.get(count);
+
+		int length = FindLength(vc.getNumVars(), vc.getNumSNVs(), vc.getInDels(), vc.getStructVars(),
+				vc.getNumMultiAlts(), vc.getTiTv(), vc.getGenoTiTv(), title) + 5;
+		
+
+		char[] chars = new char[length + 1];
+		Arrays.fill(chars, '-');
+		String s = new String(chars);
+		s = "+" + s + "+";
+
+		char[] ch = new char[length + 3];
+		Arrays.fill(ch, '=');
+		String t = new String(ch);
+
+		double snvPercent = (double) vc.getNumSNVs() / (double) vc.getNumVars() * 100;
+		double InDelsPercent = (double) vc.getInDels() / (double) vc.getNumVars() * 100;
+		double StructPercent = (double) vc.getStructVars() / (double) vc.getNumVars() * 100;
+
+		int LeftColumn = 15;
+
+		String leftalignFormatint = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + "d |" + newLine;
+		//String leftalignFormatd = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + ".2f |" + newLine;
+		String rightalignFormati = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "s |" + newLine;
+		String rightalignFormatf = "|%" + LeftColumn + "s%" + (length - LeftColumn) + ".2f |" + newLine;
+		//String rightalignFormats = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "s |" + newLine;
+		String leftalignFormats = " %-" + (length--) + "s" + newLine;
+		//String leftAlignError = " %-" + length + "s" + newLine;
+
+		if (printmulti) {
+			System.out.format(t + newLine);
+			int pos = 0;
+
+			System.out.format(leftalignFormats, "");
+			for (String vpfile : file) {
+				if (pos > 0)
+					title = "           " + vpfile + ": " + FileName.get(pos);
+				pos++;
+				System.out.format(leftalignFormats, title);
+			}
+		} else {
+			System.out.format(t + newLine);
+			System.out.format(leftalignFormats, "");
+			System.out.format(leftalignFormats, title);
+		}
+		System.out.format(leftalignFormats, "");
+		System.out.format(t + newLine);
+		System.out.format(newLine);
+		System.out.format(s + newLine);
+		System.out.format(leftalignFormatint, "TotalVars:", vc.getNumVars());
+		System.out.format(leftalignFormatint, "Total Samples:", NumSamples);
+		System.out.format(s + newLine);
+		System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(vc.getNumSNVs()) + " (" + UtilityBelt.roundDouble(snvPercent) + "%)");
+		System.out.format(rightalignFormatf, "Ti/Tv:", vc.getTiTv());
+		System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", vc.getGenoTiTv());
+		System.out.format(s + newLine);
+		System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(vc.getInDels()) + " (" + UtilityBelt.roundDouble(InDelsPercent) + "%)");
+		System.out.format(s + newLine);
+		System.out.format(rightalignFormati, "StructVars:", Integer.toString(vc.getStructVars()) + " (" + UtilityBelt.roundDouble(StructPercent) + "%)");
+		System.out.format(s + newLine);
+		System.out.format(leftalignFormatint, "MultiAlts:", vc.getNumMultiAlts());
+		System.out.format(s + newLine);
 	
+		System.out.format(newLine + newLine);
+
+	
+	}
+	
+	*/
 	
 }

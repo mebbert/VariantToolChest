@@ -3,12 +3,18 @@
  */
 package vtc.tools.varstats;
 
+import java.util.ArrayList;
+
+import vtc.tools.utilitybelt.UtilityBelt;
+
 /**
  * @author markebbert
  *
  */
 public class VariantPoolSummary {
 
+	private int numSamples;
+	
 	private int numVars;
 	private int numSNVs;
 	private int numMNVs;
@@ -88,6 +94,7 @@ public class VariantPoolSummary {
 	
 	
 	public VariantPoolSummary() {
+		numSamples = 0;
 		numVars = 0;
 		numSNVs = 0;
 		numMNVs = 0;	
@@ -109,6 +116,23 @@ public class VariantPoolSummary {
 		genoTiCount = 0;
 		genoTvCount = 0;
 	}
+	
+	
+	/**
+	 * @return the numSamples
+	 */
+	public int getNumSamples() {
+		return numSamples;
+	}
+
+
+	/**
+	 * @param numSamples the numSamples to set
+	 */
+	public void setNumSamples(int numSamples) {
+		this.numSamples = numSamples;
+	}
+
 
 
 	/**
@@ -421,6 +445,7 @@ public class VariantPoolSummary {
 
 
 	public void addition(VariantPoolSummary vps) {
+		numSamples += vps.getNumSamples();
 		numVars += vps.getNumVars();
 		numSNVs += vps.getNumSNVs();
 		numMNVs += vps.getNumMNVs();	
@@ -442,6 +467,35 @@ public class VariantPoolSummary {
 		genoTiCount += vps.getGenoTiCount();
 		genoTvCount += vps.getGenoTvCount();
 		
+	}
+	
+	public int longest_length(){
+		int length = 0;
+		ArrayList<String> values = new ArrayList<String>();
+		values.add(Integer.toString(numSamples));
+		values.add(Integer.toString(numVars));
+		values.add(Integer.toString(numSNVs));
+		values.add(Integer.toString(numMNVs));
+		values.add(Integer.toString(numIndels));
+		values.add(Integer.toString(numInsertions));
+		values.add(Integer.toString(numDeletions));
+		values.add(Integer.toString(smallestInsertion));
+		values.add(Integer.toString(largestInsertion));
+		values.add(UtilityBelt.roundDouble((avgInsertionSize)));
+		values.add(Integer.toString(smallestDeletion));
+		values.add(Integer.toString(largestDeletion));
+		values.add(UtilityBelt.roundDouble((avgDeletionSize)));
+		values.add(Integer.toString(numStructVars));
+		values.add(Integer.toString(numStructIns));
+		values.add(Integer.toString(numStructDels));
+		values.add(Integer.toString(numMultiAlts));
+		values.add(UtilityBelt.roundDouble((tiTv)));
+		values.add(UtilityBelt.roundDouble((genoTiTv)));
+		for(String s : values){
+			if(s.length()>length)
+				length = s.length();
+		}
+		return length;
 	}
 
 }
