@@ -136,6 +136,7 @@ public class Summary {
 		altcount = getaltcounts(Genotypes, Alternates);
 		//System.out.println(refcount + "  "+altcount);
 
+
 		temp += Integer.toString(refcount) + "\t" + altcount;
 		Depth d = new Depth();
 		d.getDepths(var, new ArrayList<String>(Arrays.asList((String[])Samples)));
