@@ -10,6 +10,8 @@ import net.sourceforge.argparse4j.inf.Namespace;
 
 import org.apache.log4j.Logger;
 
+import vtc.Engine;
+import vtc.Tool;
 import vtc.tools.setoperator.SetOperatorEngine;
 import vtc.tools.varstats.VarStatsEngine;
 
