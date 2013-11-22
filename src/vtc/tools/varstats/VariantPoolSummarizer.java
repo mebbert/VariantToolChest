@@ -43,8 +43,8 @@ public class VariantPoolSummarizer {
     	for(VariantPool vp : allVPs.values()){
     		vpSummary = summarizeVariantPool(vp);
     		vpSummary.setNumSamples(vp.getSamples().size());
-    		vpSummaries.put(vp.getPoolID(), vpSummary);
-    		
+    		//vpSummaries.put(vp.getPoolID(), vpSummary);
+    		vpSummaries.put(vp.getFile().getName(), vpSummary);
     	}
     	return vpSummaries;
     }
@@ -321,9 +321,7 @@ public class VariantPoolSummarizer {
 		String title;
 		title = "Summary of: " + keys[0];
 		
-		if(length+15>title.length()){
-			length += 20;
-		}
+		length += 20;
 		
 		
 		
@@ -339,7 +337,7 @@ public class VariantPoolSummarizer {
 		System.out.format(leftalignFormats, "");
 		for (Object vpfile : keys) {
 			if (pos > 0)
-				title = "           " + vpfile + ": " + keys[pos];
+				title = "            " + vpfile.toString();
 			pos++;
 			System.out.format(leftalignFormats, title);
 		}
@@ -356,9 +354,7 @@ public class VariantPoolSummarizer {
 		String title;
 		title = "Summary of: " + file;
 	
-		if(length+15>title.length()){
-			length += 20;
-		}
+		length += 15+file.length();
 		
 		
 		char[] ch = new char[length + 3];
@@ -368,8 +364,11 @@ public class VariantPoolSummarizer {
 		String leftalignFormats = " %-" + (length--) + "s" + newLine;
 		System.out.format(t + newLine);
 		System.out.format(leftalignFormats, "");
+		System.out.format(leftalignFormats, title);
+		System.out.format(leftalignFormats, "");
 		System.out.format(t + newLine);
 		System.out.format(newLine);
+		printFiles(length, vps);
 	}
 	
 	private static void printFiles(int length, VariantPoolSummary vps) {
@@ -404,6 +403,8 @@ public class VariantPoolSummarizer {
 		System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(vps.getNumSNVs()));
 		System.out.format(rightalignFormatf, "Ti/Tv:", vps.getTiTv());
 		System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", vps.getGenoTiTv());
+		System.out.format(s + newLine);
+		System.out.format(rightalignFormati, "MNVs:      ", Integer.toString(vps.getNumMNVs()));
 		System.out.format(s + newLine);
 		System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(vps.getNumIndels()));
 		System.out.format(rightalignFormati, "INS:", Integer.toString(vps.getNumInsertions()));
