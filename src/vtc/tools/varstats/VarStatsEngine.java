@@ -4,6 +4,7 @@
 package vtc.tools.varstats;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -91,10 +92,23 @@ public class VarStatsEngine implements Engine {
             boolean sum = parsedArgs.getBoolean("Summary");
             boolean PrintMulti = parsedArgs.getBoolean("Combined");
             boolean assoc = parsedArgs.getBoolean("association");
-
+            
+            HashMap<String, VariantPoolSummary> summaries = new HashMap<String, VariantPoolSummary>();
+            
+            if(sum){
+            	summaries = VariantPoolSummarizer.summarizeVariantPools(AllVPs);
+            	VariantPoolSummarizer.printSummary(summaries, PrintMulti);
+            }
+            if(assoc){
+            	VarStats vstat = new VarStats(AllVPs, phenoArgs);
+            }
+            
+            
+            
+/*
             @SuppressWarnings("unused")
 			VarStats vstat = new VarStats(AllVPs, phenoArgs, PrintMulti, sum, assoc);
-
+*/
         } catch (InvalidInputFileException e) {
             UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
         } catch (Exception e) {

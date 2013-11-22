@@ -49,10 +49,10 @@ public class VarStats {
 
     // constructors
 
-    public VarStats(TreeMap<String, VariantPool> allVPs, ArrayList<Object> phenoArgs, boolean printMulti, boolean sum, boolean assoc) {
-        if (sum)
+    public VarStats(TreeMap<String, VariantPool> allVPs, ArrayList<Object> phenoArgs/*, boolean printMulti, boolean sum, boolean assoc*/) {
+       /* if (sum)
             IterateAndCount(allVPs, printMulti);
-        if (assoc)
+        if (assoc)*/
             doAssociation(allVPs, phenoArgs);
     }
 
@@ -62,7 +62,7 @@ public class VarStats {
     // Functions
 
     @SuppressWarnings("unused")
-	private void doAssociation(TreeMap<String, VariantPool> AllVPs, ArrayList<Object> phenoArgs) {
+	public void doAssociation(TreeMap<String, VariantPool> AllVPs, ArrayList<Object> phenoArgs) {
 
         if (phenoArgs != null) {
             // Make a structure to read in the phenotype information...

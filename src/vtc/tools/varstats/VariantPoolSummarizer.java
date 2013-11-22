@@ -43,8 +43,8 @@ public class VariantPoolSummarizer {
     	for(VariantPool vp : allVPs.values()){
     		vpSummary = summarizeVariantPool(vp);
     		vpSummary.setNumSamples(vp.getSamples().size());
-    		vpSummaries.put(vp.getPoolID(), vpSummary);
-    		
+    		//vpSummaries.put(vp.getPoolID(), vpSummary);
+    		vpSummaries.put(vp.getFile().getName(), vpSummary);
     	}
     	return vpSummaries;
     }
@@ -321,64 +321,70 @@ public class VariantPoolSummarizer {
 		String title;
 		title = "Summary of: " + keys[0];
 		
+		length += 20;
+		
+		
+		
 		char[] ch = new char[length + 3];
 		Arrays.fill(ch, '=');
-		String t = new String(ch);
-		int LeftColumn = 15;
+		String t = new String(ch);	
 		String leftalignFormats = " %-" + (length--) + "s" + newLine;
+		
 		System.out.format(t + newLine);
+		
 		int pos = 0;
 
 		System.out.format(leftalignFormats, "");
 		for (Object vpfile : keys) {
 			if (pos > 0)
-				title = "           " + vpfile + ": " + keys[pos];
+				title = "            " + vpfile.toString();
 			pos++;
 			System.out.format(leftalignFormats, title);
 		}
 		System.out.format(leftalignFormats, "");
 		System.out.format(t + newLine);
 		System.out.format(newLine);
+		printFiles(length, vps);
 	}
 
-	private static void PrintIndividualFiles(String string,	VariantPoolSummary vps) {
+	private static void PrintIndividualFiles(String file,	VariantPoolSummary vps) {
 		int length = vps.longest_length();
 		String newLine = System.getProperty("line.separator");
 
 		String title;
-		//title = "Summary of " + file.get(count) + ": " + FileName.get(count);
+		title = "Summary of: " + file;
+	
+		length += 15+file.length();
+		
+		
+		char[] ch = new char[length + 3];
+		Arrays.fill(ch, '=');
+		String t = new String(ch);
+		int LeftColumn = 15;
+		String leftalignFormats = " %-" + (length--) + "s" + newLine;
+		System.out.format(t + newLine);
+		System.out.format(leftalignFormats, "");
+		System.out.format(leftalignFormats, title);
+		System.out.format(leftalignFormats, "");
+		System.out.format(t + newLine);
+		System.out.format(newLine);
+		printFiles(length, vps);
 	}
 	
-	//this is not a functional print functions
-/*
-	private static void printFiles(Object[] fileName, int pos, VariantPoolSummary vps) {
+	private static void printFiles(int length, VariantPoolSummary vps) {
 
 		String newLine = System.getProperty("line.separator");
 
-		String title;
-
-		if (printmulti)
-			title = "Summary of " + file.get(0) + ": " + FileName.get(0);
-		else
-			title = "Summary of " + file.get(count) + ": " + FileName.get(count);
-
-		int length = FindLength(vc.getNumVars(), vc.getNumSNVs(), vc.getInDels(), vc.getStructVars(),
-				vc.getNumMultiAlts(), vc.getTiTv(), vc.getGenoTiTv(), title) + 5;
-		
 
 		char[] chars = new char[length + 1];
 		Arrays.fill(chars, '-');
 		String s = new String(chars);
 		s = "+" + s + "+";
-
-		char[] ch = new char[length + 3];
-		Arrays.fill(ch, '=');
-		String t = new String(ch);
-
-		double snvPercent = (double) vc.getNumSNVs() / (double) vc.getNumVars() * 100;
-		double InDelsPercent = (double) vc.getInDels() / (double) vc.getNumVars() * 100;
-		double StructPercent = (double) vc.getStructVars() / (double) vc.getNumVars() * 100;
-
+/*
+		double snvPercent = (double) vps.getNumSNVs() / (double) vps.getNumVars() * 100;
+		double InDelsPercent = (double) vps.getInDels() / (double) vps.getNumVars() * 100;
+		double StructPercent = (double) vps.getStructVars() / (double) vps.getNumVars() * 100;
+*/
 		int LeftColumn = 15;
 
 		String leftalignFormatint = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + "d |" + newLine;
@@ -389,38 +395,32 @@ public class VariantPoolSummarizer {
 		String leftalignFormats = " %-" + (length--) + "s" + newLine;
 		//String leftAlignError = " %-" + length + "s" + newLine;
 
-		if (printmulti) {
-			System.out.format(t + newLine);
-			int pos = 0;
-
-			System.out.format(leftalignFormats, "");
-			for (String vpfile : file) {
-				if (pos > 0)
-					title = "           " + vpfile + ": " + FileName.get(pos);
-				pos++;
-				System.out.format(leftalignFormats, title);
-			}
-		} else {
-			System.out.format(t + newLine);
-			System.out.format(leftalignFormats, "");
-			System.out.format(leftalignFormats, title);
-		}
-		System.out.format(leftalignFormats, "");
-		System.out.format(t + newLine);
-		System.out.format(newLine);
+		
 		System.out.format(s + newLine);
-		System.out.format(leftalignFormatint, "TotalVars:", vc.getNumVars());
-		System.out.format(leftalignFormatint, "Total Samples:", NumSamples);
+		System.out.format(leftalignFormatint, "TotalVars:", vps.getNumVars());
+		System.out.format(leftalignFormatint, "Total Samples:", vps.getNumSamples());
 		System.out.format(s + newLine);
-		System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(vc.getNumSNVs()) + " (" + UtilityBelt.roundDouble(snvPercent) + "%)");
-		System.out.format(rightalignFormatf, "Ti/Tv:", vc.getTiTv());
-		System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", vc.getGenoTiTv());
+		System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(vps.getNumSNVs()));
+		System.out.format(rightalignFormatf, "Ti/Tv:", vps.getTiTv());
+		System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", vps.getGenoTiTv());
 		System.out.format(s + newLine);
-		System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(vc.getInDels()) + " (" + UtilityBelt.roundDouble(InDelsPercent) + "%)");
+		System.out.format(rightalignFormati, "MNVs:      ", Integer.toString(vps.getNumMNVs()));
 		System.out.format(s + newLine);
-		System.out.format(rightalignFormati, "StructVars:", Integer.toString(vc.getStructVars()) + " (" + UtilityBelt.roundDouble(StructPercent) + "%)");
+		System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(vps.getNumIndels()));
+		System.out.format(rightalignFormati, "INS:", Integer.toString(vps.getNumInsertions()));
+		System.out.format(rightalignFormati, "DEL:", Integer.toString(vps.getNumDeletions()));
+		System.out.format(rightalignFormati, "smallINS:", UtilityBelt.roundDouble(vps.getSmallestInsertion()));
+		System.out.format(rightalignFormati, "largINS:", UtilityBelt.roundDouble(vps.getLargestInsertion()));
+		System.out.format(rightalignFormati, "avgINS:", UtilityBelt.roundDouble(vps.getAvgInsertionSize()));
+		System.out.format(rightalignFormati, "smallDEL:", UtilityBelt.roundDouble(vps.getSmallestDeletion()));
+		System.out.format(rightalignFormati, "largeDEL:", UtilityBelt.roundDouble(vps.getLargestDeletion()));
+		System.out.format(rightalignFormati, "avgDEL:", UtilityBelt.roundDouble(vps.getAvgDeletionSize()));
 		System.out.format(s + newLine);
-		System.out.format(leftalignFormatint, "MultiAlts:", vc.getNumMultiAlts());
+		System.out.format(rightalignFormati, "StructVars:", Integer.toString(vps.getNumStructVars()));
+		System.out.format(rightalignFormati, "StructINS:", Integer.toString(vps.getNumStructIns()));
+		System.out.format(rightalignFormati, "StructDEL:", Integer.toString(vps.getNumStructDels()));
+		System.out.format(s + newLine);
+		System.out.format(leftalignFormatint, "MultiAlts:", vps.getNumMultiAlts());
 		System.out.format(s + newLine);
 	
 		System.out.format(newLine + newLine);
@@ -428,6 +428,5 @@ public class VariantPoolSummarizer {
 	
 	}
 	
-	*/
 	
 }
