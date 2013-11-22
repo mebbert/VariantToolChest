@@ -4,6 +4,7 @@
 package vtc.tools.varstats;
 
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import org.broadinstitute.variant.variantcontext.Allele;
 
@@ -18,7 +19,8 @@ public class VariantRecordSummary {
 	private String chr;
 	private int position;
 	private Allele ref;
-	private ArrayList<Allele> alts, insertions, deletions;
+	private ArrayList<Allele> alts;
+	private TreeSet<String> insertions, deletions;
 	private int snvCount, mnvCount, indelCount, insCount,
 		delCount, structIndelCount, structInsCount,
 		structDelCount, tiCount, tvCount, genoTiCount,
@@ -77,8 +79,8 @@ public class VariantRecordSummary {
 	}
 	
 	private void init(){
-		this.insertions = new ArrayList<Allele>();
-		this.deletions = new ArrayList<Allele>();
+		this.insertions = new TreeSet<String>();
+		this.deletions = new TreeSet<String>();
 	}
 
 	/**
@@ -361,11 +363,11 @@ public class VariantRecordSummary {
 		this.depth = depth;
 	}
 	
-	public ArrayList<Allele> getInsertions(){
+	public TreeSet<String> getInsertions(){
 		return this.insertions;
 	}
 	
-	public void addInsertion(Allele insertion){
+	public void addInsertion(String insertion){
 		this.insertions.add(insertion);
 	}
 	
@@ -393,11 +395,11 @@ public class VariantRecordSummary {
 		return UtilityBelt.getAverageLength(this.insertions);
 	}
 	
-	public ArrayList<Allele> getDeletions(){
+	public TreeSet<String> getDeletions(){
 		return this.deletions;
 	}
 	
-	public void addDeletion(Allele deletion){
+	public void addDeletion(String deletion){
 		this.deletions.add(deletion);
 	}
 	

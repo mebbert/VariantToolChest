@@ -14,7 +14,7 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class VariantPoolSummary {
 
 	private int numSamples;
-	
+	private int numVarRecords;
 	private int numVars;
 	private int numSNVs;
 	private int numMNVs;
@@ -61,13 +61,14 @@ public class VariantPoolSummary {
 	 * @param genoTvCount
 	 * @param genoTiTv
 	 */
-	public VariantPoolSummary(int numVars, int numSNVs, int numMNVs, int numIndels,
+	public VariantPoolSummary(int numVarRecords, int numVars, int numSNVs, int numMNVs, int numIndels,
 			int numInsertions, int numDeletions, int smallestInsertion,
 			int largestInsertion, double avgInsertionSize,
 			int smallestDeletion, int largestDeletion,
 			double avgDeletionSize, int numStructVars, int numStructIns, int numStructDels, int numMultiAlts,
 			double tiCount, double tvCount, double tiTv, double genoTiCount,
 			double genoTvCount, double genoTiTv) {
+		this.numVarRecords = numVarRecords;
 		this.numVars = numVars;
 		this.numSNVs = numSNVs;
 		this.numMNVs = numMNVs;
@@ -133,6 +134,20 @@ public class VariantPoolSummary {
 		this.numSamples = numSamples;
 	}
 
+	/**
+	 * @return the numVarRecords
+	 */
+	public int getNumVarRecords() {
+		return numVarRecords;
+	}
+
+
+	/**
+	 * @param numVarRecords the numVarRecords to set
+	 */
+	public void setNumVarRecords(int numVarRecords) {
+		this.numVarRecords = numVarRecords;
+	}
 
 
 	/**

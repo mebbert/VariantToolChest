@@ -183,7 +183,7 @@ public class VariantPool implements Pool{
 	 * Return the number of variants in this pool
 	 * @return
 	 */
-	public int getCount(){
+	public int getNumVarRecords(){
 		return hMap.size();
 	}
 	
@@ -787,6 +787,7 @@ public class VariantPool implements Pool{
 			 */
 			if(!UtilityBelt.altTypeIsIndel(type)){ continue; }
 			if(getOverlappingIndel(var.getChr(), var.getStart(), alt.length(), type) != null){
+//				System.out.println("var2: " + var.getChr() + ":" + var.getStart() + ":" + ref + ":" + alt);
 				overlappingIndelAlleleCount++;
 			}
 		}

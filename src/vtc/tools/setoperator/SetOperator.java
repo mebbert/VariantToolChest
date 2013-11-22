@@ -208,6 +208,8 @@ public class SetOperator {
 				 */
 				var1 = vp1.getVariant(currVarKey);
 				if(var1.isIndel() || var1.isMixed()){ // At least one alternate is an indel
+//					System.out.println("var: " + var1.getChr() + ":" + var1.getStart() + ":"
+//						+ var1.getReference() + ":" + var1.getAlternateAlleles());
 					int matches = vp2.getOverlappingIndelAlleleCount(var1);
 					if(matches > 0){
 						potentialMatchingIndelAlleles += matches;
@@ -561,7 +563,7 @@ public class SetOperator {
 		VariantPool smallest = null;
 		int currSize, currSmallest = -1;
 		for(VariantPool vp : variantPools){
-			currSize = vp.getCount();
+			currSize = vp.getNumVarRecords();
 			if(currSize < currSmallest || currSmallest == -1){
 				currSmallest = currSize;
 				smallest = vp;
@@ -819,7 +821,7 @@ public class SetOperator {
 		/* Loop over variantPools */
 		for(VariantPool vp : variantPools){
 			logger.info("Processing variant pool '" + vp.getPoolID() + "'...");
-			int nVars = vp.getCount();
+			int nVars = vp.getNumVarRecords();
 			it = vp.getVariantIterator();
 			
 			/* Iterate over each variant in this pool */

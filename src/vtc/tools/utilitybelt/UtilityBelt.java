@@ -6,6 +6,7 @@ package vtc.tools.utilitybelt;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 
@@ -55,9 +56,9 @@ public class UtilityBelt {
 	 * @param alleles
 	 * @return
 	 */
-	public static int getSmallestLength(ArrayList<Allele> alleles){
+	public static int getSmallestLength(TreeSet<String> alleles){
 		int currSize, smallest = -1;
-		for(Allele al : alleles){
+		for(String al : alleles){
 			currSize = al.length();
 			if(smallest == -1){
 				smallest = currSize;
@@ -74,9 +75,9 @@ public class UtilityBelt {
 	 * @param alleles
 	 * @return
 	 */
-	public static int getLargestLength(ArrayList<Allele> alleles){
+	public static int getLargestLength(TreeSet<String> alleles){
 		int currSize, largest = -1;
-		for(Allele al : alleles){
+		for(String al : alleles){
 			currSize = al.length();
 			if(largest == -1){
 				largest = currSize;
@@ -94,13 +95,13 @@ public class UtilityBelt {
 	 * @param alleles
 	 * @return Returns -1 if alleles is empty
 	 */
-	public static double getAverageLength(ArrayList<Allele> alleles){
+	public static double getAverageLength(TreeSet<String> alleles){
 		if(alleles.size() == 0){
 			return -1;
 		}
 
 		int cumLength = 0;
-		for(Allele al : alleles){
+		for(String al : alleles){
 			cumLength += al.length();
 		}
 		

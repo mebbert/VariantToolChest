@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
@@ -17,10 +17,6 @@ import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.datastructures.VariantPool;
 import vtc.tools.utilitybelt.UtilityBelt;
-import vtc.tools.varstats.AltType;
-import vtc.tools.varstats.Depth;
-import vtc.tools.varstats.VariantPoolSummary;
-import vtc.tools.varstats.VariantRecordSummary;
 
 /**
  * @author markebbert
@@ -60,7 +56,7 @@ public class VariantPoolSummarizer {
 		String currVarKey;
 		VariantContext var;
 		VariantRecordSummary vrs;
-		ArrayList<Allele> allInsertions = new ArrayList<Allele>(), allDeletions = new ArrayList<Allele>();
+		TreeSet<String> allInsertions = new TreeSet<String>(), allDeletions = new TreeSet<String>();
     	int totalVarCount = 0, snvCount = 0, mnvCount = 0, indelCount = 0, insCount = 0,
     			delCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0,
     			multiAltCount = 0, tiCount = 0, tvCount = 0, genoTiCount = 0, genoTvCount = 0;
@@ -115,7 +111,7 @@ public class VariantPoolSummarizer {
 		double tiTv = (double)tiCount/(double)tvCount;
 		double genoTiTv = (double)genoTiCount/(double)genoTvCount;
 
-		return new VariantPoolSummary(totalVarCount, snvCount, mnvCount, indelCount, insCount, delCount,
+		return new VariantPoolSummary(vp.getNumVarRecords(), totalVarCount, snvCount, mnvCount, indelCount, insCount, delCount,
 				smallestIns, longestIns, avgIns, smallestDel, longestDel, avgDel,
 				structIndelCount, structInsCount, structDelCount, multiAltCount,
 				tiCount, tvCount, tiTv, genoTiCount, genoTvCount, genoTiTv);
@@ -158,22 +154,22 @@ public class VariantPoolSummarizer {
     		else if(type == AltType.INSERTION){
     			indelCount++;
     			insCount++;
-    			vrs.addInsertion(alt);
+    			vrs.addInsertion(alt.getBaseString());
     		}
     		else if(type == AltType.DELETION){
     			indelCount++;
     			delCount++;
-    			vrs.addDeletion(alt);
+    			vrs.addDeletion(ref.getBaseString()); // input the ref allele since that's what was deleted
     		}
     		else if(type == AltType.STRUCTURAL_INSERTION){
     			structIndelCount++;
     			structInsCount++;
-    			vrs.addInsertion(alt);
+    			vrs.addInsertion(alt.getBaseString());
     		}
     		else if(type == AltType.STRUCTURAL_DELETION){
     			structIndelCount++;
     			structDelCount++;
-    			vrs.addDeletion(alt);
+    			vrs.addDeletion(ref.getBaseString()); // input the ref allele since that's what was deleted
     		}
     	}
     	
@@ -288,15 +284,15 @@ public class VariantPoolSummarizer {
 		return false;
 	}
 	
-	public static void printSummary(HashMap<String, VariantPoolSummary> VPSummary, boolean PrintCombined){
-		Object[] keys = VPSummary.keySet().toArray();
+	public static void printSummary(HashMap<String, VariantPoolSummary> vpSummaries, boolean PrintCombined){
+		Object[] keys = vpSummaries.keySet().toArray();
 		VariantPoolSummary vps = new VariantPoolSummary();
 		for(Object o : keys){
 			if(PrintCombined == false){
-				PrintIndividualFiles(o.toString(), VPSummary.get(o));
+				PrintIndividualFiles(o.toString(), vpSummaries.get(o));
 			}
 			else{
-				vps.addition(VPSummary.get(o));
+				vps.addition(vpSummaries.get(o));
 			
 			}
 			double ti = vps.getTiTv();
@@ -360,7 +356,7 @@ public class VariantPoolSummarizer {
 		char[] ch = new char[length + 3];
 		Arrays.fill(ch, '=');
 		String t = new String(ch);
-		int LeftColumn = 15;
+//		int LeftColumn = 15;
 		String leftalignFormats = " %-" + (length--) + "s" + newLine;
 		System.out.format(t + newLine);
 		System.out.format(leftalignFormats, "");
@@ -392,7 +388,7 @@ public class VariantPoolSummarizer {
 		String rightalignFormati = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "s |" + newLine;
 		String rightalignFormatf = "|%" + LeftColumn + "s%" + (length - LeftColumn) + ".2f |" + newLine;
 		//String rightalignFormats = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "s |" + newLine;
-		String leftalignFormats = " %-" + (length--) + "s" + newLine;
+//		String leftalignFormats = " %-" + (length--) + "s" + newLine;
 		//String leftAlignError = " %-" + length + "s" + newLine;
 
 		
@@ -409,6 +405,8 @@ public class VariantPoolSummarizer {
 		System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(vps.getNumIndels()));
 		System.out.format(rightalignFormati, "INS:", Integer.toString(vps.getNumInsertions()));
 		System.out.format(rightalignFormati, "DEL:", Integer.toString(vps.getNumDeletions()));
+
+		System.out.format(rightalignFormati, "Sizes:    ", "");
 		System.out.format(rightalignFormati, "smallINS:", UtilityBelt.roundDouble(vps.getSmallestInsertion()));
 		System.out.format(rightalignFormati, "largINS:", UtilityBelt.roundDouble(vps.getLargestInsertion()));
 		System.out.format(rightalignFormati, "avgINS:", UtilityBelt.roundDouble(vps.getAvgInsertionSize()));
