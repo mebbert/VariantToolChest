@@ -373,16 +373,16 @@ public class SetOperator {
 
 		Iterator<String> it = smallest.getVariantIterator();
 		String currVarKey;
-		VariantContext var = null;
+		ArrayList<VariantContext> fuzzyVars;
+		ArrayList<Genotype> genotypes, fuzzyGenos;
+		VariantContext var = null, tmpVar, smallestVar;
 		SamplePool sp;
 		GenotypesContext gc;
-		Iterator<Genotype> genoIt;
-		Genotype geno;
-		ArrayList<Genotype> genotypes;
 		LinkedHashSet<Allele> allAlleles;
 		HashMap<String, Genotype> sampleGenotypes;
-		VariantContext smallestVar;
-		boolean intersects, allVPsContainVar;
+		boolean intersects, fuzzyIntersects, allVPsContainVar;
+		int potentialMatchingIndelAlleles = 0;
+		int potentialMatchingIndelRecords = 0;
 
 
 
@@ -450,30 +450,51 @@ public class SetOperator {
 						/* Iterate over the sample genotypes in this GenotypeContext
 						 * and determine if they intersect by genotype
 						 */
-						genoIt = gc.iterator();
-						while(genoIt.hasNext()){
-							geno = genoIt.next();
-							if(!geno.isAvailable() && type != IntersectType.ALT){
-								String s = "Sample is missing genotypes! Cannot intersect by genotypes for position " + var.getStart();
-								emitExcludedVariantWarning(s, currVarKey, op.getOperationID(), null);
-							}
-							else if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, op.getOperationID())){
-								intersects = false;
-								break;
-							}
-							genotypes.add(getCorrectGenotype(var, geno.getSampleName()));
-							sampleGenotypes.put(geno.getSampleName(), getCorrectGenotype(var, geno.getSampleName()));
-						}
-	
-						if(!intersects)
+						genotypes = intersectsByGenotype(gc, var, sampleGenotypes, type, currVarKey, op.getOperationID());
+						if(genotypes == null){
+							intersects = false;
 							break;
+						}
 					}
 
 				}
 				else{
-					var = smallest.getVariant(currVarKey);
-					if(var.isIndel() || var.isMixed()){
-						boolean fuzzyMatch = allVariantPoolsContainINDELFuzzyMatching(variantPools, var, currVarKey);
+					/* If we're here, not all VariantPools had the variant
+					 * associated with currVarKey. If it's an indel, check
+					 * to see if there are fuzzy matches in all VariantPools
+					 * and then see if they intersect by genotype. Getting
+					 * tmpVar from "smallest" since it's the VariantPool
+					 * that the Iterator originated from. It must have
+					 * currVarKey.
+					 */
+					tmpVar = smallest.getVariant(currVarKey);
+					if(tmpVar.isIndel() || tmpVar.isMixed()){
+						fuzzyVars = allVariantPoolsContainINDELFuzzyMatching(variantPools, tmpVar, currVarKey);
+						if(fuzzyVars != null){
+							sampleGenotypes = new HashMap<String, Genotype>();
+							fuzzyIntersects = true;
+							int count = 0;
+							for(VariantContext fuzzyVar : fuzzyVars){
+								fuzzyVar = fuzzyVars.get(count);
+								fuzzyGenos = intersectsByGenotype(fuzzyVar.getGenotypes(), fuzzyVar,
+										sampleGenotypes, type, currVarKey, op.getOperationID());
+								if(fuzzyGenos == null){
+									fuzzyIntersects = false;
+									break;
+								}
+								count++;
+							}
+							if(fuzzyIntersects){
+								potentialMatchingIndelRecords++;
+								
+								/* Count the number of same-size indels in this variant. */
+								for(Allele alt : tmpVar.getAlternateAlleles()){
+									if(UtilityBelt.altTypeIsIndel(UtilityBelt.determineAltType(tmpVar.getReference(), alt))){
+										potentialMatchingIndelAlleles++;
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -488,7 +509,46 @@ public class SetOperator {
 				intersection.addVariant(buildVariant(var, allAlleles, genotypes), false);
 			}
 		}
+		intersection.setPotentialMatchingIndelRecords(potentialMatchingIndelRecords);
+		intersection.setPotentialMatchingIndelAlleles(potentialMatchingIndelAlleles);
 		return intersection;
+	}
+	
+	/**
+	 * Determine if this variant intersects by genotype.
+	 * @param gc
+	 * @param var
+	 * @param sampleGenotypes
+	 * @param type
+	 * @param currVarKey
+	 * @param operID
+	 * @return
+	 */
+	private ArrayList<Genotype> intersectsByGenotype(GenotypesContext gc,
+			VariantContext var, HashMap<String, Genotype> sampleGenotypes,
+			IntersectType type, String currVarKey, String operID){
+		Iterator<Genotype> genoIt = gc.iterator();
+		Genotype geno, correctGeno;
+		ArrayList<Genotype> genotypes = new ArrayList<Genotype>();
+		
+		/* Iterate over the sample genotypes in this GenotypeContext
+		 * and determine if they intersect by genotype
+		 */
+		while(genoIt.hasNext()){
+			geno = genoIt.next();
+			if(!geno.isAvailable() && type != IntersectType.ALT){
+				String s = "Sample is missing genotypes! Cannot intersect by" +
+						"genotypes for position " + var.getStart();
+				emitExcludedVariantWarning(s, currVarKey, operID, null);
+			}
+			else if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, operID)){
+				return null;
+			}
+			correctGeno = getCorrectGenotype(var, geno.getSampleName());
+			genotypes.add(correctGeno);
+			sampleGenotypes.put(geno.getSampleName(), correctGeno);
+		}
+		return genotypes;
 	}
 	
 	/**
@@ -574,28 +634,49 @@ public class SetOperator {
 	}
 	
 	
-	private boolean allVariantPoolsContainINDELFuzzyMatching(ArrayList<VariantPool> variantPools, VariantContext var, String varKey){
+	/**
+	 * Check if all VariantPools have a potential indel match.
+	 * @param variantPools
+	 * @param var
+	 * @param varKey
+	 * @return An ArrayList<VariantContext> with the match from each VariantPool, or null if
+	 * any didn't have a match.
+	 */
+	private ArrayList<VariantContext> allVariantPoolsContainINDELFuzzyMatching(ArrayList<VariantPool> variantPools,
+			VariantContext var, String varKey){
 		
 		VariantContext tmpVar;
-		int matches;
+		ArrayList<VariantContext> matches = new ArrayList<VariantContext>();
 		for(VariantPool vp : variantPools){
 
 			tmpVar = vp.getVariant(varKey);
 
 			/* if tmpVar != null, just continue. It matched perfectly */
 			if(tmpVar != null){
+				matches.add(tmpVar);
 				continue;
 			}
 			
-			/* count how many overlapping indels match
-			 * but align differently.
-			 */
-			matches = vp.getOverlappingIndelAlleleCount(var);
-			if(matches == 0){
-				return false;
+			Allele ref = var.getReference();
+			List<Allele> alts = var.getAlternateAlleles();
+			for(Allele alt : alts){
+				AltType type = UtilityBelt.determineAltType(ref, alt);
+				/* Make sure this alt is an indel. If the variant is mixed,
+				 * we'll wind up looking at SNVs too.
+				 */
+				if(!UtilityBelt.altTypeIsIndel(type)){ continue; }
+				tmpVar = vp.getOverlappingIndel(var.getChr(), var.getStart(), alt.length(), type);
+				if(tmpVar != null){
+					matches.add(tmpVar);
+					break;
+				}
+			}
+			if(tmpVar == null){
+				/* This VariantPool didn't have a potential match */
+				return null;
 			}
 		}
-		return true;
+		return matches;
 	}
 	
 	
@@ -672,8 +753,7 @@ public class SetOperator {
 			}
 		}
 		else if(type == IntersectType.ALT){
-			/* TODO: Create test case for this. I don't think this is working.
-			 * Should be placed in performIntersect
+			/* TODO: Create test case for this.
 			 */
 			/* If IntersectType.ALT, always return true because
 			 * the user doesn't care about genotype.
@@ -681,8 +761,7 @@ public class SetOperator {
 			return true;
 		}
 //		else if(type == IntersectType.POS){
-//			 /* TODO: Create test case for this. I don't think this is working.
-//			  * Should be placed in performIntersect
+//			 /* TODO: Create test case for this.
 //			  */
 //			/* If IntersectType.POS, always return true because
 //			 * the user doesn't care about genotype.
@@ -721,10 +800,12 @@ public class SetOperator {
 		String currVarKey;
 		VariantContext var, var2;
 		HashSet<String> processedVarKeys = new HashSet<String>();
+		HashMap<Integer, String> fuzzyMatches = new HashMap<Integer, String>();
 		Iterator<String> it;
 		ArrayList<Genotype> genotypes;
 		LinkedHashSet<Allele> alleles;
-//		Allele ref;
+		int potentialMatchingIndelAlleles = 0;
+		int potentialMatchingIndelRecords = 0;
 		
 		VariantPool union = new VariantPool(addChr());
 		union.setFile(new File(op.getOperationID()));
@@ -796,9 +877,25 @@ public class SetOperator {
 							
 							/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
 							genotypes.addAll(getCorrectGenotypes(var2, vp2.getSamples()));
-							alleles.addAll(var2.getAlleles());						}
+							alleles.addAll(var2.getAlleles());
+						}
 						else{
 							genotypes.addAll(generateNoCallGenotypesForSamples(vp.getSamples(), vp2.getSamples()));
+							
+							/* If var1 is an INDEL, check if there is a fuzzy match */
+							if(!varOverlapsFuzzyMatch(var, fuzzyMatches)
+									&& (var.isIndel() || var.isMixed())){ // At least one alternate is an indel
+								int matches = vp2.getOverlappingIndelAlleleCount(var);
+								if(matches > 0){
+									/* track the vars that had a fuzzy match. The position
+									 * is the key and 'chr:varLength' is the value.
+									 */
+									fuzzyMatches.put(var.getStart(), var.getChr() +
+											":" + (var.getEnd() - var.getStart()));
+									potentialMatchingIndelAlleles += matches;
+									potentialMatchingIndelRecords++;
+								}
+							}
 						}
 						union.addVariant(buildVariant(var, alleles, genotypes), true);
 					}
@@ -806,6 +903,8 @@ public class SetOperator {
 				count++;
 			}
 		}
+		union.setPotentialMatchingIndelAlleles(potentialMatchingIndelAlleles);
+		union.setPotentialMatchingIndelRecords(potentialMatchingIndelRecords);
 		return union;
 	}
 	
@@ -855,6 +954,34 @@ public class SetOperator {
 		return genotypes;
 	}
 	
+	/**
+	 * Test whether a similar variant is recorded in fuzzyMatches. fuzzyMatches uses
+	 * the variant position as the key and 'chr:varLength' as the value. If there is
+	 * a variant within the length of var and of the same size, consider them fuzzy
+	 * matches.
+	 * 
+	 * @param var
+	 * @param fuzzyMatches
+	 * @return
+	 */
+	private boolean varOverlapsFuzzyMatch(VariantContext var, HashMap<Integer, String> fuzzyMatches){
+		int indelLength = var.getEnd() - var.getStart();
+		String indelLengthString = Integer.toString(indelLength);
+		int pos = var.getStart();
+		String[] chrAndLengthArray;
+		String chrAndLength;
+		for(int i = pos - indelLength; i <= pos + indelLength; i++){
+			chrAndLength = fuzzyMatches.get(i);
+			if(chrAndLength != null){
+				chrAndLengthArray = chrAndLength.split(":");
+				if(chrAndLengthArray[0].equals(var.getChr()) && chrAndLengthArray[1].equals(indelLengthString)){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	
 	
 	
