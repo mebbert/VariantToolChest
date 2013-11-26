@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
 
@@ -37,8 +38,8 @@ import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.setoperator.operation.Operation;
 import vtc.tools.setoperator.operation.OperationFactory;
 import vtc.tools.utilitybelt.UtilityBelt;
-import vtc.tools.varstats.VarStats;
 import vtc.tools.varstats.VariantPoolSummarizer;
+import vtc.tools.varstats.VariantPoolSummary;
 
 /**
  * @author markebbert
@@ -326,7 +327,8 @@ public class SetOperatorEngine implements Engine {
         printComparisonTable(resultingVPs);
 
         /* Print summary tables for each operation */
-        VariantPoolSummarizer.summarizeVariantPools(resultingVPs);
+        HashMap<String, VariantPoolSummary> vpSummaries = VariantPoolSummarizer.summarizeVariantPools(resultingVPs);
+        VariantPoolSummarizer.printSummary(vpSummaries, false);
 //        new VarStats(resultingVPs, null, false, true, false);
     }
 
@@ -439,7 +441,7 @@ public class SetOperatorEngine implements Engine {
                     		canonicalPath.substring(0, canonicalPath.lastIndexOf(File.separator) + 1),
                     		result, refGenome, outputFormat, repairHeader);
 
-                    logger.info(result.getCount() + " variants written for operation: '" + op.getOperationID() + "'");
+                    logger.info(result.getNumVarRecords() + " variants written for operation: '" + op.getOperationID() + "'");
                 }
             } else {
                 throw new RuntimeException("Something is very wrong! 'result' should not be null");
@@ -451,7 +453,7 @@ public class SetOperatorEngine implements Engine {
             logger.info("Printing " + result.getPoolID() + " to file: " + outFile.getAbsolutePath());
             VariantPool.printVariantPool(outFile.getAbsolutePath(), result, refGenome, outputFormat, repairHeader);
 
-            logger.info(result.getCount() + " variant(s) written.");
+            logger.info(result.getNumVarRecords() + " variant(s) written.");
         }
         return resultingVPs;
     }
@@ -465,53 +467,62 @@ public class SetOperatorEngine implements Engine {
         Iterator<String> it = resultingVPs.keySet().iterator();
 
         String poolID;
-        int acompbCount = 0, bcompaCount = 0, intersectCount = 0, unionCount = 0;
+        int acompbCount = 0, bcompaCount = 0, intersectCount = 0, unionCount = 0,
+        	acompbFuzCount = 0, bcompaFuzCount = 0, intersectFuzCount = 0, unionFuzCount = 0;
         VariantPool result;
         while (it.hasNext()) {
             poolID = it.next();
             result = resultingVPs.get(poolID);
-            System.out.println("PotentialMatchingINDELAlleles: " + result.getPotentialMatchingIndelAlleles());
-            System.out.println("PotentialMatchingINDELRecords: " + result.getPotentialMatchingIndelRecords());
             if ("AcompB".equals(poolID)) {
-                acompbCount = result.getCount();
+                acompbCount = result.getNumVarRecords();
+                acompbFuzCount = result.getPotentialMatchingIndelAlleles();
             } else if ("BcompA".equals(poolID)) {
-                bcompaCount = result.getCount();
+                bcompaCount = result.getNumVarRecords();
+                bcompaFuzCount = result.getPotentialMatchingIndelAlleles();
             } else if ("intersect".equals(poolID)) {
-                intersectCount = result.getCount();
+                intersectCount = result.getNumVarRecords();
+                intersectFuzCount = result.getPotentialMatchingIndelAlleles();
             } else if ("union".equals(poolID)) {
-                unionCount = result.getCount();
+                unionCount = result.getNumVarRecords();
+                unionFuzCount = result.getPotentialMatchingIndelAlleles();
             }
         }
 
         String newLine = System.getProperty("line.separator");
-        String leftAlignFormat = "| %-16s | %12d |" + newLine;
+        String leftAlignFormat = "| %-16s | %12d | %15d |" + newLine;
         // String centerAlignFormat = "| %14s | %10s | %13.2f%% | %8.0f |" +
         // newLine;
-        System.out.format("===================================" + newLine);
-        System.out.format("                                   " + newLine);
-        System.out.format("       Summary of comparison       " + newLine);
-        System.out.format("                                   " + newLine);
-        System.out.format("===================================" + newLine + newLine);
+        System.out.format("\n=====================================================" + newLine);
+        System.out.format("                                                     " + newLine);
+        System.out.format("                Summary of comparison                " + newLine);
+        System.out.format("                                                     " + newLine);
+        System.out.format("=====================================================" + newLine + newLine);
 
-        System.out.format("+------------------+--------------+" + newLine);
-        System.out.format("|   Variant Pool   |    n Vars    |" + newLine);
-        System.out.format("+------------------+--------------+" + newLine);
+        System.out.format("+------------------+--------------+-----------------+" + newLine);
+        System.out.format("|   Variant Pool   |    n Vars    | n Fuzzy Matches |" + newLine);
+        System.out.format("+------------------+--------------+-----------------+" + newLine);
 
-        System.out.format(leftAlignFormat, "A - B", acompbCount);
-        System.out.format(leftAlignFormat, "B - A", bcompaCount);
-        System.out.format(leftAlignFormat, "Intersect", intersectCount);
-        System.out.format(leftAlignFormat, "Union", unionCount);
+        System.out.format(leftAlignFormat, "A - B", acompbCount, acompbFuzCount);
+        System.out.format(leftAlignFormat, "B - A", bcompaCount, bcompaFuzCount);
+        System.out.format(leftAlignFormat, "Intersect", intersectCount, intersectFuzCount);
+        System.out.format(leftAlignFormat, "Union", unionCount, unionFuzCount);
 
-        System.out.format("+------------------+--------------+" + newLine);
+        System.out.format("+------------------+--------------+-----------------+" + newLine);
 
-        if (acompbCount + bcompaCount + intersectCount == unionCount) {
+    	int sum = acompbCount + bcompaCount + intersectCount;
+
+        if (sum == unionCount) {
             System.out.format(" Status: OK! Counts are consistent " + newLine);
         } else {
-            System.out.format(" Status: ERR! Counts inconsistent  " + newLine +
-            				  " Verify inters. and comp. options" + newLine);
+            System.out.format(" Status: ERR! Counts inconsistent. Sum of  " + newLine +
+            				  " " + acompbCount + " + " + bcompaCount + " + " + intersectCount +
+            				  " = " + sum + ". Should be " + unionCount + "." + newLine + newLine +
+            				  " There may have been separate record for the same" + newLine +
+            				  " locus and ref. " + newLine +
+            				  " Also verify intersect and complement options." + newLine);
         }
 
-        System.out.format("+------------------+--------------+" + newLine + newLine + newLine);
+        System.out.format("+------------------+--------------+-----------------+" + newLine + newLine + newLine);
 
     }
     
