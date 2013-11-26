@@ -450,7 +450,7 @@ public class VariantPoolSummarizer {
 		
 		
 
-		char[] chars = new char[length + 1];
+		char[] chars = new char[length];
 		Arrays.fill(chars, '-');
 		String s = new String(chars);
 		s = "+" + s + "+";
@@ -463,13 +463,13 @@ public class VariantPoolSummarizer {
 		
 		int LeftColumn = 15;
 		
-		String leftalignFormats = " %-" + (length--) + "s" + "\t";
-		String leftalignFormatint = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + "d |" + "\t";
-		String rightalignFormati = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "s |" + "\t";
-		String rightalignFormatf = "|%" + LeftColumn + "s%" + (length - LeftColumn) + ".2f |" + "\t";
+		String leftalignFormats = " %-" + (length--) + "s" + "          ";
+		String leftalignFormatint = "|%-" + LeftColumn + "s%" + (length - LeftColumn) + "d |" + "          ";
+		String rightalignFormati = "|%" + LeftColumn + "s%" + (length - LeftColumn) + "s |" + "          ";
+		String rightalignFormatf = "|%" + LeftColumn + "s%" + (length - LeftColumn) + ".2f |" + "          ";
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(t + "\t");
+			System.out.format(t + "         ");
 		
 		System.out.format(newLine);
 		
@@ -481,6 +481,7 @@ public class VariantPoolSummarizer {
 		for(int i = 0; i<size;i++){
 			title = "Summary of: " + filenames[i];
 			System.out.format(leftalignFormats, title);
+			System.out.print(" ");
 		}
 		
 		System.out.format(newLine);
@@ -491,7 +492,7 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(t + "\t");
+			System.out.format(t + "         ");
 		
 		System.out.format(newLine);
 		
@@ -499,7 +500,7 @@ public class VariantPoolSummarizer {
 
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(s + "\t");
+			System.out.format(s + "          ");
 		
 		System.out.format(newLine);
 		
@@ -514,7 +515,7 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(s + "\t");
+			System.out.format(s + "          ");
 		
 		System.out.format(newLine);
 		
@@ -534,7 +535,7 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(s + "\t");
+			System.out.format(s + "          ");
 		
 		System.out.format(newLine);
 		
@@ -544,7 +545,7 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(s + "\t");
+			System.out.format(s + "          ");
 		
 		System.out.format(newLine);
 		
@@ -594,7 +595,7 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(s + "\t");
+			System.out.format(s + "          ");
 		
 		System.out.format(newLine);
 		
@@ -614,7 +615,7 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(s + "\t");
+			System.out.format(s + "          ");
 		
 		System.out.format(newLine);
 		
@@ -624,7 +625,7 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(s + "\t");
+			System.out.format(s + "          ");
 		
 		System.out.format(newLine);
 	
