@@ -57,11 +57,13 @@ public class VarStatsEngine implements Engine {
                 .help("Specify a VCF input file. Multiple files may be " + "specified at once. An ID may be provided for the input file " + "for use in --set-operation as follows: '--input " + "fId=input.vcf fId2=input2.vcf', where "
                         + "'fId' and 'fId2' are the new IDs. If IDs " + "are excluded, IDs will be assigned as 'v0', " + "'v1', etc. by default.");
         Stats.addArgument("-s", "--summary").dest("Summary").action(Arguments.storeTrue()).help("Prints summary statistics to the console");
-        Stats.addArgument("-c", "--combined").dest("Combined").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files in one block.  The default is will print each file separately.");
+        Stats.addArgument("-c", "--combined").dest("Combined").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files in one block.  The default will print each file separately.");
         Stats.addArgument("-a", "--association").action(Arguments.storeTrue()).dest("association")
                 .help("Performs an association test (also generates allele frequencies).  It only accepts one file. " + "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
         Stats.addArgument("-p", "--pheno").nargs("+").dest("pheno").type(String.class).help("Allows for multiple pheno files.");
 
+        Stats.addArgument("-x", "--side_x_side").dest("Side_x_side").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files side by side.  The default will print each file separately.");
+        
         try {
             parsedArgs = parser.parseArgs(args);
             logger.info(parsedArgs);
@@ -92,12 +94,17 @@ public class VarStatsEngine implements Engine {
             boolean sum = parsedArgs.getBoolean("Summary");
             boolean PrintMulti = parsedArgs.getBoolean("Combined");
             boolean assoc = parsedArgs.getBoolean("association");
+            boolean side_by_side = parsedArgs.getBoolean("Side_x_side");
+            
             
             HashMap<String, VariantPoolSummary> summaries = new HashMap<String, VariantPoolSummary>();
             
             if(sum){
             	summaries = VariantPoolSummarizer.summarizeVariantPools(AllVPs);
-            	VariantPoolSummarizer.printSummary(summaries, PrintMulti);
+            	if(side_by_side)
+            		VariantPoolSummarizer.PrintSide_by_Side(summaries);
+            	else
+            		VariantPoolSummarizer.printSummary(summaries, PrintMulti);
             }
             if(assoc){
             	VarStats vstat = new VarStats(AllVPs, phenoArgs);
