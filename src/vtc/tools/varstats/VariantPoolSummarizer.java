@@ -295,7 +295,7 @@ public class VariantPoolSummarizer {
 				vps.addition(vpSummaries.get(o));
 			
 			}
-			double ti = vps.getTiTv();
+			double ti = vps.getTiCount();
 			double tv = vps.getTvCount();
 			vps.setTiTv(ti/tv);
 			double genoti = vps.getGenoTiCount();
@@ -495,9 +495,6 @@ public class VariantPoolSummarizer {
 			System.out.format(t + "         ");
 		
 		System.out.format(newLine);
-		
-		
-
 		
 		for(int i = 0; i<size;i++)
 			System.out.format(s + "          ");
