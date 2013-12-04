@@ -328,7 +328,8 @@ public class SetOperatorEngine implements Engine {
 
         /* Print summary tables for each operation */
         HashMap<String, VariantPoolSummary> vpSummaries = VariantPoolSummarizer.summarizeVariantPools(resultingVPs);
-        VariantPoolSummarizer.printSummary(vpSummaries, false);
+//        VariantPoolSummarizer.printSummary(vpSummaries, false);
+        VariantPoolSummarizer.PrintSide_by_Side(vpSummaries);
 //        new VarStats(resultingVPs, null, false, true, false);
     }
 

@@ -408,7 +408,7 @@ public class VariantPoolSummarizer {
 
 		System.out.format(rightalignFormati, "Sizes:    ", "");
 		System.out.format(rightalignFormati, "smallINS:", UtilityBelt.roundDouble(vps.getSmallestInsertion()));
-		System.out.format(rightalignFormati, "largINS:", UtilityBelt.roundDouble(vps.getLargestInsertion()));
+		System.out.format(rightalignFormati, "largeINS:", UtilityBelt.roundDouble(vps.getLargestInsertion()));
 		System.out.format(rightalignFormati, "avgINS:", UtilityBelt.roundDouble(vps.getAvgInsertionSize()));
 		System.out.format(rightalignFormati, "smallDEL:", UtilityBelt.roundDouble(vps.getSmallestDeletion()));
 		System.out.format(rightalignFormati, "largeDEL:", UtilityBelt.roundDouble(vps.getLargestDeletion()));
@@ -567,7 +567,7 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(rightalignFormati, "largINS:", UtilityBelt.roundDouble(Summaries.get(filenames[i]).getLargestInsertion()));
+			System.out.format(rightalignFormati, "largeINS:", UtilityBelt.roundDouble(Summaries.get(filenames[i]).getLargestInsertion()));
 		
 		System.out.format(newLine);
 		
