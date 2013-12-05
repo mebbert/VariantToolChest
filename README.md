@@ -89,10 +89,10 @@ If there is a "NaN" for either Ti/Tv or (Geno)Ti/Tv it means that there is divis
 A tab delimited file is written per variant that is named filename_summary.txt.  In this case input1_summary.txt:
 
 <pre><code>
-Chr	Pos	ID	Ref	Alts	RefCount	AltCount	AvgDepth	MinDepth	MaxDepth	Qual	Errors
-chr20	14370	rs6054257	G	A	3	3	4.67	1	8	29.0
-chr20	17330	.	T	A	4	2	3.67	3	5	3.0
-chr20	1110696	rs6040355	A	G,T	0	2,4	5	4	6	67.0	Incorrect depth calls in samples: NA00002.
+Chr     Pos     ID          Ref Alts RefCount AltCount AvgDepth MinDepth MaxDepth Qual Errors
+chr20   14370   rs6054257   G   A    3        3        4.67     1        8        29.0
+chr20   17330   .           T   A    4        2        3.67     3        5         3.0
+chr20   1110696 rs6040355   A   G,T  0        2,4      5        4        6        67.0 Incorrect depth calls in samples: NA00002.
 ...
 </code></pre>
 
