@@ -259,9 +259,9 @@ public class SetOperatorEngine implements Engine {
             }
 
         } catch (ArgumentParserException e) {
-            UtilityBelt.printErrorUsageAndExit(parser, logger, e);
+            UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
         } catch (InvalidOperationException e) {
-            UtilityBelt.printErrorUsageAndExit(parser, logger, e);
+            UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
         } catch (InvalidInputFileException e) {
             UtilityBelt.printErrorUsageAndExit(parser, logger, e);
         } catch (FileNotFoundException e) {

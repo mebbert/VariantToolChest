@@ -141,6 +141,7 @@ public class VarStats {
                 while ((line = br.readLine()) != null) {
                     // process the line.
                     String line1[] = line.split("\t");
+                    System.out.println(line);
                     phenos.put(line1[0], line1[1]);
                 }
                 br.close();
