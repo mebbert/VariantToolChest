@@ -91,6 +91,12 @@ The Summary outputs the following statistics to the screen.
 * **Ti/Tv** outputs the ratio of Transition versus Transition SNVs. 
 * **(Geno)Ti/Tv** outputs the genotypic ratio of Transition versus Tranversion SNVs.
 * **INDELs** counts the number of Insertions & Deletions.
+* **smallINS** the smallest (length) observed insertion.
+* **largeINS** the largest (length) observed insertion.
+* **avgINS** the average (length) observed insertion.
+* **smallDEL** the smallest (length) observed deletion.
+* **largeDEL** the largest (length) observed deletion.
+* **avgDEL** the average (length) observed deletion.
 * **StructVars** counts the number of Structural Variants in the file.
 * **MultiAlts** counts the number of variants that have multiple alternate alleles.
 
