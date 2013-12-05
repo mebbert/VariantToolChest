@@ -52,26 +52,37 @@ The third will output individual summaries for each of the files.
 The Summary outputs the following statistics to the screen.
 	
 <pre><code>
-=================================
+===============================
                                
  Summary of v1: input1.vcf     
                                
-=================================
-
-+-------------------------------+
-|TotalVars:                   4 |
-|Total Samples:               3 |
-+-------------------------------+
-|    SNVs:              3 (75%) |
-|         Ti/Tv:           1.00 |
-|   (Geno)Ti/Tv:           0.83 |
-+-------------------------------+
-|    INDELs:            1 (25%) |
-+-------------------------------+
-|    StructVars:         0 (0%) |
-+-------------------------------+
-|MultiAlts:                   2 |
-+-------------------------------+
+===============================
++-----------------------------+
+|TotalVars:              3200 |
+|Total Samples:             1 |
++-----------------------------+
+|    SNVs:                151 |
+|         Ti/Tv:         2.78 |
+|   (Geno)Ti/Tv:         2.78 |
++-----------------------------+
+|    MNVs:                  0 |
++-----------------------------+
+|    INDELs:             3049 |
+|           INS:         1700 |
+|           DEL:         1349 |
+|      smallINS:            2 |
+|      largeINS:           30 |
+|        avgINS:            7 |
+|      smallDEL:            2 |
+|      largeDEL:           27 |
+|        avgDEL:            7 |
++-----------------------------+
+|    StructVars:            0 |
+|     StructINS:            0 |
+|     StructDEL:            0 |
++-----------------------------+
+|MultiAlts:                 0 |
++-----------------------------+
 </code></pre>
 	
 * **TotalVars** counts the total number of variants in the file/files.
