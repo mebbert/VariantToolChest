@@ -135,9 +135,9 @@ but these will not be included in the analysis and will not throw an error.
 
 The tab delimited output file is named filename_Assoc.txt has the following format:
 <pre><code>
-Chr	ID	Pos	Ref	Alt	CaseRefCount	CaseAltCount	ControlRefCount	ControlAltCount	OR	P-Value
-20	.	669442	TG	T	389	33	323	21	0.7664	0.3563
-20	.	719486	C	CT	420	0	339	1	NA	0.2661
+Chr	ID	Pos	    Ref	Alt	CaseRefCount	CaseAltCount	ControlRefCount	ControlAltCount	OR	P-Value
+20  .	669442  TG  T	389	33	323	21	0.7664	0.3563
+20  .	719486	C	CT	420	0	339	1	NA	0.2661
 20	.	890696	C	CAT	419	3	341	3	1.229	0.8013
 20	.	1102516	CT	C	419	1	338	2	2.479	0.4440
 20	.	1149576	CT	C	420	2	342	0	NA	0.2024
