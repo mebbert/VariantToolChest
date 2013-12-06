@@ -258,6 +258,11 @@ public class SetOperatorEngine implements Engine {
                 		intersectType, printIntermediateFiles, outputFormat, outFile, refGenome, repairHeader);
             }
 
+        } catch (NumberFormatException e) {
+        	InvalidInputFileException ie = new InvalidInputFileException("Java through a NumberFormatException. " +
+        			"Expected numeric value." + " May be an invalid annotation value. The original" +
+        					" error was: '" + e.getMessage() + "'");
+            UtilityBelt.printErrorUsageAndExit(parser, logger, ie);
         } catch (ArgumentParserException e) {
             UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
         } catch (InvalidOperationException e) {
@@ -268,7 +273,7 @@ public class SetOperatorEngine implements Engine {
             UtilityBelt.printErrorUsageAndExit(parser, logger, e);
         } catch (TribbleException e) {
             UtilityBelt.printErrorUsageAndExit(parser, logger, e);
-        } catch (Exception e) {
+        }  catch (Exception e) {
             logger.error("Caught unexpected exception, something is very wrong!");
             e.printStackTrace();
         }
