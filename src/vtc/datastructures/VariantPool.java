@@ -780,14 +780,16 @@ public class VariantPool implements Pool{
 		int overlappingIndelAlleleCount = 0;
 		Allele ref = var.getReference();
 		List<Allele> alts = var.getAlternateAlleles();
+		int indelLength;
 		for(Allele alt : alts){
 			AltType type = UtilityBelt.determineAltType(ref, alt);
 			/* Make sure this alt is an indel. If the variant is mixed,
 			 * we'll wind up looking at SNVs too.
 			 */
 			if(!UtilityBelt.altTypeIsIndel(type)){ continue; }
-			if(getOverlappingIndel(var.getChr(), var.getStart(), alt.length(), type) != null){
-//				System.out.println("var2: " + var.getChr() + ":" + var.getStart() + ":" + ref + ":" + alt);
+			indelLength = ref.length() > alt.length() ? ref.length() : alt.length(); // length is the longer of the two
+			if(getOverlappingIndel(var.getChr(), var.getStart(), indelLength, type) != null){
+//				System.out.println("var2: " + var.getChr() + ":" + var.getStart() + ":" + ref + ":" + alt + "\tLength: " + indelLength);
 				overlappingIndelAlleleCount++;
 			}
 		}
@@ -806,6 +808,7 @@ public class VariantPool implements Pool{
 	 */
 	public VariantContext getOverlappingIndel(String chr, int pos, int indelLength, AltType type){
 		
+		int currIndelLength;
 		/* For each variant within +/- indelLength, check if there's another
 		 * indel with the same length. The indels must be of the same type.
 		 * i.e., they must both be insertions or both be deletions, etc.
@@ -838,8 +841,9 @@ public class VariantPool implements Pool{
 				 * return true
 				 */
 				for(Allele alt : alts){
+					currIndelLength = ref.length() > alt.length() ? ref.length() : alt.length(); // length is the longer of the two
 					if(UtilityBelt.determineAltType(ref, alt) == type
-							&& alt.length() == indelLength){
+							&& currIndelLength == indelLength){
 //						System.out.println("\nvar1: " + var.getChr() + ":" + var.getStart() + ":" + ref + ":" + alt);
 						return var;
 					}

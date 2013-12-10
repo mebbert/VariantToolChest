@@ -267,19 +267,26 @@ public class VariantPoolSummarizer {
 	 * @return
 	 */
 	private static boolean isTransition(String ref, String alt){
-		if(ref.length() > 1 || alt.length() > 1){
-	        throw new RuntimeException("Something is very wrong! Expected single nucleotide" +
-	        		" reference and alternate! Got: " + ref + ">" + alt);
-		}
+//		if(ref.length() > 1 || alt.length() > 1){
+//	        throw new RuntimeException("Something is very wrong! Expected single nucleotide" +
+//	        		" reference and alternate! Got: " + ref + ">" + alt);
+//		}
 			
-		if (alt.equals("G") && ref.equals("A")) {
-			return true;
-		} else if (alt.equals("A") && ref.equals("G")) {
-			return true;
-		} else if (alt.equals("T") && ref.equals("C")) {
-			return true;
-		} else if (alt.equals("C") && ref.equals("T")) {
-			return true;
+		char[] refArray = ref.toCharArray();
+		char[] altArray = alt.toCharArray();
+		
+		for(int i = 0; i < refArray.length; i++){
+			if(refArray[i] != altArray[i]){
+				if (alt.equals("G") && ref.equals("A")) {
+					return true;
+				} else if (alt.equals("A") && ref.equals("G")) {
+					return true;
+				} else if (alt.equals("T") && ref.equals("C")) {
+					return true;
+				} else if (alt.equals("C") && ref.equals("T")) {
+					return true;
+				}
+			}
 		}
 		return false;
 	}
@@ -408,7 +415,7 @@ public class VariantPoolSummarizer {
 
 		System.out.format(rightalignFormati, "Sizes:    ", "");
 		System.out.format(rightalignFormati, "smallINS:", UtilityBelt.roundDouble(vps.getSmallestInsertion()));
-		System.out.format(rightalignFormati, "largINS:", UtilityBelt.roundDouble(vps.getLargestInsertion()));
+		System.out.format(rightalignFormati, "largeINS:", UtilityBelt.roundDouble(vps.getLargestInsertion()));
 		System.out.format(rightalignFormati, "avgINS:", UtilityBelt.roundDouble(vps.getAvgInsertionSize()));
 		System.out.format(rightalignFormati, "smallDEL:", UtilityBelt.roundDouble(vps.getSmallestDeletion()));
 		System.out.format(rightalignFormati, "largeDEL:", UtilityBelt.roundDouble(vps.getLargestDeletion()));
@@ -567,7 +574,7 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 		
 		for(int i = 0; i<size;i++)
-			System.out.format(rightalignFormati, "largINS:", UtilityBelt.roundDouble(Summaries.get(filenames[i]).getLargestInsertion()));
+			System.out.format(rightalignFormati, "largeINS:", UtilityBelt.roundDouble(Summaries.get(filenames[i]).getLargestInsertion()));
 		
 		System.out.format(newLine);
 		

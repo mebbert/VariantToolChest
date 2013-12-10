@@ -649,6 +649,7 @@ public class SetOperator {
 		
 		VariantContext tmpVar;
 		ArrayList<VariantContext> matches = new ArrayList<VariantContext>();
+		int indelLength;
 		for(VariantPool vp : variantPools){
 
 			tmpVar = vp.getVariant(varKey);
@@ -667,7 +668,8 @@ public class SetOperator {
 				 * we'll wind up looking at SNVs too.
 				 */
 				if(!UtilityBelt.altTypeIsIndel(type)){ continue; }
-				tmpVar = vp.getOverlappingIndel(var.getChr(), var.getStart(), alt.length(), type);
+				indelLength = ref.length() > alt.length() ? ref.length() : alt.length(); // length is the longer of the two
+				tmpVar = vp.getOverlappingIndel(var.getChr(), var.getStart(), indelLength, type);
 				if(tmpVar != null){
 					matches.add(tmpVar);
 					break;
