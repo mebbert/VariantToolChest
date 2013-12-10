@@ -111,9 +111,9 @@ public class VarStats {
                     Assoc.SetCaseAltCount(CaseAlleleCount[1]);
                     Assoc.SetControlRefCount(ControlAlleleCount[0]);
                     Assoc.SetControlAltCount(ControlAlleleCount[1]);
-                    ChiSquareTest test = new ChiSquareTest();
-                    double PVal = test.chiSquareTestDataSetsComparison(ControlAlleleCount, CaseAlleleCount);
-
+                   	ChiSquareTest test = new ChiSquareTest();
+                   	double PVal = test.chiSquareTestDataSetsComparison(ControlAlleleCount, CaseAlleleCount);
+                    
                     Assoc.SetPValue(PVal);
 
                     double OR = Assoc.calcOR(CaseAlleleCount, ControlAlleleCount);
