@@ -642,6 +642,238 @@ public class VariantPoolSummarizer {
 	}
 	
 	
+	public static void Print_Columns(HashMap<String, VariantPoolSummary>  Summaries){
+		Object[] filenames = Summaries.keySet().toArray();
+		int size = filenames.length;
+		int length = -1;
+		int namesize = -1;
+		for(int i = 0;i<size;i++){
+			int temp= Summaries.get(filenames[i]).longest_length();
+			if(length<temp)
+				length = temp;
+			if(namesize<filenames[i].toString().length())
+				namesize = filenames[i].toString().length();
+		}
+		
+		String newLine = System.getProperty("line.separator");
+		
+		int column_size = 10*size;
+		/*
+		for(int i=0;i<size;i++){
+			column_size += 10+Summaries.get(filenames[i]).longest_length();
+		}*/
+		if(column_size > length)
+			length = 15+column_size;
+		else
+			length += 15+namesize;
+		String title="Summary of: " + filenames[0];
+		
 	
+		length+=2;
+		
+
+		char[] chars = new char[length];
+		Arrays.fill(chars, '-');
+		String s = new String(chars);
+		s = "+" + s + "+";
+		
+		
+		
+		char[] ch = new char[length + 3];
+		Arrays.fill(ch, '=');
+		String t = new String(ch);
+		
+		int LeftColumn = 15;
+		
+		
+		
+		
+		String r_int_align="%10d";
+		String bar = " |";
+		String r_string_align = "%10s";
+		String r_float_align = "%10.2f";
+		
+		String leftalignFormats = " %-" + (length--) + "s" + newLine;
+		String leftalignFormatint = "|%-" + LeftColumn + "s %10d";
+		String rightalignFormati = "|%" + LeftColumn + "s %10s";
+		String rightalignFormatf = "|%" + LeftColumn + "s %10.2f";
+		
+		
+		
+		
+		System.out.format(t + newLine);
+		
+		int pos = 0;
+
+		System.out.format(leftalignFormats, "");
+		for (Object vpfile : filenames) {
+			if (pos > 0)
+				title = "            " + vpfile.toString();
+			pos++;
+			System.out.format(leftalignFormats, title);
+		}
+		System.out.format(leftalignFormats, "");
+		System.out.format(t + newLine);
+		System.out.format(newLine);
+		
+		
+		
+		
+		
+		
+		System.out.format(s);
+		
+		System.out.format(newLine);
+		
+		System.out.format(leftalignFormatint, "TotalVars:", Summaries.get(filenames[0]).getNumVars());
+		for(int i = 1; i<size;i++)
+			System.out.format(r_int_align, Summaries.get(filenames[i]).getNumVars());
+
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(leftalignFormatint, "Total Samples:", Summaries.get(filenames[0]).getNumSamples());
+		for(int i = 1; i<size;i++)
+			System.out.format(r_int_align, Summaries.get(filenames[i]).getNumSamples());
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		System.out.format(s);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(Summaries.get(filenames[0]).getNumSNVs()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, Integer.toString(Summaries.get(filenames[i]).getNumSNVs()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormatf, "Ti/Tv:", Summaries.get(filenames[0]).getTiTv());
+		for(int i = 1; i<size;i++)
+			System.out.format(r_float_align, Summaries.get(filenames[i]).getTiTv());
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", Summaries.get(filenames[0]).getGenoTiTv());
+		for(int i = 1; i<size;i++)
+			System.out.format(r_float_align, Summaries.get(filenames[i]).getGenoTiTv());
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		System.out.format(s);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "MNVs:      ", Integer.toString(Summaries.get(filenames[0]).getNumMNVs()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, Integer.toString(Summaries.get(filenames[i]).getNumMNVs()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		System.out.format(s);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(Summaries.get(filenames[0]).getNumIndels()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, Integer.toString(Summaries.get(filenames[i]).getNumIndels()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "INS:", Integer.toString(Summaries.get(filenames[0]).getNumInsertions()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, Integer.toString(Summaries.get(filenames[i]).getNumInsertions()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "DEL:", Integer.toString(Summaries.get(filenames[0]).getNumDeletions()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, Integer.toString(Summaries.get(filenames[i]).getNumDeletions()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "smallINS:", UtilityBelt.roundDouble(Summaries.get(filenames[0]).getSmallestInsertion()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, UtilityBelt.roundDouble(Summaries.get(filenames[i]).getSmallestInsertion()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "largeINS:", UtilityBelt.roundDouble(Summaries.get(filenames[0]).getLargestInsertion()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, UtilityBelt.roundDouble(Summaries.get(filenames[i]).getLargestInsertion()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "avgINS:", UtilityBelt.roundDouble(Summaries.get(filenames[0]).getAvgInsertionSize()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, UtilityBelt.roundDouble(Summaries.get(filenames[i]).getAvgInsertionSize()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "smallDEL:", UtilityBelt.roundDouble(Summaries.get(filenames[0]).getSmallestDeletion()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align,UtilityBelt.roundDouble(Summaries.get(filenames[i]).getSmallestDeletion()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "largeDEL:", UtilityBelt.roundDouble(Summaries.get(filenames[0]).getLargestDeletion()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, UtilityBelt.roundDouble(Summaries.get(filenames[i]).getLargestDeletion()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "avgDEL:", UtilityBelt.roundDouble(Summaries.get(filenames[0]).getAvgDeletionSize()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, UtilityBelt.roundDouble(Summaries.get(filenames[i]).getAvgDeletionSize()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		System.out.format(s);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "StructVars:", Integer.toString(Summaries.get(filenames[0]).getNumStructVars()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, Integer.toString(Summaries.get(filenames[i]).getNumStructVars()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "StructINS:", Integer.toString(Summaries.get(filenames[0]).getNumStructIns()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, Integer.toString(Summaries.get(filenames[i]).getNumStructIns()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(rightalignFormati, "StructDEL:", Integer.toString(Summaries.get(filenames[0]).getNumStructDels()));
+		for(int i = 1; i<size;i++)
+			System.out.format(r_string_align, Integer.toString(Summaries.get(filenames[i]).getNumStructDels()));
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		System.out.format(s);
+		System.out.format(newLine);
+		
+		System.out.format(leftalignFormatint, "MultiAlts:", Summaries.get(filenames[0]).getNumMultiAlts());
+		for(int i = 1; i<size;i++)
+			System.out.format(r_int_align, Summaries.get(filenames[i]).getNumMultiAlts());
+		
+		System.out.format(bar);
+		System.out.format(newLine);
+		System.out.format(s);
+		System.out.format(newLine);
+		System.out.format(newLine + newLine);
+
+		
+		
+		
+	}	
 	
 }
