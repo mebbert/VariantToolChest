@@ -111,9 +111,12 @@ public class VarStats {
                     Assoc.SetCaseAltCount(CaseAlleleCount[1]);
                     Assoc.SetControlRefCount(ControlAlleleCount[0]);
                     Assoc.SetControlAltCount(ControlAlleleCount[1]);
-                   	ChiSquareTest test = new ChiSquareTest();
-                   	double PVal = test.chiSquareTestDataSetsComparison(ControlAlleleCount, CaseAlleleCount);
-                    
+                    double PVal=-1;
+                    if(CaseAlleleCount[0]!=0&&CaseAlleleCount[1]!=0&&ControlAlleleCount[0]!=0&&ControlAlleleCount[1]!=0){
+                    	ChiSquareTest test = new ChiSquareTest();
+                   		PVal = test.chiSquareTestDataSetsComparison(ControlAlleleCount, CaseAlleleCount);
+                    }
+
                     Assoc.SetPValue(PVal);
 
                     double OR = Assoc.calcOR(CaseAlleleCount, ControlAlleleCount);
@@ -141,7 +144,7 @@ public class VarStats {
                 while ((line = br.readLine()) != null) {
                     // process the line.
                     String line1[] = line.split("\t");
-                    System.out.println(line);
+                  //  System.out.println(line);
                     phenos.put(line1[0], line1[1]);
                 }
                 br.close();
