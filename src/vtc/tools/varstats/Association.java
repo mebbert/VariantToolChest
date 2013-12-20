@@ -156,7 +156,12 @@ public class Association {
 
     @Override
     public String toString() {
-        String PVal = String.format("%.4g%n", PValue);
+    	String PVal = "";
+    	if(PValue!=-1)
+    		PVal = String.format("%.4g%n", PValue);
+    	else
+    		PVal = "NaN";
+    		
         String or;
         if (OR == -1) {
             or = "NA";
