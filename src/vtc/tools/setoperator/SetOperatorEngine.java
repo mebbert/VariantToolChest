@@ -113,6 +113,15 @@ public class SetOperatorEngine implements Engine {
                 		"'v1', etc. by default.");
 
         operationOptions
+        		.addArgument("-c", "--genotype-complement-type")
+        		.dest("COMP_TYPE").type(String.class)
+        		.setDefault(ComplementType.HET_OR_HOMO_ALT.getCommand())
+                .help("Specify the type of complement to perform for a" +
+                		" variant across samples (e.g. require all samples" +
+                		" be heterozygous). Possible options are: " +
+                		createComplementTypeCommandLineToString());
+
+        operationOptions
                 .addArgument("-g", "--genotype-intersect-type")
                 .dest("INTER_TYPE")
                 .type(String.class)
@@ -122,15 +131,19 @@ public class SetOperatorEngine implements Engine {
                 		" be heterozygous or require all samples be homozygous" +
                 		" for the alternate allele). Possible options are: "
                         + createIntersectTypeCommandLineToString());
-
+        
         operationOptions
-        		.addArgument("-c", "--genotype-complement-type")
-        		.dest("COMP_TYPE").type(String.class)
-        		.setDefault(ComplementType.HET_OR_HOMO_ALT.getCommand())
-                .help("Specify the type of complement to perform for a" +
-                		" variant across samples (e.g. require all samples" +
-                		" be heterozygous). Possible options are: " +
-                		createComplementTypeCommandLineToString());
+        		.addArgument("-t", "--treat-sample-names-as-unique")
+        		.dest("UNIQUE")
+        		.action(Arguments.storeTrue())
+        		.help("Force all sample names to be treated as unique when" +
+        				" performing a UNION. Many" +
+        				" VCFs use the same sample name. If this option" +
+        				" is false, any samples with the same name will be" +
+        				" treated as such (i.e., the variants will be unioned" +
+        				" into a single sample in the result). Essentially, " +
+        				" duplicate names will have the file name appended to" +
+        				" the sample name.");
 
         output.addArgument("-o", "--out")
         		.dest("OUT").setDefault("variant_list.out.vcf")
@@ -246,16 +259,17 @@ public class SetOperatorEngine implements Engine {
             boolean verbose = parsedArgs.getBoolean("VERBOSE");
             boolean addChr = parsedArgs.getBoolean("CHR");
             boolean compare = parsedArgs.getBoolean("COMPARE");
+            boolean forceUniqueNames = parsedArgs.getBoolean("UNIQUE");
 
             if (compare) {
                 if (vcfArgs.size() > 2) {
                     throw new InvalidOperationException("Error: cannot perform auto comparison on more " + "than two input files.");
                 }
                 performComparison(vcfArgs, verbose, addChr, complementType, intersectType,
-                		outputFormat, outFile, refGenome, repairHeader);
+                		outputFormat, outFile, refGenome, repairHeader, forceUniqueNames);
             } else {
                 performOperations(vcfArgs, null, operations, verbose, addChr, complementType,
-                		intersectType, printIntermediateFiles, outputFormat, outFile, refGenome, repairHeader);
+                		intersectType, printIntermediateFiles, outputFormat, outFile, refGenome, repairHeader, forceUniqueNames);
             }
 
         } catch (NumberFormatException e) {
@@ -299,7 +313,7 @@ public class SetOperatorEngine implements Engine {
      */
     private void performComparison(ArrayList<Object> vcfArgs, boolean verbose, boolean addChr,
     		ComplementType complementType, IntersectType intersectType, SupportedFileType outputFormat,
-    		File outFile, File refGenome, boolean repairHeader)
+    		File outFile, File refGenome, boolean repairHeader, boolean forceUniqueNames)
             throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
 
         TreeMap<String, VariantPool> allVPs = UtilityBelt.createVariantPools(vcfArgs, addChr);
@@ -326,7 +340,7 @@ public class SetOperatorEngine implements Engine {
         /* perform the operations */
         TreeMap<String, VariantPool> resultingVPs = performOperations(vcfArgs, allVPs, operations,
         		verbose, addChr, complementType, intersectType, printIntermediateFiles, outputFormat,
-        		complement2Outfile, refGenome, repairHeader);
+        		complement2Outfile, refGenome, repairHeader, forceUniqueNames);
 
         /* Print table showing results of intersect, union, and complements */
         printComparisonTable(resultingVPs);
@@ -359,8 +373,10 @@ public class SetOperatorEngine implements Engine {
      * @throws URISyntaxException
      */
     private TreeMap<String, VariantPool> performOperations(ArrayList<Object> vcfArgs, TreeMap<String, VariantPool> allVPs,
-    		ArrayList<Object> operations, boolean verbose, boolean addChr, ComplementType complementType, IntersectType intersectType, boolean printIntermediateFiles,
-            SupportedFileType outputFormat, File outFile, File refGenome, boolean repairHeader) throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
+    		ArrayList<Object> operations, boolean verbose, boolean addChr, ComplementType complementType,
+    		IntersectType intersectType, boolean printIntermediateFiles, SupportedFileType outputFormat,
+    		File outFile, File refGenome, boolean repairHeader, boolean forceUniqueNames)
+    				throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
 
         TreeMap<String, VariantPool> resultingVPs = new TreeMap<String, VariantPool>();
         
@@ -390,7 +406,7 @@ public class SetOperatorEngine implements Engine {
                 result = so.performIntersect((IntersectOperation) op, associatedVPs, intersectType);
             } else if (o == Operator.UNION) {
             	System.out.println("\nPerforming union...");
-                result = so.performUnion(op, associatedVPs);
+                result = so.performUnion(op, associatedVPs, forceUniqueNames);
             } else {
                 throw new RuntimeException("Something is very wrong! Received an invalid operator: " + o);
             }

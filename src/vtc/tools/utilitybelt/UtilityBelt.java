@@ -15,6 +15,7 @@ import org.broadinstitute.variant.variantcontext.Allele;
 
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.VariantPool;
+import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.varstats.AltType;
 
 /**
@@ -39,8 +40,9 @@ public class UtilityBelt {
 	 * @param inputFiles
 	 * @return
 	 * @throws InvalidInputFileException
+	 * @throws InvalidOperationException 
 	 */
-	public static TreeMap<String, VariantPool> createVariantPools(ArrayList<Object> inputFiles, boolean addChr) throws InvalidInputFileException{
+	public static TreeMap<String, VariantPool> createVariantPools(ArrayList<Object> inputFiles, boolean addChr) throws InvalidInputFileException, InvalidOperationException{
 		
 		TreeMap<String, VariantPool> vpMap = new TreeMap<String, VariantPool>();
 		for(Object o : inputFiles){

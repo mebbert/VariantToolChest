@@ -794,8 +794,9 @@ public class SetOperator {
 	 * @param op
 	 * @param variantPools
 	 * @return
+	 * @throws InvalidOperationException 
 	 */
-	public VariantPool performUnion(Operation op, ArrayList<VariantPool> variantPools){
+	public VariantPool performUnion(Operation op, ArrayList<VariantPool> variantPools, boolean forceUniqueNames) throws InvalidOperationException{
 		
 		/* TODO: Only perform union on samples specified in operation!
 		 * TODO: Add verbose information
@@ -810,14 +811,23 @@ public class SetOperator {
 		LinkedHashSet<Allele> alleles;
 		int potentialMatchingIndelAlleles = 0;
 		int potentialMatchingIndelRecords = 0;
+		HashMap<String,TreeSet<String>> uniqueNames = null;
 		
 		VariantPool union = new VariantPool(addChr());
 		union.setFile(new File(op.getOperationID()));
 		union.setPoolID(op.getOperationID());
 
 		/* Add all samples from each VariantPool involved in the intersection */
-		for(VariantPool vp : variantPools){
-			union.addSamples(vp.getSamples());
+		if(forceUniqueNames){
+			uniqueNames = generateUniqueSampleNames(variantPools);
+			for(VariantPool vp : variantPools){
+				union.addSamples(uniqueNames.get(vp.getPoolID()));
+			}
+		}
+		else{
+			for(VariantPool vp : variantPools){
+				union.addSamples(vp.getSamples());
+			}
 		}
 		
 		/* Loop over variantPools */
@@ -847,9 +857,16 @@ public class SetOperator {
 					var = vp.getVariant(currVarKey);
 
 					/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
-					genotypes.addAll(getCorrectGenotypes(var, vp.getSamples()));
+					if(forceUniqueNames){
+						genotypes.addAll(getCorrectGenotypes(var, uniqueNames.get(vp.getPoolID())));
+					}
+					else{
+						genotypes.addAll(getCorrectGenotypes(var, vp.getSamples()));
+					}
 					alleles.addAll(var.getAlleles());
-//					ref = var.getReference();
+					
+					
+					
 					for(VariantPool vp2 : variantPools){
 						
 						/* Skip this VariantPool if it's the same as vp */
@@ -862,28 +879,25 @@ public class SetOperator {
 						 */
 						var2 = vp2.getVariant(currVarKey);
 						if(var2 != null){
-
-							/* TODO: Verify that this is unnecessary. We will assume they are using the
-							 * same build. Since variants are stored by 'chr:pos:ref', anything at this
-							 * point must match!
-							 */
-							
-							/* Check that refs match, otherwise omit */
-//							if(!ref.equals(var2.getReference(), true)){
-//								String s = "reference alleles do not match between variant pools. Do the reference builds match?";
-//								emitExcludedVariantWarning(s, currVarKey, op.getOperationID(), null);
-//								break;
-//							}
-							
-							if(hasMatchingSampleWithDifferentGenotype(var, var2, currVarKey, op.getOperationID())){
+	
+							if(!forceUniqueNames && hasMatchingSampleWithDifferentGenotype(var, var2, currVarKey, op.getOperationID())){
 								break;
 							}
 							
-							/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
-							genotypes.addAll(getCorrectGenotypes(var2, vp2.getSamples()));
+							/* Check that the genotypes exist. If they don't, create 'NO_CALL' genotypes */
+							if(forceUniqueNames){
+								genotypes.addAll(getCorrectGenotypes(var2, uniqueNames.get(vp2.getPoolID())));
+							}
+							else{
+								genotypes.addAll(getCorrectGenotypes(var2, vp2.getSamples()));
+							}
 							alleles.addAll(var2.getAlleles());
 						}
 						else{
+							/* Generate NO_CALL genotypes for samples that we don't have data for. And verify
+							 * we don't overwrite an existing genotype. Probably only useful for unions where
+							 * we might get the same sample in multiple variant pools.
+							 */
 							genotypes.addAll(generateNoCallGenotypesForSamples(vp.getSamples(), vp2.getSamples()));
 							
 							/* If var1 is an INDEL, check if there is a fuzzy match */
@@ -952,7 +966,7 @@ public class SetOperator {
 			 * overwrite genotypes from var1.
 			 */
 			if(!var1Samples.contains(s)){
-				genotypes.add(generateNoCallGenotypeForSample(s));
+				genotypes.add(generateGenotypeForSample(s, Allele.NO_CALL, Allele.NO_CALL));
 			}
 		}
 		return genotypes;
@@ -996,7 +1010,45 @@ public class SetOperator {
 	
 	/****************************************************
 	 * Useful operations
+	 * 
 	 */
+	
+	/**
+	 * Generate unique sample names when looking at multiple VariantPools.
+	 * 
+	 * @param variantPools
+	 * @return
+	 * @throws InvalidOperationException
+	 */
+	private HashMap<String, TreeSet<String>> generateUniqueSampleNames(ArrayList<VariantPool> variantPools) throws InvalidOperationException{
+		HashMap<String, TreeSet<String>> vpHash = new HashMap<String, TreeSet<String>>();
+		TreeSet<String> sampleNames, masterSampleNames = new TreeSet<String>();
+
+		for(VariantPool vp : variantPools){
+			sampleNames = new TreeSet<String>();
+			Iterator<String> it = vp.getSamples().iterator();
+			String name, uniqueName;
+			while(it.hasNext()){
+				name = it.next();
+				if(masterSampleNames.contains(name)){
+					uniqueName = name + "-" + vp.getFile().getName();
+					if(masterSampleNames.contains(uniqueName)){
+						throw new InvalidOperationException("Something is very wrong! " + 
+								"Trying to force unique sample names, but \'" +
+									uniqueName + "\' is not unique.");
+					}
+					sampleNames.add(uniqueName);
+					masterSampleNames.add(uniqueName);
+				}
+				else{
+					sampleNames.add(name);
+					masterSampleNames.add(name);
+				}
+			}
+			vpHash.put(vp.getPoolID(), sampleNames);
+		}
+		return vpHash;
+	}
 	
 	/**
 	 * Determine whether a specific sample has a genotype for the given variant. If
@@ -1009,9 +1061,9 @@ public class SetOperator {
 		
 		/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
 		if(var.getGenotypes().size() > 0 && !var.getGenotypes().get(0).isAvailable()){
-			return generateNoCallGenotypeForSample(sample);
+			return generateGenotypeForSample(sample, Allele.NO_CALL, Allele.NO_CALL);
 		}
-		return var.getGenotype(sample);
+		return new GenotypeBuilder(sample, var.getAlleles()).make();
 	}
 	
 	/**
@@ -1022,12 +1074,22 @@ public class SetOperator {
 	 * @return
 	 */
 	private ArrayList<Genotype> getCorrectGenotypes(VariantContext var, TreeSet<String> samples){
+		/* TODO: Test that the treeset and var are sorting sample names and genotypes identically.
+		 * Should be because they both use default sorting methods.
+		 */
 
 		/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
 		if(var.getGenotypes().size() > 0 && !var.getGenotypes().get(0).isAvailable()){
 			return generateNoCallGenotypesForSamples(samples);
 		}
-		return new ArrayList<Genotype>(var.getGenotypes());
+		else{
+			Iterator<String> sampleIT = samples.iterator();
+			ArrayList<Genotype> correctGenos = new ArrayList<Genotype>();
+			for(Genotype geno : var.getGenotypesOrderedByName()){
+				correctGenos.add(renameGenotypeForSample(sampleIT.next(), geno));
+			}
+			return correctGenos;
+		}
 	}
 	
 	/**
@@ -1039,9 +1101,34 @@ public class SetOperator {
 		
 		ArrayList<Genotype> genotypes = new ArrayList<Genotype>();
 		for(String s : varSamples){
-			genotypes.add(generateNoCallGenotypeForSample(s));
+			genotypes.add(generateGenotypeForSample(s, Allele.NO_CALL, Allele.NO_CALL));
 		}
 		return genotypes;
+	}
+	
+	/**
+	 * Generate genotype for a single sample
+	 * @param sample
+	 * @return
+	 */
+	private Genotype generateGenotypeForSample(String sample, Allele a1, Allele a2){
+		
+		ArrayList<Allele> alleles = new ArrayList<Allele>();
+		alleles.add(a1);
+		alleles.add(a2);
+		return new GenotypeBuilder(sample, alleles).make();
+	}
+	
+	private Genotype renameGenotypeForSample(String sampleName, Genotype geno){
+		return new GenotypeBuilder(sampleName, geno.getAlleles())
+					.AD(geno.getAD())
+					.DP(geno.getDP())
+					.GQ(geno.getGQ())
+					.PL(geno.getPL())
+					.attributes(geno.getExtendedAttributes())
+					.filters(geno.getFilters())
+					.phased(geno.isPhased())
+					.make();
 	}
 	
 	/**
@@ -1049,14 +1136,9 @@ public class SetOperator {
 	 * @param sample
 	 * @return
 	 */
-	private Genotype generateNoCallGenotypeForSample(String sample){
-		
-		ArrayList<Allele> alleles = new ArrayList<Allele>();
-		alleles.add(Allele.NO_CALL);
-		alleles.add(Allele.NO_CALL);
-		return new GenotypeBuilder(sample, alleles).make();
-	}
-	
+//	private Genotype generateGenotypeForSample(String sample, List<Allele> alleles){
+//		return new GenotypeBuilder(sample, alleles).make();
+//	}
 	
 	/**
 	 * Build a new variant from an original and add all alleles and genotypes
