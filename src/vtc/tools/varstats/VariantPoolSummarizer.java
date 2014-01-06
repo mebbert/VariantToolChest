@@ -16,6 +16,10 @@ import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.datastructures.VariantPool;
+import vtc.tools.setoperator.SetOperator;
+import vtc.tools.setoperator.operation.InvalidOperationException;
+import vtc.tools.setoperator.operation.Operation;
+import vtc.tools.setoperator.operation.OperationFactory;
 import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
@@ -25,6 +29,70 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class VariantPoolSummarizer {
     
     public VariantPoolSummarizer(){}
+    
+    /**
+     * Provide a detailed summary of all 
+     * @param allVPs
+     * @param combined
+     * @return
+     * @throws InvalidOperationException 
+     */
+    public static HashMap<String,ArrayList<VariantRecordSummary>> summarizeVariantPoolsDetailed(TreeMap<String, VariantPool> allVPs,
+    		boolean combined) throws InvalidOperationException{
+    	
+    	HashMap<String, ArrayList<VariantRecordSummary>> detailedVariantPoolSummaries =
+    			new HashMap<String, ArrayList<VariantRecordSummary>>();
+    	ArrayList<VariantPool> allVPsList = new ArrayList<VariantPool>(allVPs.values());
+    	
+    	/* If combined, union all of the VPs before
+    	 * summarizing
+    	 */
+    	if(combined && allVPsList.size() > 1){
+    		String union = "", unionName = "combined";
+    		VariantPool unionVP = null;
+    		SetOperator so = new SetOperator();
+    		
+    		/* Build the operation string */
+			union = unionName + "=u[";
+    		for(int i = 0; i < allVPsList.size(); i++){
+    			if(i == 0){
+    				union += allVPsList.get(i).getPoolID();
+    			}
+    			else{
+    				union += ":" + allVPsList.get(i).getPoolID();
+    			}
+    		}
+            union += "]";
+    			
+    		Operation op = OperationFactory.createOperation(union, allVPs);
+    		unionVP = so.performUnion(op, allVPsList, true);
+    		
+    		Iterator<String> varIT = unionVP.getVariantIterator();
+    		String currVarKey;
+    		ArrayList<VariantRecordSummary> recordSummaries = new ArrayList<VariantRecordSummary>();
+    		while(varIT.hasNext()){
+    			currVarKey = varIT.next();
+    			recordSummaries.add(collectVariantStatistics(unionVP.getVariant(currVarKey)));
+    		}
+    		detailedVariantPoolSummaries.put(unionName, recordSummaries);
+    	}
+    	else{
+    		Iterator<String> varIT;
+    		String currVarKey;
+    		ArrayList<VariantRecordSummary> recordSummaries;
+	    	for(VariantPool vp : allVPs.values()){
+				recordSummaries = new ArrayList<VariantRecordSummary>();
+	    		varIT = vp.getVariantIterator();
+	    		
+	    		while(varIT.hasNext()){
+	    			currVarKey = varIT.next();
+	    			recordSummaries.add(collectVariantStatistics(vp.getVariant(currVarKey)));
+	    		}
+	    		detailedVariantPoolSummaries.put(vp.getPoolID(), recordSummaries);
+	    	}
+    	}
+    	return detailedVariantPoolSummaries;
+    }
     
     /**
      * Summarize statistics for a set of VariantPools.
@@ -135,7 +203,7 @@ public class VariantPoolSummarizer {
     			structDelCount = 0, tiCount = 0, tvCount = 0;
 		AltType type;
 		VariantRecordSummary vrs = new VariantRecordSummary(var.getChr(), var.getStart(),
-				var.getReference(), new ArrayList<Allele>(var.getAlternateAlleles()));
+				var.getID(), var.getReference(), new ArrayList<Allele>(var.getAlternateAlleles()));
     	for(Allele alt : alts){
     		type = UtilityBelt.determineAltType(ref, alt);
     		
@@ -201,30 +269,54 @@ public class VariantPoolSummarizer {
 		Allele ref = var.getReference();
 		List<Allele> alts = var.getAlternateAlleles();
 
-		int refCount = 0, tmpAltCount, genoTiCount = 0, genoTvCount = 0;
-		ArrayList<Integer> altCounts = new ArrayList<Integer>();
+		int refGenoCount = 0, refSampleCount = 0, tmpRefGenoCount,
+				altGenoCount, altSampleCount, tmpAltGenoCount, tmpAltSampleCount,
+				genoTiCount = 0, genoTvCount = 0, nSamples = 0, nSamplesWithCall = 0;
+		ArrayList<Integer> altGenoCounts = new ArrayList<Integer>();
+		ArrayList<Integer> altSampleCounts = new ArrayList<Integer>();
 		Iterator<Genotype> genoIT = var.getGenotypes().iterator();
 		Genotype geno;
 		int iterCount = 0;
 		
 		// Loop over all of the genotypes in the record
 		while(genoIT.hasNext()){
+			nSamples++;
 			geno = genoIT.next();
 			
+			if(!geno.isNoCall()){
+				nSamplesWithCall++;
+			}
+			
 			// Get the reference allele count
-			refCount += geno.countAllele(ref);
+			tmpRefGenoCount = geno.countAllele(ref);
+			refGenoCount += tmpRefGenoCount;
+			
+			// Increment refSampleCount if this genotype has at least one ref allele
+			if(tmpRefGenoCount > 0){
+				refSampleCount++;
+			}
 
 			// Get the count for each alternate allele
 			for(int i = 0; i < alts.size(); i++){
 				if(iterCount == 0){
-					tmpAltCount = 0;
-					altCounts.add(tmpAltCount);
+					altGenoCount = 0;
+					altSampleCount = 0;
+					altGenoCounts.add(altGenoCount);
+					altSampleCounts.add(altSampleCount);
 				}
 				else{
-					tmpAltCount = altCounts.get(i);
+					altGenoCount = altGenoCounts.get(i);
+					altSampleCount = altSampleCounts.get(i);
 				}
-				tmpAltCount += geno.countAllele(alts.get(i));
-				altCounts.set(i, tmpAltCount);
+				tmpAltGenoCount = geno.countAllele(alts.get(i));
+				altGenoCount += tmpAltGenoCount;
+				
+				if(tmpAltGenoCount > 0){
+					altSampleCount++;
+				}
+
+				altGenoCounts.set(i, altGenoCount);
+				altSampleCounts.set(i, altSampleCount);
 				
 				// Get ti/tv info too, but only vor SNVs
 				if(UtilityBelt.determineAltType(ref, alts.get(i)) == AltType.SNV){
@@ -236,12 +328,17 @@ public class VariantPoolSummarizer {
 					}
 				}
 			}
+			iterCount++;
 		}
 		
-		vrs.setRefGenotypeCount(refCount);
-		vrs.setAltGenotypeCounts(altCounts);
+		vrs.setRefGenotypeCount(refGenoCount);
+		vrs.setRefSampleCount(refSampleCount);
+		vrs.setAltGenotypeCounts(altGenoCounts);
+		vrs.setAltSampleCounts(altSampleCounts);
 		vrs.setGenoTiCount(genoTiCount);
 		vrs.setGenoTvCount(genoTvCount);
+		vrs.setnSamples(nSamples);
+		vrs.setnSamplesWithCall(nSamplesWithCall);
 		
 		Depth depth = new Depth();
 		depth.getDepths(var, samples);

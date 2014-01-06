@@ -187,7 +187,7 @@ public class SetOperatorEngine implements Engine {
         output.addArgument("-a", "--add-chr")
         		.dest("CHR")
         		.action(Arguments.storeTrue())
-        		.help("Add 'chr' to chromosome (e.g. 'chr20' instead of '20'");
+        		.help("Add 'chr' to chromosome (e.g. 'chr20' instead of '20')");
 
         try {
             parsedArgs = parser.parseArgs(args);
@@ -384,7 +384,7 @@ public class SetOperatorEngine implements Engine {
 	        allVPs = UtilityBelt.createVariantPools(vcfArgs, addChr);
         }
 
-        ArrayList<Operation> ops = createOperations(operations, allVPs);
+        ArrayList<Operation> ops = UtilityBelt.createOperations(operations, allVPs);
 
         ArrayList<VariantPool> associatedVPs;
         ArrayList<VCFHeader> associatedVPHeaders;
@@ -548,24 +548,6 @@ public class SetOperatorEngine implements Engine {
 
     }
     
-
-    /**
-     * Will create Operation objects from command line-provided operation
-     * strings and return as ArrayList<Operation>
-     * 
-     * @param operations
-     * @return
-     * @throws InvalidOperationException
-     */
-    private ArrayList<Operation> createOperations(ArrayList<Object> operations, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException {
-
-        ArrayList<Operation> opList = new ArrayList<Operation>();
-        for (Object o : operations) {
-            Operation op = OperationFactory.createOperation(o.toString(), variantPools);
-            opList.add(op);
-        }
-        return opList;
-    }
 
     /**
      * Extract only VariantPool objects associated with the Operation provided

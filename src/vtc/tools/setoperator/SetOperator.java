@@ -45,6 +45,10 @@ public class SetOperator {
 	 * Constructors
 	 */
 	
+	public SetOperator(){
+		this(false, false);
+	}
+	
 	public SetOperator(boolean verbose, boolean addChr){
 		this.verbose = verbose;
 		this.addChr = addChr;
@@ -793,7 +797,7 @@ public class SetOperator {
 	 * Perform union between VariantPools
 	 * @param op
 	 * @param variantPools
-	 * @return
+	 * @return VariantPool
 	 * @throws InvalidOperationException 
 	 */
 	public VariantPool performUnion(Operation op, ArrayList<VariantPool> variantPools, boolean forceUniqueNames) throws InvalidOperationException{

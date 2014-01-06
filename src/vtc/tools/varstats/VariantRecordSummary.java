@@ -16,7 +16,7 @@ import vtc.tools.utilitybelt.UtilityBelt;
  */
 public class VariantRecordSummary {
 
-	private String chr;
+	private String chr, id;
 	private int position;
 	private Allele ref;
 	private ArrayList<Allele> alts;
@@ -24,9 +24,10 @@ public class VariantRecordSummary {
 	private int snvCount, mnvCount, indelCount, insCount,
 		delCount, structIndelCount, structInsCount,
 		structDelCount, tiCount, tvCount, genoTiCount,
-		genoTvCount, refGenotypeCount;
+		genoTvCount, refGenotypeCount, refSampleCount,
+		nSamples, nSamplesWithCall;
 	private String quality;
-	private ArrayList<Integer> altGenotypeCounts;
+	private ArrayList<Integer> altGenotypeCounts, altSampleCounts;
 	private Depth depth;
 	
 
@@ -36,10 +37,11 @@ public class VariantRecordSummary {
 	 * @param ref
 	 * @param alts
 	 */
-	public VariantRecordSummary(String chr, int position, Allele ref,
+	public VariantRecordSummary(String chr, int position, String id, Allele ref,
 			ArrayList<Allele> alts) {
 		this.chr = chr;
 		this.position = position;
+		this.id = id;
 		this.ref = ref;
 		this.alts = alts;
 		init();
@@ -57,12 +59,13 @@ public class VariantRecordSummary {
 	 * @param tiCount
 	 * @param tvCount
 	 */
-	public VariantRecordSummary(String chr, int position, Allele ref, ArrayList<Allele> alts,
+	public VariantRecordSummary(String chr, int position, String id, Allele ref, ArrayList<Allele> alts,
 			int snpCount, int mnpCount, int indelCount,
 			int insCount, int delCount, int structIndelCount,
 			int structInsCount, int structDelCount, int tiCount, int tvCount) {
 		this.chr = chr;
 		this.position = position;
+		this.id = id;
 		this.ref = ref;
 		this.alts = alts;
 		this.snvCount = snpCount;
@@ -109,6 +112,14 @@ public class VariantRecordSummary {
 	 */
 	public void setPosition(int position) {
 		this.position = position;
+	}
+	
+	public String getID() {
+		return id;
+	}
+	
+	public void setID(String id) {
+		this.id = id;
 	}
 
 	/**
@@ -322,6 +333,34 @@ public class VariantRecordSummary {
 	}
 
 	/**
+	 * @return the refSampleCount
+	 */
+	public int getRefSampleCount() {
+		return refSampleCount;
+	}
+
+	/**
+	 * @param refSampleCount the refSampleCount to set
+	 */
+	public void setRefSampleCount(int refSampleCount) {
+		this.refSampleCount = refSampleCount;
+	}
+
+	/**
+	 * @return the altSampleCounts
+	 */
+	public ArrayList<Integer> getAltSampleCounts() {
+		return altSampleCounts;
+	}
+
+	/**
+	 * @param altSampleCounts the altSampleCounts to set
+	 */
+	public void setAltSampleCounts(ArrayList<Integer> altSampleCounts) {
+		this.altSampleCounts = altSampleCounts;
+	}
+
+	/**
 	 * @return the altGenotypeCounts
 	 */
 	public ArrayList<Integer> getAltGenotypeCounts() {
@@ -428,6 +467,34 @@ public class VariantRecordSummary {
 	}
 	
 	/**
+	 * @return the nSamples
+	 */
+	public int getnSamples() {
+		return nSamples;
+	}
+
+	/**
+	 * @param nSamples the nSamples to set
+	 */
+	public void setnSamples(int nSamples) {
+		this.nSamples = nSamples;
+	}
+
+	/**
+	 * @return the nSamplesWithCall
+	 */
+	public int getnSamplesWithCall() {
+		return nSamplesWithCall;
+	}
+
+	/**
+	 * @param nSamplesWithCall the nSamplesWithCall to set
+	 */
+	public void setnSamplesWithCall(int nSamplesWithCall) {
+		this.nSamplesWithCall = nSamplesWithCall;
+	}
+
+	/**
 	 * Create a comma-separated string
 	 * with all alts
 	 * 
@@ -442,11 +509,73 @@ public class VariantRecordSummary {
 				altString.append(this.alts.get(i));
 			}
 			else{
-				altString.append("," + this.alts.get(i));
+				altString.append(",");
+				altString.append(this.alts.get(i));
 			}
 		}
 		return altString.toString();
 	}
 	
+	public String altGenotypeCountToString(){
+		StringBuilder altGenoCount = new StringBuilder();
+		for(int i = 0; i < this.altGenotypeCounts.size(); i++){
+			if(i == 0){
+				altGenoCount.append(this.altGenotypeCounts.get(i));
+			}
+			else{
+				altGenoCount.append(",");
+				altGenoCount.append(this.altGenotypeCounts.get(i));
+			}
+		}
+		return altGenoCount.toString();
+	}
+	
+	public String altSampleCountToString(){
+		StringBuilder altSampleCount = new StringBuilder();
+		for(int i = 0; i < this.altSampleCounts.size(); i++){
+			if(i == 0){
+				altSampleCount.append(this.altSampleCounts.get(i));
+			}
+			else{
+				altSampleCount.append(",");
+				altSampleCount.append(this.altSampleCounts.get(i));
+			}
+		}
+		return altSampleCount.toString();
+	}
+	
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.getChr());
+		sb.append("\t");
+		sb.append(this.getPosition());
+		sb.append("\t");
+		sb.append(this.getID());
+		sb.append("\t");
+		sb.append(this.getRef().getBaseString());
+		sb.append("\t");
+		sb.append(this.altToString());
+		sb.append("\t");
+		sb.append(this.getRefGenotypeCount());
+		sb.append("\t");
+		sb.append(this.altGenotypeCountToString());
+		sb.append("\t");
+		sb.append(this.getRefSampleCount());
+		sb.append("\t");
+		sb.append(this.altSampleCountToString());
+		sb.append("\t");
+		sb.append(this.getnSamplesWithCall());
+		sb.append("\t");
+		sb.append(this.getnSamples());
+		sb.append("\t");
+		sb.append(this.getDepth().getMinDepth());
+		sb.append("\t");
+		sb.append(this.getDepth().getMaxDepth());
+		sb.append("\t");
+		sb.append(this.getDepth().getAvgDepth());
+		sb.append("\t");
+		sb.append(this.getQuality());
+		return sb.toString();
+	}
 	
 }

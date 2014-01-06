@@ -3,8 +3,10 @@
  */
 package vtc.tools.varstats;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.TreeMap;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -60,6 +62,10 @@ public class VarStatsEngine implements Engine {
         Stats.addArgument("-c", "--combined").dest("Combined").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files in one block.  The default will print each file separately.");
         Stats.addArgument("-x", "--side_x_side").dest("Side_x_side").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files side by side.  The default will print each file separately.");
         Stats.addArgument("-m", "--MultiColumns").dest("MultiColumns").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files in multiple columns of the same table.  The default will print each file separately.");
+        Stats.addArgument("-d", "--detailed-summary")
+        		.dest("Detailed")
+        		.action(Arguments.storeTrue())
+        		.help("Prints summary statistics to the console");
         Stats.addArgument("-a", "--association").action(Arguments.storeTrue()).dest("association")
                 .help("Performs an association test (also generates allele frequencies).  It only accepts one file. " + "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
         Stats.addArgument("-p", "--pheno").nargs("+").dest("pheno").type(String.class).help("Allows for multiple pheno files.");
@@ -90,17 +96,17 @@ public class VarStatsEngine implements Engine {
 
             TreeMap<String, VariantPool> AllVPs;
 
-            AllVPs = UtilityBelt.createVariantPools(vcfArgs, true);
 
             boolean sum = parsedArgs.getBoolean("Summary");
-            boolean PrintMulti = parsedArgs.getBoolean("Combined");
+            boolean combined = parsedArgs.getBoolean("Combined");
             boolean assoc = parsedArgs.getBoolean("association");
             boolean side_by_side = parsedArgs.getBoolean("Side_x_side");
             boolean multi_column = parsedArgs.getBoolean("MultiColumns");
-            
+            boolean detailedSummary = parsedArgs.getBoolean("Detailed");
             
             HashMap<String, VariantPoolSummary> summaries = new HashMap<String, VariantPoolSummary>();
             
+            AllVPs = UtilityBelt.createVariantPools(vcfArgs, true);
             if(sum){
             	summaries = VariantPoolSummarizer.summarizeVariantPools(AllVPs);
             	if(side_by_side)
@@ -108,19 +114,39 @@ public class VarStatsEngine implements Engine {
             	else if(multi_column)
             		VariantPoolSummarizer.Print_Columns(summaries);
             	else
-            		VariantPoolSummarizer.printSummary(summaries, PrintMulti);
+            		VariantPoolSummarizer.printSummary(summaries, combined);
             	
+            }
+            if(detailedSummary){
+            	// generate detailed summary
+            	HashMap<String, ArrayList<VariantRecordSummary>> detailedSummaries =
+            			VariantPoolSummarizer.summarizeVariantPoolsDetailed(AllVPs, combined);
+            	
+            	Iterator<String> summaryIT = detailedSummaries.keySet().iterator();
+            	String vpID;
+            	ArrayList<VariantRecordSummary> summary;
+            	String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count" +
+            			"\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_total_samples\t" +
+            			"Min_depth\tMax_depth\tAvg_depth\tQuality";
+            	String fileName;
+            	while(summaryIT.hasNext()){
+            		vpID = summaryIT.next();
+            		summary = detailedSummaries.get(vpID);
+            		
+            		fileName = vpID + "_detailed_summary.txt";
+            		logger.info("Writing detailed summary to: " + fileName);
+            		PrintWriter writer = new PrintWriter(fileName);
+            		writer.println(header);
+            		for(VariantRecordSummary vrs : summary){
+            			writer.println(vrs.toString());
+            		}
+            		writer.close();
+            	}
             }
             if(assoc){
             	VarStats vstat = new VarStats(AllVPs, phenoArgs);
             }
             
-            
-            
-/*
-            @SuppressWarnings("unused")
-			VarStats vstat = new VarStats(AllVPs, phenoArgs, PrintMulti, sum, assoc);
-*/
         } catch (InvalidInputFileException e) {
             UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);
         } catch (Exception e) {

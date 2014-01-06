@@ -16,6 +16,8 @@ import org.broadinstitute.variant.variantcontext.Allele;
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.VariantPool;
 import vtc.tools.setoperator.operation.InvalidOperationException;
+import vtc.tools.setoperator.operation.Operation;
+import vtc.tools.setoperator.operation.OperationFactory;
 import vtc.tools.varstats.AltType;
 
 /**
@@ -213,5 +215,23 @@ public class UtilityBelt {
 		parser.printHelp();
 		System.exit(1);		
 	}
+	
+    /**
+     * Will create Operation objects from command line-provided operation
+     * strings and return as ArrayList<Operation>
+     * 
+     * @param operations
+     * @return
+     * @throws InvalidOperationException
+     */
+    public static ArrayList<Operation> createOperations(ArrayList<Object> operations, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException {
+
+        ArrayList<Operation> opList = new ArrayList<Operation>();
+        for (Object o : operations) {
+            Operation op = OperationFactory.createOperation(o.toString(), variantPools);
+            opList.add(op);
+        }
+        return opList;
+    }
 	
 }

@@ -395,7 +395,7 @@ public class VariantPool implements Pool{
 		/* If a variant already exists with this chr:pos:ref,
 		 * ignore subsequent variants and emit warning. 
 		 */
-		if(hMap.containsKey(chrPosRef) && !union ){
+		if(hMap.containsKey(chrPosRef) && !union){
 			/* TODO: Determine how to handle VCFs with multiple records
 			 * at the same location. Sometimes people represent multiple
 			 * alts on different lines. e.g.:
