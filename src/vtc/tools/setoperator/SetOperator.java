@@ -12,6 +12,8 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.broadinstitute.variant.variantcontext.Allele;
@@ -825,6 +827,7 @@ public class SetOperator {
 		if(forceUniqueNames){
 			uniqueNames = generateUniqueSampleNames(variantPools);
 			for(VariantPool vp : variantPools){
+				// TODO: All SamplePool manipulations should happen in the VariantPool! Otherwise they get out of sync!
 				union.addSamples(uniqueNames.get(vp.getPoolID()));
 			}
 		}
@@ -1028,30 +1031,54 @@ public class SetOperator {
 		HashMap<String, TreeSet<String>> vpHash = new HashMap<String, TreeSet<String>>();
 		TreeSet<String> sampleNames, masterSampleNames = new TreeSet<String>();
 
+        String name, uniqueName, uniqueNum;
 		for(VariantPool vp : variantPools){
 			sampleNames = new TreeSet<String>();
 			Iterator<String> it = vp.getSamples().iterator();
-			String name, uniqueName;
 			while(it.hasNext()){
 				name = it.next();
-				if(masterSampleNames.contains(name)){
-					uniqueName = name + "-" + vp.getFile().getName();
+//				if(masterSampleNames.contains(name)){
+				
+				/* I changed this to force all sample names to have
+				 * the parent directory and file name. Otherwise, the first time
+				 * a name like 'sample' comes up, it won't be easy/possible
+				 * to know where it came from.
+				 */
+					uniqueName = name + ":" + vp.getFile().getAbsoluteFile().getParentFile().getName() + "/" + vp.getFile().getName();
 					if(masterSampleNames.contains(uniqueName)){
-						throw new InvalidOperationException("Something is very wrong! " + 
-								"Trying to force unique sample names, but \'" +
-									uniqueName + "\' is not unique.");
+						uniqueNum = getUniqueSampleNumber(uniqueName);
+						if(uniqueNum != null){
+							uniqueName.replaceAll("-" + uniqueNum + "$", "-" + Integer.toString(Integer.parseInt(uniqueNum) + 1));
+						}
+						else{
+							uniqueName = uniqueName + "-1";
+						}
+						masterSampleNames.remove(uniqueName);
+//						throw new InvalidOperationException("Something is very wrong! " + 
+//								"Trying to force unique sample names, but \'" +
+//									uniqueName + "\' is not unique.");
 					}
 					sampleNames.add(uniqueName);
 					masterSampleNames.add(uniqueName);
-				}
-				else{
-					sampleNames.add(name);
-					masterSampleNames.add(name);
-				}
+//				}
+//				else{
+//					sampleNames.add(name);
+//					masterSampleNames.add(name);
+//				}
 			}
 			vpHash.put(vp.getPoolID(), sampleNames);
 		}
 		return vpHash;
+	}
+	
+	private String getUniqueSampleNumber(String uniqueName){
+		String patternStr="^.+(-(\\d+))?$";
+		Pattern p = Pattern.compile(patternStr);
+		Matcher m = p.matcher(uniqueName);
+		if(m.find()){
+			return m.group(2);
+		}
+		return null;
 	}
 	
 	/**
@@ -1090,7 +1117,7 @@ public class SetOperator {
 			Iterator<String> sampleIT = samples.iterator();
 			ArrayList<Genotype> correctGenos = new ArrayList<Genotype>();
 			for(Genotype geno : var.getGenotypesOrderedByName()){
-				correctGenos.add(renameGenotypeForSample(sampleIT.next(), geno));
+				correctGenos.add(VariantPool.renameGenotypeForSample(sampleIT.next(), geno));
 			}
 			return correctGenos;
 		}
@@ -1123,17 +1150,7 @@ public class SetOperator {
 		return new GenotypeBuilder(sample, alleles).make();
 	}
 	
-	private Genotype renameGenotypeForSample(String sampleName, Genotype geno){
-		return new GenotypeBuilder(sampleName, geno.getAlleles())
-					.AD(geno.getAD())
-					.DP(geno.getDP())
-					.GQ(geno.getGQ())
-					.PL(geno.getPL())
-					.attributes(geno.getExtendedAttributes())
-					.filters(geno.getFilters())
-					.phased(geno.isPhased())
-					.make();
-	}
+
 	
 	/**
 	 * Generate NO_CALL genotype for a single sample

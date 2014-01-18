@@ -69,7 +69,7 @@ public class Depth {
 		if(minDepth == Integer.MAX_VALUE || maxDepth == -1)
 			temp = "\t"+"NA"+"\t"+"NA"+"\t"+"NA";
 		else
-			temp = "\t"+UtilityBelt.roundDouble(avgDepth)+"\t"+Integer.toString(minDepth)+"\t"+Integer.toString(maxDepth);
+			temp = "\t"+UtilityBelt.roundDoubleToString(avgDepth)+"\t"+Integer.toString(minDepth)+"\t"+Integer.toString(maxDepth);
 		return temp;
 	}
 

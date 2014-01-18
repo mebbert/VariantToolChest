@@ -6,6 +6,9 @@ package vtc.tools.varstats;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
+import json.JSONException;
+import json.JSONObject;
+
 import org.broadinstitute.variant.variantcontext.Allele;
 
 import vtc.tools.utilitybelt.UtilityBelt;
@@ -25,9 +28,11 @@ public class VariantRecordSummary {
 		delCount, structIndelCount, structInsCount,
 		structDelCount, tiCount, tvCount, genoTiCount,
 		genoTvCount, refGenotypeCount, refSampleCount,
-		nSamples, nSamplesWithCall;
+		nSamples, nSamplesWithCall, nGenosCalled;
 	private String quality;
-	private ArrayList<Integer> altGenotypeCounts, altSampleCounts;
+	private ArrayList<Integer> altGenotypeCounts, altSampleCounts,
+		hetSampleCounts, homoVarSampleCounts;
+	private ArrayList<Double> altGenotypeFreqs, altSampleFreqs;
 	private Depth depth;
 	
 
@@ -374,6 +379,38 @@ public class VariantRecordSummary {
 		this.altGenotypeCounts = altGenotypeCounts;
 	}
 	
+	public ArrayList<Integer> getHetSampleCounts(){
+		return this.hetSampleCounts;
+	}
+	
+	public void setHetSampleCounts(ArrayList<Integer> hetSampleCounts){
+		this.hetSampleCounts = hetSampleCounts;
+	}
+	
+	public ArrayList<Integer> getHomoVarSampleCounts(){
+		return this.homoVarSampleCounts;
+	}
+	
+	public void setHomoVarSampleCounts(ArrayList<Integer> homoVarSampleCounts){
+		this.homoVarSampleCounts = homoVarSampleCounts;
+	}
+	
+	public ArrayList<Double> getAltSampleFreqs() {
+		return altSampleFreqs;
+	}
+	
+	public void setAltSampleFreqs(ArrayList<Double> altSampleFreqs){
+		this.altSampleFreqs = altSampleFreqs;
+	}
+	
+	public ArrayList<Double> getAltGenotypeFreqs(){
+		return this.altGenotypeFreqs;
+	}
+	
+	public void setAltGenotypeFreqs(ArrayList<Double> altGenotypeFreqs){
+		this.altGenotypeFreqs = altGenotypeFreqs;
+	}
+	
 	/**
 	 * @return the quality
 	 */
@@ -493,6 +530,14 @@ public class VariantRecordSummary {
 	public void setnSamplesWithCall(int nSamplesWithCall) {
 		this.nSamplesWithCall = nSamplesWithCall;
 	}
+	
+	public int getnGenosCalled() {
+		return nGenosCalled;
+	}
+	
+	public void setnGenosCalled(int nGenosCalled) {
+		this.nGenosCalled = nGenosCalled;
+	}
 
 	/**
 	 * Create a comma-separated string
@@ -501,47 +546,61 @@ public class VariantRecordSummary {
 	 * @param alts
 	 * @return
 	 */
-	public String altToString(){
-		
-		StringBuilder altString = new StringBuilder();
-		for(int i = 0; i < this.alts.size(); i++){
-			if(i == 0){
-				altString.append(this.alts.get(i));
-			}
-			else{
-				altString.append(",");
-				altString.append(this.alts.get(i));
-			}
-		}
-		return altString.toString();
-	}
+//	public String altToString(){
+//		
+//		StringBuilder altString = new StringBuilder();
+//		for(int i = 0; i < this.alts.size(); i++){
+//			if(i == 0){
+//				altString.append(this.alts.get(i));
+//			}
+//			else{
+//				altString.append(",");
+//				altString.append(this.alts.get(i));
+//			}
+//		}
+//		return altString.toString();
+//	}
+//	
+//	public String altGenotypeCountToString(){
+//		StringBuilder altGenoCount = new StringBuilder();
+//		for(int i = 0; i < this.altGenotypeCounts.size(); i++){
+//			if(i == 0){
+//				altGenoCount.append(this.altGenotypeCounts.get(i));
+//			}
+//			else{
+//				altGenoCount.append(",");
+//				altGenoCount.append(this.altGenotypeCounts.get(i));
+//			}
+//		}
+//		return altGenoCount.toString();
+//	}
+//	
+//	public String altSampleCountToString(){
+//		StringBuilder altSampleCount = new StringBuilder();
+//		for(int i = 0; i < this.altSampleCounts.size(); i++){
+//			if(i == 0){
+//				altSampleCount.append(this.altSampleCounts.get(i));
+//			}
+//			else{
+//				altSampleCount.append(",");
+//				altSampleCount.append(this.altSampleCounts.get(i));
+//			}
+//		}
+//		return altSampleCount.toString();
+//	}
 	
-	public String altGenotypeCountToString(){
-		StringBuilder altGenoCount = new StringBuilder();
-		for(int i = 0; i < this.altGenotypeCounts.size(); i++){
+	public String altStatArrayToString(ArrayList<?> list){
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < list.size(); i++){
 			if(i == 0){
-				altGenoCount.append(this.altGenotypeCounts.get(i));
+				sb.append(list.get(i));
 			}
 			else{
-				altGenoCount.append(",");
-				altGenoCount.append(this.altGenotypeCounts.get(i));
+				sb.append(",");
+				sb.append(list.get(i));
 			}
 		}
-		return altGenoCount.toString();
-	}
-	
-	public String altSampleCountToString(){
-		StringBuilder altSampleCount = new StringBuilder();
-		for(int i = 0; i < this.altSampleCounts.size(); i++){
-			if(i == 0){
-				altSampleCount.append(this.altSampleCounts.get(i));
-			}
-			else{
-				altSampleCount.append(",");
-				altSampleCount.append(this.altSampleCounts.get(i));
-			}
-		}
-		return altSampleCount.toString();
+		return sb.toString();
 	}
 	
 	public String toString(){
@@ -554,19 +613,25 @@ public class VariantRecordSummary {
 		sb.append("\t");
 		sb.append(this.getRef().getBaseString());
 		sb.append("\t");
-		sb.append(this.altToString());
+		sb.append(this.altStatArrayToString(this.alts));
 		sb.append("\t");
 		sb.append(this.getRefGenotypeCount());
 		sb.append("\t");
-		sb.append(this.altGenotypeCountToString());
+		sb.append(this.altStatArrayToString(this.altGenotypeCounts));
 		sb.append("\t");
 		sb.append(this.getRefSampleCount());
 		sb.append("\t");
-		sb.append(this.altSampleCountToString());
+		sb.append(this.altStatArrayToString(this.altSampleCounts));
 		sb.append("\t");
 		sb.append(this.getnSamplesWithCall());
 		sb.append("\t");
+		sb.append(this.getnGenosCalled());
+		sb.append("\t");
 		sb.append(this.getnSamples());
+		sb.append("\t");
+		sb.append(this.altStatArrayToString(this.altGenotypeFreqs));
+		sb.append("\t");
+		sb.append(this.altStatArrayToString(this.altSampleFreqs));
 		sb.append("\t");
 		sb.append(this.getDepth().getMinDepth());
 		sb.append("\t");
@@ -576,6 +641,31 @@ public class VariantRecordSummary {
 		sb.append("\t");
 		sb.append(this.getQuality());
 		return sb.toString();
+	}
+	
+	/**
+	 * Form an ArrayList<JSONObject> for each alternate allele in
+	 * this VariantRecordSummary
+	 * 
+	 * @return
+	 * @throws JSONException
+	 */
+	public ArrayList<JSONObject> toJSON() throws JSONException{
+		ArrayList<JSONObject> altAlleleSummaries = new ArrayList<JSONObject>();
+		JSONObject summary;
+		
+		for(int i = 0; i < alts.size(); i++){
+			summary = new JSONObject();
+            summary.put("chr", this.getChr());
+            summary.put("start", this.getPosition());
+            summary.put("ref", this.getRef());
+            summary.put("alt", alts.get(i));
+            summary.put("hetSampleCount", this.getHetSampleCounts().get(i));
+            summary.put("homoVarSampleCount", this.getHomoVarSampleCounts().get(i));
+            summary.put("totalSamplesWithCoverage", this.getnSamplesWithCall());
+            altAlleleSummaries.add(summary);
+		}
+		return altAlleleSummaries;
 	}
 	
 }

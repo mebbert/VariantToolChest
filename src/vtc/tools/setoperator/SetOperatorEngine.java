@@ -394,7 +394,7 @@ public class SetOperatorEngine implements Engine {
         VCFHeader header;
         for (Operation op : ops) {
             SetOperator so = new SetOperator(verbose, addChr);
-            associatedVPs = getAssociatedVariantPoolsAsArrayList(op, allVPs);
+            associatedVPs = UtilityBelt.getAssociatedVariantPoolsAsArrayList(op, allVPs);
             result = null;
 
             o = op.getOperator();
@@ -475,7 +475,7 @@ public class SetOperatorEngine implements Engine {
             logger.info("Printing " + result.getPoolID() + " to file: " + outFile.getAbsolutePath());
             VariantPool.printVariantPool(outFile.getAbsolutePath(), result, refGenome, outputFormat, repairHeader);
 
-            logger.info(result.getNumVarRecords() + " variant(s) written.");
+            logger.info(result.getNumVarRecords() + " variant record(s) written.");
         }
         return resultingVPs;
     }
@@ -548,38 +548,6 @@ public class SetOperatorEngine implements Engine {
 
     }
     
-
-    /**
-     * Extract only VariantPool objects associated with the Operation provided
-     * as an ArrayList<VariantPool>.
-     * 
-     * @param op
-     * @param vps
-     * @return
-     */
-    private ArrayList<VariantPool> getAssociatedVariantPoolsAsArrayList(Operation op, TreeMap<String, VariantPool> vps) {
-
-        /*
-         * Get all pool IDs associated with this Operation. Note: All SamplePool
-         * objects have a pool ID that matches a VariantPool pool ID.
-         */
-        Collection<String> pids = op.getAllPoolIDs();
-        ArrayList<VariantPool> vpList = new ArrayList<VariantPool>();
-        Iterator<String> it = vps.keySet().iterator();
-        String pid;
-
-        /*
-         * Iterate over the VP TreeMap and add any VP associated with Operation
-         * op to the vpList and return vpList
-         */
-        while (it.hasNext()) {
-            pid = it.next();
-            if (pids.contains(pid)) {
-                vpList.add(vps.get(pid));
-            }
-        }
-        return vpList;
-    }
 
     /**
      * Get VCFHeaders from the list of VariantPools.

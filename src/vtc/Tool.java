@@ -15,7 +15,10 @@ public enum Tool {
 	SET_OPERATOR("SetOperator", "SO", "Perform set operations on variant sets",
 			new ArrayList<String>(Arrays.asList(new String[]{"SO", "SetOperator"}))),
     VAR_STATS("VarStats", "VS", "Perform various statistical analyses",
-            new ArrayList<String>(Arrays.asList(new String[]{"VS", "VarStats"})));;
+            new ArrayList<String>(Arrays.asList(new String[]{"VS", "VarStats"}))),
+    ARUP_FREQUENCY_CALCULATOR("ARUPFrequencyCalculator", "AFC", "Navigate ARUP result directories " +
+			"and calculate test-specific variant frequencies",
+			new ArrayList<String>(Arrays.asList(new String[]{"AFC", "ARUPFrequencyCalculator"})));
 	
 	private String name, shortCommand, briefDescription;
 	private ArrayList<String> permittedCommands;

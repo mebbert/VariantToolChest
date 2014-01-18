@@ -24,6 +24,9 @@ import org.apache.log4j.Logger;
 import org.broad.tribble.AbstractFeatureReader;
 import org.broad.tribble.FeatureReader;
 import org.broadinstitute.variant.variantcontext.Allele;
+import org.broadinstitute.variant.variantcontext.Genotype;
+import org.broadinstitute.variant.variantcontext.GenotypeBuilder;
+import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.broadinstitute.variant.variantcontext.VariantContextBuilder;
 import org.broadinstitute.variant.variantcontext.writer.Options;
@@ -274,7 +277,7 @@ public class VariantPool implements Pool{
 		this.header = header;
 	}
 	
-	public void setSamples(SamplePool samples){
+	private void setSamples(SamplePool samples){
 		this.samples = samples;
 	}
 	
@@ -436,6 +439,11 @@ public class VariantPool implements Pool{
 		}
 	}
 	
+	public void updateVariant(String key, VariantContext newVar){
+		hMap.put(key, newVar);
+		tMap.put(key, newVar);
+	}
+	
 	/**
 	 * Add or remove 'chr' to chromosome if user requests
 	 * @param chr
@@ -505,6 +513,92 @@ public class VariantPool implements Pool{
 ////		vcBuilder.attributes(var.getAttributes());
 //		return vcBuilder.make();
 //	}
+	
+	/**
+	 * Change the sample names for this VariantPool. The newSampleNames
+	 * must be in the same order as they are in the file.
+	 * 
+	 * @param newSampleNames
+	 */
+	public void changeSampleNames(ArrayList<String> newSampleNames){
+		
+		/* Update the SamplePool */
+        SamplePool newSamples = new SamplePool();
+        newSamples.setPoolID(this.poolID); // VariantPools and SamplePools must have same ID
+        newSamples.addSamples(new TreeSet<String>(newSampleNames));
+		this.setSamples(newSamples);
+		
+		Iterator<String> varIT = this.getVariantIterator();
+		VariantContext currVar;
+		String varKey;
+		GenotypesContext gcs;
+		ArrayList<Genotype> newGenos;
+		while(varIT.hasNext()){
+			varKey = varIT.next();
+			currVar = this.getVariant(varKey);
+			gcs = currVar.getGenotypes();
+			newGenos = new ArrayList<Genotype>();
+			for(int i = 0; i < gcs.size(); i++){
+				newGenos.add(renameGenotypeForSample(newSampleNames.get(i), gcs.get(i)));
+			}
+			currVar = buildVariant(currVar, currVar.getAlleles(), newGenos);
+			this.updateVariant(varKey, currVar);
+		}
+	}
+	
+	/**
+	 * Change the sample name for a genotype
+	 * 
+	 * @param sampleName
+	 * @param geno
+	 * @return
+	 */
+	public static Genotype renameGenotypeForSample(String sampleName, Genotype geno){
+		return new GenotypeBuilder(sampleName, geno.getAlleles())
+					.AD(geno.getAD())
+					.DP(geno.getDP())
+					.GQ(geno.getGQ())
+					.PL(geno.getPL())
+					.attributes(geno.getExtendedAttributes())
+					.filters(geno.getFilters())
+					.phased(geno.isPhased())
+					.make();
+	}
+	
+	public static Genotype changeAllelesForGenotype(Genotype geno, ArrayList<Allele> newAlleles){
+		return new GenotypeBuilder(geno.getSampleName(), newAlleles)
+					.AD(geno.getAD())
+					.DP(geno.getDP())
+					.GQ(geno.getGQ())
+					.PL(geno.getPL())
+					.attributes(geno.getExtendedAttributes())
+					.filters(geno.getFilters())
+					.phased(geno.isPhased())
+					.make();
+	}
+	
+	/**
+	 * Build a new variant from an original and add all alleles and genotypes
+	 * 
+	 * @param var
+	 * @param alleles
+	 * @param genos
+	 * @return
+	 */
+	public static VariantContext buildVariant(VariantContext var, List<Allele> alleles, ArrayList<Genotype> genos){
+		/* Start building the new VariantContext */
+		VariantContextBuilder vcBuilder = new VariantContextBuilder();
+		vcBuilder.chr(var.getChr());
+		vcBuilder.start(var.getStart());
+		vcBuilder.stop(var.getEnd());
+		vcBuilder.alleles(alleles);
+		vcBuilder.genotypes(genos);
+		vcBuilder.filters(var.getFilters());
+		vcBuilder.log10PError(var.getLog10PError());
+		vcBuilder.source(var.getSource());
+		vcBuilder.attributes(var.getAttributes());
+		return vcBuilder.make();
+	}
 
 	/**
 	 * Read a vcf and add VariantContext objects to the pool. 

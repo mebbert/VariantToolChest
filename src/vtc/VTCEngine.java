@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import vtc.Engine;
 import vtc.Tool;
+import vtc.tools.arupfrequencycalculator.ARUPFrequencyCalculatorEngine;
 import vtc.tools.setoperator.SetOperatorEngine;
 import vtc.tools.varstats.VarStatsEngine;
 
@@ -67,6 +68,10 @@ public class VTCEngine implements Engine{
                 VarStatsEngine vse = new VarStatsEngine(toolArgs);
                 vse.doStats();
             }
+			else if(tool == Tool.ARUP_FREQUENCY_CALCULATOR){
+				ARUPFrequencyCalculatorEngine afce = new ARUPFrequencyCalculatorEngine(toolArgs);
+				afce.calculateFrequencies();
+			}
 			
 		} catch (ArgumentParserException e) {
 			printErrorUsageHelpAndExit(e);

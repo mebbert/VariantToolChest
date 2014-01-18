@@ -3,8 +3,11 @@
  */
 package vtc.tools.utilitybelt;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -31,10 +34,23 @@ public class UtilityBelt {
 		return;
 	}
 	
-	 public static String roundDouble(double d) {
+	 public static String roundDoubleToString(double d) {
 	        DecimalFormat df = new DecimalFormat("#.##");
 	        return String.valueOf(df.format(d));
-	    }
+    }
+	 
+    /**
+     * @param unrounded
+     * @param precision
+     * @param roundingMode
+     * @return
+     */
+    public static double round(double unrounded, int precision, int roundingMode)
+    {
+        BigDecimal bd = new BigDecimal(unrounded);
+        BigDecimal rounded = bd.setScale(precision, roundingMode);
+        return rounded.doubleValue();
+    }
 	
 	
 	/**
@@ -53,6 +69,39 @@ public class UtilityBelt {
 		}
 		return vpMap;
 	}
+	
+
+    /**
+     * Extract only VariantPool objects associated with the Operation provided
+     * as an ArrayList<VariantPool>.
+     * 
+     * @param op
+     * @param vps
+     * @return
+     */
+    public static ArrayList<VariantPool> getAssociatedVariantPoolsAsArrayList(Operation op, TreeMap<String, VariantPool> vps) {
+
+        /*
+         * Get all pool IDs associated with this Operation. Note: All SamplePool
+         * objects have a pool ID that matches a VariantPool pool ID.
+         */
+        Collection<String> pids = op.getAllPoolIDs();
+        ArrayList<VariantPool> vpList = new ArrayList<VariantPool>();
+        Iterator<String> it = vps.keySet().iterator();
+        String pid;
+
+        /*
+         * Iterate over the VP TreeMap and add any VP associated with Operation
+         * op to the vpList and return vpList
+         */
+        while (it.hasNext()) {
+            pid = it.next();
+            if (pids.contains(pid)) {
+                vpList.add(vps.get(pid));
+            }
+        }
+        return vpList;
+    }
 	
 	/**
 	 * Determine the smallest length of alleles
@@ -233,5 +282,7 @@ public class UtilityBelt {
         }
         return opList;
     }
+    
+
 	
 }

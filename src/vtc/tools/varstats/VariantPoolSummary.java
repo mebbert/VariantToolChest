@@ -496,16 +496,16 @@ public class VariantPoolSummary {
 		values.add(Integer.toString(numDeletions));
 		values.add(Integer.toString(smallestInsertion));
 		values.add(Integer.toString(largestInsertion));
-		values.add(UtilityBelt.roundDouble((avgInsertionSize)));
+		values.add(UtilityBelt.roundDoubleToString((avgInsertionSize)));
 		values.add(Integer.toString(smallestDeletion));
 		values.add(Integer.toString(largestDeletion));
-		values.add(UtilityBelt.roundDouble((avgDeletionSize)));
+		values.add(UtilityBelt.roundDoubleToString((avgDeletionSize)));
 		values.add(Integer.toString(numStructVars));
 		values.add(Integer.toString(numStructIns));
 		values.add(Integer.toString(numStructDels));
 		values.add(Integer.toString(numMultiAlts));
-		values.add(UtilityBelt.roundDouble((tiTv)));
-		values.add(UtilityBelt.roundDouble((genoTiTv)));
+		values.add(UtilityBelt.roundDoubleToString((tiTv)));
+		values.add(UtilityBelt.roundDoubleToString((genoTiTv)));
 		for(String s : values){
 			if(s.length()>length)
 				length = s.length();

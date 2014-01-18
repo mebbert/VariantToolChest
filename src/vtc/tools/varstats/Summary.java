@@ -234,8 +234,8 @@ public class Summary {
 		String nummultialts = Integer.toString(NumMultiAlts);
 		find.add(nummultialts);
 		
-		find.add(UtilityBelt.roundDouble(TiTv));
-		find.add(UtilityBelt.roundDouble(GenoTiTv));
+		find.add(UtilityBelt.roundDoubleToString(TiTv));
+		find.add(UtilityBelt.roundDoubleToString(GenoTiTv));
 		find.add(title);
 
 		int length = 0;
@@ -312,13 +312,13 @@ public class Summary {
 		System.out.format(leftalignFormatint, "TotalVars:", vc.getNumVars());
 		System.out.format(leftalignFormatint, "Total Samples:", NumSamples);
 		System.out.format(s + newLine);
-		System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(vc.getNumSNVs()) + " (" + UtilityBelt.roundDouble(snvPercent) + "%)");
+		System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(vc.getNumSNVs()) + " (" + UtilityBelt.roundDoubleToString(snvPercent) + "%)");
 		System.out.format(rightalignFormatf, "Ti/Tv:", vc.getTiTv());
 		System.out.format(rightalignFormatf, "(Geno)Ti/Tv:", vc.getGenoTiTv());
 		System.out.format(s + newLine);
-		System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(vc.getInDels()) + " (" + UtilityBelt.roundDouble(InDelsPercent) + "%)");
+		System.out.format(rightalignFormati, "INDELs:    ", Integer.toString(vc.getInDels()) + " (" + UtilityBelt.roundDoubleToString(InDelsPercent) + "%)");
 		System.out.format(s + newLine);
-		System.out.format(rightalignFormati, "StructVars:", Integer.toString(vc.getStructVars()) + " (" + UtilityBelt.roundDouble(StructPercent) + "%)");
+		System.out.format(rightalignFormati, "StructVars:", Integer.toString(vc.getStructVars()) + " (" + UtilityBelt.roundDoubleToString(StructPercent) + "%)");
 		System.out.format(s + newLine);
 		System.out.format(leftalignFormatint, "MultiAlts:", vc.getNumMultiAlts());
 		System.out.format(s + newLine);

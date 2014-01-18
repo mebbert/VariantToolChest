@@ -3,6 +3,8 @@
  */
 package vtc.tools.varstats;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,32 +121,21 @@ public class VarStatsEngine implements Engine {
             }
             if(detailedSummary){
             	// generate detailed summary
-            	HashMap<String, ArrayList<VariantRecordSummary>> detailedSummaries =
-            			VariantPoolSummarizer.summarizeVariantPoolsDetailed(AllVPs, combined);
             	
-            	Iterator<String> summaryIT = detailedSummaries.keySet().iterator();
-            	String vpID;
-            	ArrayList<VariantRecordSummary> summary;
-            	String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count" +
-            			"\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_total_samples\t" +
-            			"Min_depth\tMax_depth\tAvg_depth\tQuality";
-            	String fileName;
-            	while(summaryIT.hasNext()){
-            		vpID = summaryIT.next();
-            		summary = detailedSummaries.get(vpID);
-            		
-            		fileName = vpID + "_detailed_summary.txt";
-            		logger.info("Writing detailed summary to: " + fileName);
-            		PrintWriter writer = new PrintWriter(fileName);
-            		writer.println(header);
-            		for(VariantRecordSummary vrs : summary){
-            			writer.println(vrs.toString());
-            		}
-            		writer.close();
+            	if(combined){
+                    ArrayList<VariantRecordSummary> summary =
+                            VariantPoolSummarizer.summarizeVariantPoolsDetailedCombined(AllVPs);
+                    String fileName = "unionedVP_detailed_summary.txt";
+                    printDetailedSummaryToFile(summary, fileName);
+            	}
+            	else{
+                    HashMap<String, ArrayList<VariantRecordSummary>> detailedSummaries =
+                            VariantPoolSummarizer.summarizeVariantPoolsDetailed(AllVPs);
+                    printDetailedSummariesToFile(detailedSummaries);
             	}
             }
             if(assoc){
-            	VarStats vstat = new VarStats(AllVPs, phenoArgs);
+            	new VarStats(AllVPs, phenoArgs);
             }
             
         } catch (InvalidInputFileException e) {
@@ -153,5 +144,38 @@ public class VarStatsEngine implements Engine {
             logger.error("Caught unexpected exception, something is very wrong!");
             e.printStackTrace();
         }
+    }
+    
+	private void printDetailedSummariesToFile(HashMap<String, ArrayList<VariantRecordSummary>> detailedSummaries) throws IOException{
+        
+        Iterator<String> summaryIT = detailedSummaries.keySet().iterator();
+        String vpID, fileName;
+        ArrayList<VariantRecordSummary> summary;
+        while(summaryIT.hasNext()){
+            vpID = summaryIT.next();
+            fileName = vpID + "_detailed_summary.txt";
+            summary = detailedSummaries.get(vpID);
+            printDetailedSummaryToFile(summary, fileName);
+        }
+	}
+    
+    /**
+     * Print a single detailed summary to the given file
+     * 
+     * @param summary
+     * @param fileName
+     * @throws FileNotFoundException
+     */
+    private void printDetailedSummaryToFile(ArrayList<VariantRecordSummary> summary, String fileName) throws FileNotFoundException{
+        logger.info("Writing detailed summary to: " + fileName);
+        String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count" +
+                "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_genos_called\tN_total_samples\t" +
+                "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
+        PrintWriter writer = new PrintWriter(fileName);
+        writer.println(header);
+        for(VariantRecordSummary vrs : summary){
+            writer.println(vrs.toString());
+        }
+        writer.close();   	
     }
 }
