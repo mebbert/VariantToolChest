@@ -30,6 +30,11 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 import org.broad.tribble.TribbleException;
 import org.broadinstitute.variant.variantcontext.Allele;
@@ -633,8 +638,32 @@ public class ARUPFrequencyCalculatorEngine {
         for(VariantRecordSummary s : summary){
             recordSummaries.put(s.toJSON());
         }
+        summaryJSON.put("analType", analType);
         summaryJSON.put("frequency.list", recordSummaries);
         return summaryJSON;
+	}
+	
+	private boolean postFreqsToNGSWeb(JSONObject varFreqs) throws IOException{
+		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+
+	    try {
+	        HttpPost request = new HttpPost("ngs-webapp-dev/Variant/UploadVariantFrequencies");
+	        StringEntity params =new StringEntity(varFreqs.toString());
+	        request.addHeader("content-type", "application/x-www-form-urlencoded");
+	        request.addHeader("Accept", "text/plain");
+	        request.setEntity(params);
+	        HttpResponse response = httpClient.execute(request);
+	        
+	        logger.info("NGSWeb HTTP Response: " + response.toString());
+
+	        // handle response here...
+	    }catch (Exception ex) {
+	        // handle exception here
+	        return false;
+	    } finally {
+	        httpClient.close();
+	    }
+	    return true;
 	}
 	
 	/**
