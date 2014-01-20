@@ -627,7 +627,7 @@ public class ARUPFrequencyCalculatorEngine {
         FileWriter fw = new FileWriter(freqs_file_name);
         fw.write(header);
         for(VariantRecordSummary s : summary){
-            fw.write(s.toString());
+            fw.write(s.toString() + "\n");
         }
         fw.close();
 	}
@@ -638,7 +638,7 @@ public class ARUPFrequencyCalculatorEngine {
         for(VariantRecordSummary s : summary){
             recordSummaries.put(s.toJSON());
         }
-        summaryJSON.put("analType", analType);
+        summaryJSON.put("dta", analType);
         summaryJSON.put("frequency.list", recordSummaries);
         return summaryJSON;
 	}
@@ -647,7 +647,7 @@ public class ARUPFrequencyCalculatorEngine {
 		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
 	    try {
-	        HttpPost request = new HttpPost("ngs-webapp-dev/Variant/UploadVariantFrequencies");
+	        HttpPost request = new HttpPost("http://ngs-webapp-dev/Variant/UploadVariantFrequencies");
 	        StringEntity params =new StringEntity(varFreqs.toString());
 	        request.addHeader("content-type", "application/x-www-form-urlencoded");
 	        request.addHeader("Accept", "text/plain");
@@ -657,9 +657,6 @@ public class ARUPFrequencyCalculatorEngine {
 	        logger.info("NGSWeb HTTP Response: " + response.toString());
 
 	        // handle response here...
-	    }catch (Exception ex) {
-	        // handle exception here
-	        return false;
 	    } finally {
 	        httpClient.close();
 	    }
