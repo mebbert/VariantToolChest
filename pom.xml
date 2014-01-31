@@ -109,5 +109,10 @@
         </plugin>
     </plugins>
   </build>
+ <scm>
+	<connection>scm:git:git@github.com:KBoehme/VTCTesting.git</connection>
+	<url>scm:https://github.com/KBoehme/VTCTesting.git</url>
+	<developerConnection>scm:git:git@github.com:KBoehme/VTCTesting.git</developerConnection>
+  </scm>
 
 </project>
