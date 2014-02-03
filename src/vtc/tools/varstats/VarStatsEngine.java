@@ -123,13 +123,13 @@ public class VarStatsEngine implements Engine {
             	// generate detailed summary
             	
             	if(combined){
-                    ArrayList<VariantRecordSummary> summary =
+                    VariantPoolDetailedSummary summary =
                             VariantPoolSummarizer.summarizeVariantPoolsDetailedCombined(AllVPs);
                     String fileName = "unionedVP_detailed_summary.txt";
                     printDetailedSummaryToFile(summary, fileName);
             	}
             	else{
-                    HashMap<String, ArrayList<VariantRecordSummary>> detailedSummaries =
+                    HashMap<String, VariantPoolDetailedSummary> detailedSummaries =
                             VariantPoolSummarizer.summarizeVariantPoolsDetailed(AllVPs);
                     printDetailedSummariesToFile(detailedSummaries);
             	}
@@ -146,11 +146,11 @@ public class VarStatsEngine implements Engine {
         }
     }
     
-	private void printDetailedSummariesToFile(HashMap<String, ArrayList<VariantRecordSummary>> detailedSummaries) throws IOException{
+	private void printDetailedSummariesToFile(HashMap<String, VariantPoolDetailedSummary> detailedSummaries) throws IOException{
         
         Iterator<String> summaryIT = detailedSummaries.keySet().iterator();
         String vpID, fileName;
-        ArrayList<VariantRecordSummary> summary;
+        VariantPoolDetailedSummary summary;
         while(summaryIT.hasNext()){
             vpID = summaryIT.next();
             fileName = vpID + "_detailed_summary.txt";
@@ -166,14 +166,14 @@ public class VarStatsEngine implements Engine {
      * @param fileName
      * @throws FileNotFoundException
      */
-    private void printDetailedSummaryToFile(ArrayList<VariantRecordSummary> summary, String fileName) throws FileNotFoundException{
+    private void printDetailedSummaryToFile(VariantPoolDetailedSummary summary, String fileName) throws FileNotFoundException{
         logger.info("Writing detailed summary to: " + fileName);
         String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count" +
                 "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_genos_called\tN_total_samples\t" +
                 "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
         PrintWriter writer = new PrintWriter(fileName);
         writer.println(header);
-        for(VariantRecordSummary vrs : summary){
+        for(VariantRecordSummary vrs : summary.getVariantRecordSummaries()){
             writer.println(vrs.toString());
         }
         writer.close();   	

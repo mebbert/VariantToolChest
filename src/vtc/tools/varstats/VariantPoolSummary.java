@@ -94,6 +94,8 @@ public class VariantPoolSummary {
 	}
 	
 	
+	
+	
 	public VariantPoolSummary() {
 		numSamples = 0;
 		numVars = 0;
@@ -237,7 +239,7 @@ public class VariantPoolSummary {
 	/**
 	 * @return the smallestInsertion
 	 */
-	public double getSmallestInsertion() {
+	public int getSmallestInsertion() {
 		return smallestInsertion;
 	}
 
@@ -251,7 +253,7 @@ public class VariantPoolSummary {
 	/**
 	 * @return the largestInsertion
 	 */
-	public double getLargestInsertion() {
+	public int getLargestInsertion() {
 		return largestInsertion;
 	}
 
@@ -279,7 +281,7 @@ public class VariantPoolSummary {
 	/**
 	 * @return the smallestDeletion
 	 */
-	public double getSmallestDeletion() {
+	public int getSmallestDeletion() {
 		return smallestDeletion;
 	}
 
@@ -293,7 +295,7 @@ public class VariantPoolSummary {
 	/**
 	 * @return the largestDeletion
 	 */
-	public double getLargestDeletion() {
+	public int getLargestDeletion() {
 		return largestDeletion;
 	}
 

@@ -41,16 +41,16 @@ public class VariantPoolSummarizer {
      * @return
      * @throws InvalidOperationException 
      */
-    public static HashMap<String,ArrayList<VariantRecordSummary>> summarizeVariantPoolsDetailed(TreeMap<String, VariantPool> allVPs)
+    public static HashMap<String, VariantPoolDetailedSummary> summarizeVariantPoolsDetailed(TreeMap<String, VariantPool> allVPs)
     		throws InvalidOperationException{
 
-    	HashMap<String, ArrayList<VariantRecordSummary>> detailedVariantPoolSummaries =
-    			new HashMap<String, ArrayList<VariantRecordSummary>>();
+    	HashMap<String, VariantPoolDetailedSummary> detailedVariantPoolSummaries =
+    			new HashMap<String, VariantPoolDetailedSummary>();
     	
-        ArrayList<VariantRecordSummary> recordSummaries;
+        VariantPoolDetailedSummary vpsd;
         for(VariantPool vp : allVPs.values()){
-            recordSummaries = summarizeVariantPoolDetailed(vp);
-            detailedVariantPoolSummaries.put(vp.getPoolID(), recordSummaries);
+            vpsd = summarizeVariantPoolDetailed(vp);
+            detailedVariantPoolSummaries.put(vp.getPoolID(), vpsd);
         }
     	return detailedVariantPoolSummaries;
     }
@@ -61,7 +61,7 @@ public class VariantPoolSummarizer {
      * @param allVPs
      * @throws InvalidOperationException 
      */
-    public static ArrayList<VariantRecordSummary> summarizeVariantPoolsDetailedCombined(TreeMap<String, VariantPool> allVPs) throws InvalidOperationException{
+    public static VariantPoolDetailedSummary summarizeVariantPoolsDetailedCombined(TreeMap<String, VariantPool> allVPs) throws InvalidOperationException{
 
     	ArrayList<VariantPool> allVPsList = new ArrayList<VariantPool>(allVPs.values());
     	if(allVPsList.size() > 1){
@@ -100,15 +100,17 @@ public class VariantPoolSummarizer {
      * @param vp
      * @return
      */
-    public static ArrayList<VariantRecordSummary> summarizeVariantPoolDetailed(VariantPool vp){
+    public static VariantPoolDetailedSummary summarizeVariantPoolDetailed(VariantPool vp){
     	Iterator<String> varIT = vp.getVariantIterator();
     	String currVarKey;
-    	ArrayList<VariantRecordSummary> summaries = new ArrayList<VariantRecordSummary>();
+//    	ArrayList<VariantRecordSummary> summaries = new ArrayList<VariantRecordSummary>();
+    	VariantPoolDetailedSummary vpds = new VariantPoolDetailedSummary(summarizeVariantPool(vp));
     	while(varIT.hasNext()){
     		currVarKey = varIT.next();
-    		summaries.add(collectVariantStatistics(vp.getVariant(currVarKey)));
+//    		summaries.add(collectVariantStatistics(vp.getVariant(currVarKey)));
+    		vpds.addVariantRecordSummary(collectVariantStatistics(vp.getVariant(currVarKey)));
     	}
-    	return summaries;
+    	return vpds;
     }
     
     /**

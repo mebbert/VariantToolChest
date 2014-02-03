@@ -657,7 +657,7 @@ public class VariantRecordSummary {
 		for(int i = 0; i < alts.size(); i++){
 			summary = new JSONObject();
             summary.put("chr", this.getChr());
-            summary.put("start", this.getPosition());
+            summary.put("pos", this.getPosition());
             summary.put("ref", this.getRef());
             summary.put("alt", alts.get(i));
             summary.put("hetSampleCount", this.getHetSampleCounts().get(i));
