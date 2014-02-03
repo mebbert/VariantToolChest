@@ -107,39 +107,47 @@ public class UtilityBelt {
 	 * Determine the smallest length of alleles
 	 * 
 	 * @param alleles
-	 * @return
+	 * @return the smallest length or -1 if alleles are empty
 	 */
 	public static int getSmallestLength(TreeSet<String> alleles){
-		int currSize, smallest = -1;
-		for(String al : alleles){
-			currSize = al.length();
-			if(smallest == -1){
-				smallest = currSize;
-			}
-			else if(currSize < smallest){
-				smallest = currSize;
-			}
+		if(alleles.size() > 0){
+            return alleles.first().length(); // Since this is a TreeSet, it should just be the first
 		}
-		return smallest;	
+		return -1;
+//		int currSize, smallest = -1;
+//		for(String al : alleles){
+//			currSize = al.length();
+//			if(smallest == -1){
+//				smallest = currSize;
+//			}
+//			else if(currSize < smallest){
+//				smallest = currSize;
+//			}
+//		}
+//		return smallest;	
 	}
 	
 	/**
 	 * Determine largest length of alleles
 	 * @param alleles
-	 * @return
+	 * @return the largest length or -1 if alleles are empty
 	 */
 	public static int getLargestLength(TreeSet<String> alleles){
-		int currSize, largest = -1;
-		for(String al : alleles){
-			currSize = al.length();
-			if(largest == -1){
-				largest = currSize;
-			}
-			else if(currSize > largest){
-				largest = currSize;
-			}
+		if(alleles.size() > 0){
+            return alleles.last().length(); // Since this is a TreeSet, it should just be the last
 		}
-		return largest;
+		return -1;
+//		int currSize, largest = -1;
+//		for(String al : alleles){
+//			currSize = al.length();
+//			if(largest == -1){
+//				largest = currSize;
+//			}
+//			else if(currSize > largest){
+//				largest = currSize;
+//			}
+//		}
+//		return largest;
 	}
 	
 	/**

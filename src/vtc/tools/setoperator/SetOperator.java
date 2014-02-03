@@ -382,7 +382,7 @@ public class SetOperator {
 		Iterator<String> it = smallest.getVariantIterator();
 		String currVarKey;
 		ArrayList<VariantContext> fuzzyVars;
-		ArrayList<Genotype> genotypes, fuzzyGenos;
+		ArrayList<Genotype> genotypes, fuzzyGenos, tmpGenotypes;
 		VariantContext var = null, tmpVar, smallestVar;
 		SamplePool sp;
 		GenotypesContext gc;
@@ -401,6 +401,7 @@ public class SetOperator {
 			var = null;
 			intersects = true;
 			genotypes = new ArrayList<Genotype>();
+			tmpGenotypes = new ArrayList<Genotype>();
 			allAlleles = new LinkedHashSet<Allele>();
 			
 			/* If intersect type is POS, only check that */
@@ -425,7 +426,7 @@ public class SetOperator {
 				}
 			}
 			else{
-				/* See if all VariantPools contain this variant before interogating genotypes.
+				/* See if all VariantPools contain this variant before interrogating genotypes.
 				 * This includes the VP we're iterating over, but lookup is O(n) + O(1), where n is the number
 				 * of VariantPools and the O(1) is looking up in a Hash. Not a big deal.
 				 * I believe verifying the var at least exists in all VPs first should save time over
@@ -458,10 +459,13 @@ public class SetOperator {
 						/* Iterate over the sample genotypes in this GenotypeContext
 						 * and determine if they intersect by genotype
 						 */
-						genotypes = intersectsByGenotype(gc, var, sampleGenotypes, type, currVarKey, op.getOperationID());
-						if(genotypes == null){
+						tmpGenotypes = intersectsByGenotype(gc, var, sampleGenotypes, type, currVarKey, op.getOperationID());
+						if(tmpGenotypes == null){
 							intersects = false;
 							break;
+						}
+						else{
+							genotypes.addAll(tmpGenotypes);
 						}
 					}
 
@@ -1094,7 +1098,7 @@ public class SetOperator {
 		if(var.getGenotypes().size() > 0 && !var.getGenotypes().get(0).isAvailable()){
 			return generateGenotypeForSample(sample, Allele.NO_CALL, Allele.NO_CALL);
 		}
-		return new GenotypeBuilder(sample, var.getAlleles()).make();
+		return new GenotypeBuilder(sample, var.getGenotype(sample).getAlleles()).make();
 	}
 	
 	/**

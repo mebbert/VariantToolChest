@@ -144,8 +144,7 @@ public class VariantPoolSummarizer {
 		VariantContext var;
 		VariantRecordSummary vrs;
 		TreeSet<String> allInsertions = new TreeSet<String>(), allDeletions = new TreeSet<String>();
-    	int totalVarCount = 0, snvCount = 0, mnvCount = 0, indelCount = 0, insCount = 0,
-    			delCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0,
+    	int totalVarCount = 0, snvCount = 0, mnvCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0,
     			multiAltCount = 0, tiCount = 0, tvCount = 0, genoTiCount = 0, genoTvCount = 0;
 		while (varIT.hasNext()) {
 			currVarKey = varIT.next();
@@ -169,9 +168,6 @@ public class VariantPoolSummarizer {
 				
 				snvCount += vrs.getSnvCount();
 				mnvCount += vrs.getMnvCount();
-				indelCount += vrs.getIndelCount();
-				insCount += vrs.getInsCount();
-				delCount += vrs.getDelCount();
 				structIndelCount += vrs.getStructIndelCount();
 				structInsCount += vrs.getStructInsCount();
 				structDelCount += vrs.getStructDelCount();
@@ -187,21 +183,10 @@ public class VariantPoolSummarizer {
 
 			}
 		}
-		int smallestIns = UtilityBelt.getSmallestLength(allInsertions);
-		int longestIns = UtilityBelt.getLargestLength(allInsertions);
-		double avgIns = UtilityBelt.getAverageLength(allInsertions);
-
-		int smallestDel = UtilityBelt.getSmallestLength(allDeletions);
-		int longestDel = UtilityBelt.getLargestLength(allDeletions);
-		double avgDel = UtilityBelt.getAverageLength(allDeletions);
 		
-		double tiTv = (double)tiCount/(double)tvCount;
-		double genoTiTv = (double)genoTiCount/(double)genoTvCount;
-
-		return new VariantPoolSummary(vp.getNumVarRecords(), totalVarCount, snvCount, mnvCount, indelCount, insCount, delCount,
-				smallestIns, longestIns, avgIns, smallestDel, longestDel, avgDel,
+		return new VariantPoolSummary(vp.getNumVarRecords(), totalVarCount, snvCount, mnvCount,
 				structIndelCount, structInsCount, structDelCount, multiAltCount,
-				tiCount, tvCount, tiTv, genoTiCount, genoTvCount, genoTiTv);
+				tiCount, tvCount, genoTiCount, genoTvCount);
     }
     
     /**
@@ -458,17 +443,8 @@ public class VariantPoolSummarizer {
 				PrintIndividualFiles(o.toString(), vpSummaries.get(o));
 			}
 			else{
-				vps.addition(vpSummaries.get(o));
-			
+				vps = VariantPoolSummary.addVariantPoolSummaries(vps, vpSummaries.get(o));
 			}
-			double ti = vps.getTiCount();
-			double tv = vps.getTvCount();
-			vps.setTiTv(ti/tv);
-			double genoti = vps.getGenoTiCount();
-			double genotv = vps.getGenoTvCount();
-			vps.setGenoTiTv(genoti/genotv);
-
-			
 		}
 		if(PrintCombined == true){
 			PrintCombinedStats(keys, vps);

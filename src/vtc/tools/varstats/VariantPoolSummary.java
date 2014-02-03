@@ -4,6 +4,7 @@
 package vtc.tools.varstats;
 
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import vtc.tools.utilitybelt.UtilityBelt;
 
@@ -18,25 +19,15 @@ public class VariantPoolSummary {
 	private int numVars;
 	private int numSNVs;
 	private int numMNVs;
-	private int numIndels;
-	private int numInsertions;
-	private int numDeletions;
-	private int smallestInsertion;
-	private int largestInsertion;
-	private double avgInsertionSize;
-	private int smallestDeletion;
-	private int largestDeletion;
-	private double avgDeletionSize;
 	private int numStructVars;
 	private int numStructIns;
 	private int numStructDels;
 	private int numMultiAlts;
 	private double tiCount;
 	private double tvCount;
-	private double tiTv;
 	private double genoTiCount;
 	private double genoTvCount;
-	private double genoTiTv;
+	TreeSet<String> allInsertions, allDeletions;
 	
 	
 	/**
@@ -59,38 +50,31 @@ public class VariantPoolSummary {
 	 * @param tiTv
 	 * @param genoTiCount
 	 * @param genoTvCount
-	 * @param genoTiTv
 	 */
-	public VariantPoolSummary(int numVarRecords, int numVars, int numSNVs, int numMNVs, int numIndels,
-			int numInsertions, int numDeletions, int smallestInsertion,
-			int largestInsertion, double avgInsertionSize,
-			int smallestDeletion, int largestDeletion,
-			double avgDeletionSize, int numStructVars, int numStructIns, int numStructDels, int numMultiAlts,
-			double tiCount, double tvCount, double tiTv, double genoTiCount,
-			double genoTvCount, double genoTiTv) {
+	public VariantPoolSummary(int numVarRecords, int numVars, int numSNVs, int numMNVs,
+			int numStructVars, int numStructIns, int numStructDels, int numMultiAlts,
+			double tiCount, double tvCount, double genoTiCount, double genoTvCount) {
 		this.numVarRecords = numVarRecords;
 		this.numVars = numVars;
 		this.numSNVs = numSNVs;
 		this.numMNVs = numMNVs;
-		this.numIndels = numIndels;
-		this.numInsertions = numInsertions;
-		this.numDeletions = numDeletions;
-		this.smallestInsertion = smallestInsertion;
-		this.largestInsertion = largestInsertion;
-		this.avgInsertionSize = avgInsertionSize;
-		this.smallestDeletion = smallestDeletion;
-		this.largestDeletion = largestDeletion;
-		this.avgDeletionSize = avgDeletionSize;
+//		this.numIndels = numIndels;
+//		this.numInsertions = numInsertions;
+//		this.numDeletions = numDeletions;
+//		this.smallestInsertion = smallestInsertion;
+//		this.largestInsertion = largestInsertion;
+//		this.avgInsertionSize = avgInsertionSize;
+//		this.smallestDeletion = smallestDeletion;
+//		this.largestDeletion = largestDeletion;
+//		this.avgDeletionSize = avgDeletionSize;
 		this.numStructVars = numStructVars;
 		this.numStructIns = numStructIns;
 		this.numStructDels = numStructDels;
 		this.numMultiAlts = numMultiAlts;
 		this.tiCount = tiCount;
 		this.tvCount = tvCount;
-		this.tiTv = tiTv;
 		this.genoTiCount = genoTiCount;
 		this.genoTvCount = genoTvCount;
-		this.genoTiTv = genoTiTv;
 	}
 	
 	
@@ -101,15 +85,15 @@ public class VariantPoolSummary {
 		numVars = 0;
 		numSNVs = 0;
 		numMNVs = 0;	
-		numIndels = 0;
-		numInsertions = 0;
-		numDeletions = 0;
-		smallestInsertion = 0;
-		largestInsertion = 0;
-		avgInsertionSize = 0;
-		smallestDeletion = 0;
-		largestDeletion = 0;
-		avgDeletionSize = 0;
+//		numIndels = 0;
+//		numInsertions = 0;
+//		numDeletions = 0;
+//		smallestInsertion = 0;
+//		largestInsertion = 0;
+//		avgInsertionSize = 0;
+//		smallestDeletion = 0;
+//		largestDeletion = 0;
+//		avgDeletionSize = 0;
 		numStructVars = 0;
 		numStructIns = 0;
 		numStructDels = 0;
@@ -198,126 +182,63 @@ public class VariantPoolSummary {
 	 * @return the numIndels
 	 */
 	public int getNumIndels() {
-		return numIndels;
-	}
-
-	/**
-	 * @param numIndels the numIndels to set
-	 */
-	public void setNumIndels(int numIndels) {
-		this.numIndels = numIndels;
+		return this.allDeletions.size() + this.allInsertions.size();
 	}
 
 	/**
 	 * @return the numInsertions
 	 */
 	public int getNumInsertions() {
-		return numInsertions;
-	}
-
-	/**
-	 * @param numInsertions the numInsertions to set
-	 */
-	public void setNumInsertions(int numInsertions) {
-		this.numInsertions = numInsertions;
+		return this.allInsertions.size();
 	}
 
 	/**
 	 * @return the numDeletions
 	 */
 	public int getNumDeletions() {
-		return numDeletions;
-	}
-
-	/**
-	 * @param numDeletions the numDeletions to set
-	 */
-	public void setNumDeletions(int numDeletions) {
-		this.numDeletions = numDeletions;
+		return this.allDeletions.size();
 	}
 
 	/**
 	 * @return the smallestInsertion
 	 */
 	public int getSmallestInsertion() {
-		return smallestInsertion;
-	}
-
-	/**
-	 * @param smallestInsertion the smallestInsertion to set
-	 */
-	public void setSmallestInsertion(int smallestInsertion) {
-		this.smallestInsertion = smallestInsertion;
+		return UtilityBelt.getSmallestLength(this.allInsertions);
 	}
 
 	/**
 	 * @return the largestInsertion
 	 */
 	public int getLargestInsertion() {
-		return largestInsertion;
-	}
-
-	/**
-	 * @param largestInsertion the largestInsertion to set
-	 */
-	public void setLargestInsertion(int largestInsertion) {
-		this.largestInsertion = largestInsertion;
+		return UtilityBelt.getLargestLength(this.allInsertions);
 	}
 
 	/**
 	 * @return the avgInsertionSize
 	 */
 	public double getAvgInsertionSize() {
-		return avgInsertionSize;
-	}
-
-	/**
-	 * @param avgInsertionSize the avgInsertionSize to set
-	 */
-	public void setAvgInsertionSize(double avgInsertionSize) {
-		this.avgInsertionSize = avgInsertionSize;
+		return UtilityBelt.getAverageLength(this.allInsertions);
 	}
 
 	/**
 	 * @return the smallestDeletion
 	 */
 	public int getSmallestDeletion() {
-		return smallestDeletion;
-	}
-
-	/**
-	 * @param smallestDeletion the smallestDeletion to set
-	 */
-	public void setSmallestDeletion(int smallestDeletion) {
-		this.smallestDeletion = smallestDeletion;
+		return UtilityBelt.getSmallestLength(this.allDeletions);
 	}
 
 	/**
 	 * @return the largestDeletion
 	 */
 	public int getLargestDeletion() {
-		return largestDeletion;
-	}
-
-	/**
-	 * @param largestDeletion the largestDeletion to set
-	 */
-	public void setLargestDeletion(int largestDeletion) {
-		this.largestDeletion = largestDeletion;
+		return UtilityBelt.getLargestLength(this.allDeletions);
 	}
 
 	/**
 	 * @return the avgDeletionSize
 	 */
 	public double getAvgDeletionSize() {
-		return avgDeletionSize;
-	}
-
-	/**
-	 * @param avgDeletionSize the avgDeletionSize to set
-	 */
-	public void setAvgDeletionSize(double avgDeletionSize) {
-		this.avgDeletionSize = avgDeletionSize;
+		return UtilityBelt.getAverageLength(this.allDeletions);
 	}
 
 	/**
@@ -408,15 +329,9 @@ public class VariantPoolSummary {
 	 * @return the tiTv
 	 */
 	public double getTiTv() {
-		return tiTv;
+		return getTiCount()/getTvCount();
 	}
 
-	/**
-	 * @param tiTv the tiTv to set
-	 */
-	public void setTiTv(double tiTv) {
-		this.tiTv = tiTv;
-	}
 
 	/**
 	 * @return the genoTiCount
@@ -450,64 +365,110 @@ public class VariantPoolSummary {
 	 * @return the genoTiTv
 	 */
 	public double getGenoTiTv() {
-		return genoTiTv;
+		return getGenoTiCount()/getGenoTvCount();
+	}
+	
+	/**
+	 * @return the allInsertions
+	 */
+	public TreeSet<String> getAllInsertions() {
+		return allInsertions;
 	}
 
 	/**
-	 * @param genoTiTv the genoTiTv to set
+	 * @param allInsertions the allInsertions to set
 	 */
-	public void setGenoTiTv(double genoTiTv) {
-		this.genoTiTv = genoTiTv;
-	}
-
-
-	public void addition(VariantPoolSummary vps) {
-		numSamples += vps.getNumSamples();
-		numVars += vps.getNumVars();
-		numSNVs += vps.getNumSNVs();
-		numMNVs += vps.getNumMNVs();	
-		numIndels += vps.getNumIndels();
-		numInsertions += vps.getNumInsertions();
-		numDeletions += vps.getNumDeletions();
-		smallestInsertion += vps.getSmallestInsertion();
-		largestInsertion += vps.getLargestInsertion();
-		avgInsertionSize += vps.getAvgInsertionSize();
-		smallestDeletion += vps.getSmallestDeletion();
-		largestDeletion += vps.getLargestDeletion();
-		avgDeletionSize += vps.getAvgDeletionSize();
-		numStructVars += vps.getNumStructVars();
-		numStructIns += vps.getNumStructIns();
-		numStructDels += vps.getNumStructDels();
-		numMultiAlts += vps.getNumMultiAlts();
-		tiCount += vps.getTiCount();
-		tvCount += vps.getTvCount();
-		genoTiCount += vps.getGenoTiCount();
-		genoTvCount += vps.getGenoTvCount();
-		
+	public void setAllInsertions(TreeSet<String> allInsertions) {
+		this.allInsertions = allInsertions;
 	}
 	
+	/**
+	 * @param newInsertions
+	 */
+	public void addInsertions(TreeSet<String> newInsertions){
+		this.allInsertions.addAll(newInsertions);
+	}
+
+	/**
+	 * @return the allDeletions
+	 */
+	public TreeSet<String> getAllDeletions() {
+		return allDeletions;
+	}
+
+	/**
+	 * @param allDeletions the allDeletions to set
+	 */
+	public void setAllDeletions(TreeSet<String> allDeletions) {
+		this.allDeletions = allDeletions;
+	}
+	
+	/**
+	 * @param newDeletions
+	 */
+	public void addDeletions(TreeSet<String> newDeletions){
+		this.allDeletions.addAll(newDeletions);
+	}
+
+	/**
+	 * Add two VariantPoolSummaryObjects together
+	 * 
+	 * @param vps1
+	 * @param vps2
+	 * @return a new VariantPoolSummary after adding vps1 and vps2 together.
+	 */
+	public static VariantPoolSummary addVariantPoolSummaries(VariantPoolSummary vps1, VariantPoolSummary vps2) {
+		VariantPoolSummary newVPS = new VariantPoolSummary();
+		newVPS.setNumSamples(vps1.getNumSamples() + vps2.getNumSamples());
+        newVPS.setNumVars(vps1.getNumVars() + vps2.getNumVars());
+        newVPS.setNumSNVs(vps1.getNumSNVs() + vps2.getNumSNVs());
+        newVPS.setNumMNVs(vps1.getNumMNVs() + vps2.getNumMNVs());	
+        
+        /* give newVPS all insertions and deletions from both VariantPoolSummary objects */
+        newVPS.setAllDeletions(vps1.getAllDeletions());
+        newVPS.addDeletions(vps2.getAllDeletions());
+        newVPS.setAllInsertions(vps1.getAllInsertions());
+        newVPS.addInsertions(vps2.getAllInsertions());
+        
+        newVPS.setNumStructVars(vps1.getNumStructVars() + vps2.getNumStructVars());
+        newVPS.setNumStructIns(vps1.getNumStructIns() + vps2.getNumStructIns());
+        newVPS.setNumStructDels(vps1.getNumStructDels() + vps2.getNumStructDels());
+        newVPS.setNumMultiAlts(vps1.getNumMultiAlts() + vps2.getNumMultiAlts());
+        newVPS.setTiCount(vps1.getTiCount() + vps2.getTiCount());
+        newVPS.setTvCount(vps1.getTvCount() + vps2.getTvCount());
+        newVPS.setGenoTiCount(vps1.getGenoTiCount() + vps2.getGenoTiCount());
+        newVPS.setGenoTvCount(vps1.getGenoTvCount() + vps2.getGenoTvCount());
+        return newVPS;
+	}
+	
+	/**
+	 * Get the longest value that will be printed in the summary tables. This
+	 * will allow the table to be formatted with the proper width.
+	 * 
+	 * @return the longest value
+	 */
 	public int longest_length(){
 		int length = 0;
 		ArrayList<String> values = new ArrayList<String>();
-		values.add(Integer.toString(numSamples));
-		values.add(Integer.toString(numVars));
-		values.add(Integer.toString(numSNVs));
-		values.add(Integer.toString(numMNVs));
-		values.add(Integer.toString(numIndels));
-		values.add(Integer.toString(numInsertions));
-		values.add(Integer.toString(numDeletions));
-		values.add(Integer.toString(smallestInsertion));
-		values.add(Integer.toString(largestInsertion));
-		values.add(UtilityBelt.roundDoubleToString((avgInsertionSize)));
-		values.add(Integer.toString(smallestDeletion));
-		values.add(Integer.toString(largestDeletion));
-		values.add(UtilityBelt.roundDoubleToString((avgDeletionSize)));
-		values.add(Integer.toString(numStructVars));
-		values.add(Integer.toString(numStructIns));
-		values.add(Integer.toString(numStructDels));
-		values.add(Integer.toString(numMultiAlts));
-		values.add(UtilityBelt.roundDoubleToString((tiTv)));
-		values.add(UtilityBelt.roundDoubleToString((genoTiTv)));
+		values.add(Integer.toString(this.getNumSamples()));
+		values.add(Integer.toString(this.getNumVars()));
+		values.add(Integer.toString(this.getNumSNVs()));
+		values.add(Integer.toString(this.getNumMNVs()));
+		values.add(Integer.toString(this.getNumIndels()));
+		values.add(Integer.toString(this.getNumInsertions()));
+		values.add(Integer.toString(this.getNumDeletions()));
+		values.add(Integer.toString(this.getSmallestInsertion()));
+		values.add(Integer.toString(this.getLargestInsertion()));
+		values.add(UtilityBelt.roundDoubleToString((this.getAvgInsertionSize())));
+		values.add(Integer.toString(this.getSmallestDeletion()));
+		values.add(Integer.toString(this.getLargestDeletion()));
+		values.add(UtilityBelt.roundDoubleToString((this.getAvgDeletionSize())));
+		values.add(Integer.toString(this.getNumStructVars()));
+		values.add(Integer.toString(this.getNumStructIns()));
+		values.add(Integer.toString(this.getNumStructDels()));
+		values.add(Integer.toString(this.getNumMultiAlts()));
+		values.add(UtilityBelt.roundDoubleToString((this.getGenoTiTv())));
+		values.add(UtilityBelt.roundDoubleToString((this.getGenoTiTv())));
 		for(String s : values){
 			if(s.length()>length)
 				length = s.length();
