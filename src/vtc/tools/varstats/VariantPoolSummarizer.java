@@ -207,7 +207,7 @@ public class VariantPoolSummarizer {
     			structDelCount = 0, tiCount = 0, tvCount = 0;
 		AltType type;
 		VariantRecordSummary vrs = new VariantRecordSummary(var.getChr(), var.getStart(),
-				var.getID(), var.getReference(), new ArrayList<Allele>(var.getAlternateAlleles()));
+				var.getReference(), new TreeSet<Allele>(var.getAlternateAlleles()));
     	for(Allele alt : alts){
     		type = UtilityBelt.determineAltType(ref, alt);
     		
@@ -278,13 +278,10 @@ public class VariantPoolSummarizer {
 				genoTiCount = 0, genoTvCount = 0, nSamples = 0,
 				nSamplesWithCall = 0, nGenosCalled = 0, hetSampleCount,
 				homoVarSampleCount;
-		double altGenoFreq, altSampleFreq;
-		ArrayList<Integer> altGenoCounts = new ArrayList<Integer>();
-		ArrayList<Integer> altSampleCounts = new ArrayList<Integer>();
-		ArrayList<Integer> hetSampleCounts = new ArrayList<Integer>();
-		ArrayList<Integer> homoVarSampleCounts = new ArrayList<Integer>();
-		ArrayList<Double> altGenoFreqs = new ArrayList<Double>();
-		ArrayList<Double> altSampleFreqs = new ArrayList<Double>();
+		HashMap<Allele, Integer> altGenoCounts = new HashMap<Allele, Integer>(),
+				altSampleCounts = new HashMap<Allele, Integer>(),
+				hetSampleCounts = new HashMap<Allele, Integer>(),
+				homoVarSampleCounts = new HashMap<Allele, Integer>();
 		Iterator<Genotype> genoIT = var.getGenotypes().iterator();
 		Genotype geno;
 		int iterCount = 0;
@@ -312,30 +309,25 @@ public class VariantPoolSummarizer {
 			}
 
 			// Get the count for each alternate allele
-			for(int i = 0; i < alts.size(); i++){
+//			for(int i = 0; i < alts.size(); i++){
+			for(Allele alt : alts){
 				if(iterCount == 0){
 					altGenoCount = 0;
 					altSampleCount = 0;
-					altGenoFreq = 0;
-					altSampleFreq = 0;
 					hetSampleCount = 0;
 					homoVarSampleCount = 0;
-					altGenoCounts.add(altGenoCount);
-					altSampleCounts.add(altSampleCount);
-					altGenoFreqs.add(altGenoFreq);
-					altSampleFreqs.add(altSampleFreq);
-					hetSampleCounts.add(hetSampleCount);
-					homoVarSampleCounts.add(homoVarSampleCount);
+					altGenoCounts.put(alt, altGenoCount);
+					altSampleCounts.put(alt, altSampleCount);
+					hetSampleCounts.put(alt, hetSampleCount);
+					homoVarSampleCounts.put(alt, homoVarSampleCount);
 				}
 				else{
-					altGenoCount = altGenoCounts.get(i);
-					altSampleCount = altSampleCounts.get(i);
-					altGenoFreq = altGenoFreqs.get(i);
-					altSampleFreq = altSampleFreqs.get(i);
-					hetSampleCount = hetSampleCounts.get(i);
-					homoVarSampleCount = homoVarSampleCounts.get(i);
+					altGenoCount = altGenoCounts.get(alt);
+					altSampleCount = altSampleCounts.get(alt);
+					hetSampleCount = hetSampleCounts.get(alt);
+					homoVarSampleCount = homoVarSampleCounts.get(alt);
 				}
-				tmpAltGenoCount = geno.countAllele(alts.get(i));
+				tmpAltGenoCount = geno.countAllele(alt);
 				altGenoCount += tmpAltGenoCount;
 				
 				if(tmpAltGenoCount > 0){
@@ -349,20 +341,14 @@ public class VariantPoolSummarizer {
 					}
 				}
 
-				altGenoCounts.set(i, altGenoCount);
-				altSampleCounts.set(i, altSampleCount);
-				hetSampleCounts.set(i, hetSampleCount);
-				homoVarSampleCounts.set(i, homoVarSampleCount);
-				
-				altGenoFreq = (nGenosCalled > 0) ? UtilityBelt.round((double)altGenoCount/nGenosCalled, 2, BigDecimal.ROUND_HALF_UP) : 0;
-				altSampleFreq = (nSamplesWithCall > 0) ? UtilityBelt.round((double)altSampleCount/nSamplesWithCall, 2, BigDecimal.ROUND_HALF_UP) : 0;
-
-				altGenoFreqs.set(i, altGenoFreq);
-				altSampleFreqs.set(i, altSampleFreq);
+				altGenoCounts.put(alt, altGenoCount);
+				altSampleCounts.put(alt, altSampleCount);
+				hetSampleCounts.put(alt, hetSampleCount);
+				homoVarSampleCounts.put(alt, homoVarSampleCount);
 				
 				// Get ti/tv info too, but only vor SNVs
-				if(UtilityBelt.determineAltType(ref, alts.get(i)) == AltType.SNV){
-					if(isTransition(ref.getBaseString(), alts.get(i).getBaseString())){
+				if(UtilityBelt.determineAltType(ref, alt) == AltType.SNV){
+					if(isTransition(ref.getBaseString(), alt.getBaseString())){
 						genoTiCount++;
 					}
 					else{
@@ -382,8 +368,6 @@ public class VariantPoolSummarizer {
 		vrs.setnSamples(nSamples);
 		vrs.setnSamplesWithCall(nSamplesWithCall);
 		vrs.setnGenosCalled(nGenosCalled);
-		vrs.setAltGenotypeFreqs(altGenoFreqs);
-		vrs.setAltSampleFreqs(altSampleFreqs);
 		vrs.setHetSampleCounts(hetSampleCounts);
 		vrs.setHomoVarSampleCounts(homoVarSampleCounts);
 		
