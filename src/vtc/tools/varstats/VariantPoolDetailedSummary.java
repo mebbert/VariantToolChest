@@ -6,6 +6,7 @@ package vtc.tools.varstats;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
@@ -51,9 +52,11 @@ public class VariantPoolDetailedSummary extends VariantPoolSummary {
 			int numSNVs, int numMNVs, int numStructVars, int numStructIns,
 			int numStructDels, int numMultiAlts, double tiCount,
 			double tvCount, double tiTv, double genoTiCount,
-			double genoTvCount, double genoTiTv) {
+			double genoTvCount, double genoTiTv, TreeSet<String> allInsertions,
+			TreeSet<String> allDeletions) {
 		super(numVarRecords, numVars, numSNVs, numMNVs, numStructVars, numStructIns,
-				numStructDels, numMultiAlts, tiCount, tvCount, genoTiCount, genoTvCount);
+				numStructDels, numMultiAlts, tiCount, tvCount, genoTiCount, genoTvCount,
+				allInsertions, allDeletions);
 		init();
 	}
 
@@ -63,7 +66,8 @@ public class VariantPoolDetailedSummary extends VariantPoolSummary {
 	public VariantPoolDetailedSummary(VariantPoolSummary vps) {
 		super(vps.getNumVarRecords(), vps.getNumVars(), vps.getNumSNVs(), vps.getNumMNVs(),
 				vps.getNumStructVars(), vps.getNumStructIns(), vps.getNumStructDels(), vps.getNumMultiAlts(),
-				vps.getTiCount(), vps.getTvCount(), vps.getGenoTiCount(), vps.getGenoTvCount());
+				vps.getTiCount(), vps.getTvCount(), vps.getGenoTiCount(), vps.getGenoTvCount(),
+				vps.getAllInsertions(), vps.getAllDeletions());
 		init();
 	}
 	

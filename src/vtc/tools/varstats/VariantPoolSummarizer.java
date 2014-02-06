@@ -186,7 +186,7 @@ public class VariantPoolSummarizer {
 		
 		return new VariantPoolSummary(vp.getNumVarRecords(), totalVarCount, snvCount, mnvCount,
 				structIndelCount, structInsCount, structDelCount, multiAltCount,
-				tiCount, tvCount, genoTiCount, genoTvCount);
+				tiCount, tvCount, genoTiCount, genoTvCount, allInsertions, allDeletions);
     }
     
     /**

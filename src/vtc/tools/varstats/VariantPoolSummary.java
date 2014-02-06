@@ -53,20 +53,12 @@ public class VariantPoolSummary {
 	 */
 	public VariantPoolSummary(int numVarRecords, int numVars, int numSNVs, int numMNVs,
 			int numStructVars, int numStructIns, int numStructDels, int numMultiAlts,
-			double tiCount, double tvCount, double genoTiCount, double genoTvCount) {
+			double tiCount, double tvCount, double genoTiCount, double genoTvCount,
+			TreeSet<String> allInsertions, TreeSet<String> allDeletions) {
 		this.numVarRecords = numVarRecords;
 		this.numVars = numVars;
 		this.numSNVs = numSNVs;
 		this.numMNVs = numMNVs;
-//		this.numIndels = numIndels;
-//		this.numInsertions = numInsertions;
-//		this.numDeletions = numDeletions;
-//		this.smallestInsertion = smallestInsertion;
-//		this.largestInsertion = largestInsertion;
-//		this.avgInsertionSize = avgInsertionSize;
-//		this.smallestDeletion = smallestDeletion;
-//		this.largestDeletion = largestDeletion;
-//		this.avgDeletionSize = avgDeletionSize;
 		this.numStructVars = numStructVars;
 		this.numStructIns = numStructIns;
 		this.numStructDels = numStructDels;
@@ -75,6 +67,8 @@ public class VariantPoolSummary {
 		this.tvCount = tvCount;
 		this.genoTiCount = genoTiCount;
 		this.genoTvCount = genoTvCount;
+		this.allInsertions = allInsertions;
+		this.allDeletions = allDeletions;
 	}
 	
 	
@@ -84,16 +78,7 @@ public class VariantPoolSummary {
 		numSamples = 0;
 		numVars = 0;
 		numSNVs = 0;
-		numMNVs = 0;	
-//		numIndels = 0;
-//		numInsertions = 0;
-//		numDeletions = 0;
-//		smallestInsertion = 0;
-//		largestInsertion = 0;
-//		avgInsertionSize = 0;
-//		smallestDeletion = 0;
-//		largestDeletion = 0;
-//		avgDeletionSize = 0;
+		numMNVs = 0;
 		numStructVars = 0;
 		numStructIns = 0;
 		numStructDels = 0;
@@ -102,6 +87,8 @@ public class VariantPoolSummary {
 		tvCount = 0;
 		genoTiCount = 0;
 		genoTvCount = 0;
+		this.allInsertions = new TreeSet<String>();
+		this.allDeletions = new TreeSet<String>();
 	}
 	
 	
