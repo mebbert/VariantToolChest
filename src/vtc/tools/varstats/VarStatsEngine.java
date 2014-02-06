@@ -173,7 +173,9 @@ public class VarStatsEngine implements Engine {
                 "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
         PrintWriter writer = new PrintWriter(fileName);
         writer.println(header);
-        for(VariantRecordSummary vrs : summary.getVariantRecordSummaries()){
+        VariantRecordSummary vrs;
+        for(String vrsKey : summary.getVariantRecordSummaries().keySet()){
+        	vrs = summary.getVariantRecordSummary(vrsKey);
             writer.println(vrs.toString());
         }
         writer.close();   	

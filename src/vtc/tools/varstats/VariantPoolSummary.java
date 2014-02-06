@@ -386,7 +386,9 @@ public class VariantPoolSummary {
 	 * @param newInsertions
 	 */
 	public void addInsertions(TreeSet<String> newInsertions){
-		this.allInsertions.addAll(newInsertions);
+		if(newInsertions != null){
+            this.allInsertions.addAll(newInsertions);
+		}
 	}
 
 	/**
@@ -407,7 +409,9 @@ public class VariantPoolSummary {
 	 * @param newDeletions
 	 */
 	public void addDeletions(TreeSet<String> newDeletions){
-		this.allDeletions.addAll(newDeletions);
+		if(newDeletions != null){
+            this.allDeletions.addAll(newDeletions);
+		}
 	}
 
 	/**

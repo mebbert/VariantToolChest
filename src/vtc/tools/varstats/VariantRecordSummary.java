@@ -595,8 +595,14 @@ public class VariantRecordSummary {
 	public String altToString(){
 		
 		StringBuilder altString = new StringBuilder();
+		TreeSet<Allele> alts = this.getAlts();
+		if(alts.isEmpty()){
+			altString.append(".");
+			return altString.toString();
+		}
+
 		boolean first = true;
-		for(Allele alt : this.getAlts()){
+		for(Allele alt : alts){
 			if(!first){
 				altString.append(",");
 			}
@@ -613,6 +619,12 @@ public class VariantRecordSummary {
 	 */
 	public String altStatArrayToString(HashMap<Allele, ?> altStat){
 		StringBuilder sb = new StringBuilder();
+		TreeSet<Allele> alts = this.getAlts();
+		if(alts.isEmpty()){
+			sb.append("0");
+			return sb.toString();
+		}
+
 		boolean first = true;
 		for(Allele alt : this.getAlts()){
 			if(!first){
@@ -624,9 +636,27 @@ public class VariantRecordSummary {
 		return sb.toString();
 	}
 	
+	/**
+	 * Generate a String including the Chr, pos, ref,
+	 * alt, number of Het samples for the alt, number
+	 * of Homo samples for the alt, total number of
+	 * samples where the locus was callable, and the
+	 * total number of samples where calls were attempted
+	 * at this locus. All of this information is generated
+	 * for each alternate allele on separate lines using
+	 * '\n'
+	 * @return
+	 */
 	public String toStringSimpleByAlt(){
+		if(this.getAlts().size() == 0){
+			return null;
+		}
+		boolean first = true;
 		StringBuilder sb = new StringBuilder();
 		for(Allele alt : this.getAlts()){
+			if(!first){ // If more than one alt, add newline
+				sb.append("\n");
+			}
             sb.append(this.getChr());
             sb.append("\t");
             sb.append(this.getPosition());
@@ -642,6 +672,7 @@ public class VariantRecordSummary {
             sb.append(this.getnSamplesWithCall());
             sb.append("\t");
             sb.append(this.getnSamples());
+            first = false;
 		}
 		return sb.toString();
 	}
