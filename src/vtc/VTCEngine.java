@@ -11,7 +11,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import org.apache.log4j.Logger;
 
 import vtc.Engine;
-import vtc.Tool;
+import vtc.KnownTools;
 import vtc.tools.arupfrequencycalculator.ARUPFrequencyCalculatorEngine;
 import vtc.tools.setoperator.SetOperatorEngine;
 import vtc.tools.varstats.VarStatsEngine;
@@ -54,21 +54,21 @@ public class VTCEngine implements Engine{
 			
 			/* Get string specifying appropriate tool */
 			String toolName = (String) parsedArgs.get("ToolName");
-			Tool tool = vtc.getTool(toolName);
+			KnownTools tool = vtc.getTool(toolName);
 			if(tool == null){
 				throw new ArgumentParserException("Invalid tool specified: " + toolName, parser);
 			}
 			
 			/* Determine which tool was specified and call it */
-			if(tool == Tool.SET_OPERATOR){
+			if(tool == KnownTools.SET_OPERATOR){
 				SetOperatorEngine soe = new SetOperatorEngine(toolArgs);
 				soe.operate();
 			}
-			else if(tool == Tool.VAR_STATS){
+			else if(tool == KnownTools.VAR_STATS){
                 VarStatsEngine vse = new VarStatsEngine(toolArgs);
                 vse.doStats();
             }
-			else if(tool == Tool.ARUP_FREQUENCY_CALCULATOR){
+			else if(tool == KnownTools.ARUP_FREQUENCY_CALCULATOR){
 				ARUPFrequencyCalculatorEngine afce = new ARUPFrequencyCalculatorEngine(toolArgs);
 				afce.calculateFrequencies();
 			}
@@ -111,8 +111,8 @@ public class VTCEngine implements Engine{
 	 * @param tool
 	 * @return
 	 */
-	private Tool getTool(String tool){
-		for(Tool t : Tool.values()){
+	private KnownTools getTool(String tool){
+		for(KnownTools t : KnownTools.values()){
 			if(t.permittedCommandsContain(tool)){
 				return t;
 			}
@@ -134,7 +134,7 @@ public class VTCEngine implements Engine{
 	private static String createToolCommandLineToString(){
 		StringBuilder sb = new StringBuilder();
 		int count = 1;
-		for(Tool t : Tool.values()){
+		for(KnownTools t : KnownTools.values()){
 			sb.append("\n" + Integer.toString(count) + ". " + t.toString());
 			count++;
 		}

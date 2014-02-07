@@ -47,30 +47,42 @@ public class VarStatsEngine implements Engine {
         parser = ArgumentParsers.newArgumentParser("VarStats");
         parser.description("Variant Stats will perform basic statistical analysis.");
         parser.defaultHelp(true); // Add default values to help menu
-        ArgumentGroup Stats = parser.addArgumentGroup("statistical arguments");
-        @SuppressWarnings("unused")
-		ArgumentGroup output = parser.addArgumentGroup("output arguments");
+        ArgumentGroup summary = parser.addArgumentGroup("Summary arguments");
+        ArgumentGroup assoc = parser.addArgumentGroup("Association arguments");
 
         // MutuallyExclusiveGroup group = parser.addMutuallyExclusiveGroup();
 
-        Stats.addArgument("-i", "--input")
+        parser.addArgument("-i", "--input")
                 .nargs("+")
                 .dest("VCF")
                 .required(true)
                 .type(String.class)
-                .help("Specify a VCF input file. Multiple files may be " + "specified at once. An ID may be provided for the input file " + "for use in --set-operation as follows: '--input " + "fId=input.vcf fId2=input2.vcf', where "
-                        + "'fId' and 'fId2' are the new IDs. If IDs " + "are excluded, IDs will be assigned as 'v0', " + "'v1', etc. by default.");
-        Stats.addArgument("-s", "--summary").dest("Summary").action(Arguments.storeTrue()).help("Prints summary statistics to the console");
-        Stats.addArgument("-c", "--combined").dest("Combined").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files in one block.  The default will print each file separately.");
-        Stats.addArgument("-x", "--side_x_side").dest("Side_x_side").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files side by side.  The default will print each file separately.");
-        Stats.addArgument("-m", "--MultiColumns").dest("MultiColumns").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files in multiple columns of the same table.  The default will print each file separately.");
-        Stats.addArgument("-d", "--detailed-summary")
-        		.dest("Detailed")
-        		.action(Arguments.storeTrue())
-        		.help("Prints summary statistics to the console");
-        Stats.addArgument("-a", "--association").action(Arguments.storeTrue()).dest("association")
+                .help("Specify a VCF input file. Multiple files may be " +
+                		"specified at once. An ID may be provided for the input file " +
+                		"for use in --set-operation as follows: '--input " +
+                		"fId=input.vcf fId2=input2.vcf', where " +
+                		"'fId' and 'fId2' are the new IDs. If IDs " +
+                		"are excluded, IDs will be assigned as 'v0', " +
+                		"'v1', etc. by default.");
+        summary.addArgument("-s", "--summary")
+		.dest("SUMMARY")
+		.type(String.class)
+		.setDefault(SupportedSummaryTypes.TABLE.getName())
+        .help("Specify the summary format. Possible options are: " +
+                createSupportedSummaryTypeString());
+//        Stats.addArgument("-s", "--summary").dest("Summary").action(Arguments.storeTrue()).help("Prints summary statistics to the console");
+//        Stats.addArgument("-c", "--combined").dest("Combined").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files in one block.  The default will print each file separately.");
+//        Stats.addArgument("-x", "--side_x_side").dest("Side_x_side").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files side by side.  The default will print each file separately.");
+//        Stats.addArgument("-m", "--MultiColumns").dest("MultiColumns").action(Arguments.storeTrue()).help("Prints summary statistics to the console for mulitple files in multiple columns of the same table.  The default will print each file separately.");
+        summary.addArgument("-d", "--detailed-summary")
+        		.dest("DETAILED")
+        		.type(String.class)
+        		.setDefault(SupportedDetailedSummaryTypes.INDIVIDUAL.getName())
+        		.help("Prints detailed summary statistics to file. Possible opteions are: "
+        				+ createSupportedDetailedSummaryTypeString());
+        assoc.addArgument("-a", "--association").action(Arguments.storeTrue()).dest("association")
                 .help("Performs an association test (also generates allele frequencies).  It only accepts one file. " + "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
-        Stats.addArgument("-p", "--pheno").nargs("+").dest("pheno").type(String.class).help("Allows for multiple pheno files.");
+        assoc.addArgument("-p", "--pheno").nargs("+").dest("pheno").type(String.class).help("Allows for multiple pheno files.");
 
         
         try {
@@ -97,38 +109,60 @@ public class VarStatsEngine implements Engine {
         try {
 
             TreeMap<String, VariantPool> AllVPs;
+            boolean sum = false, detailedSummary = false;
+            SupportedSummaryTypes  summaryType = null;
+            SupportedDetailedSummaryTypes detSumType = null;
 
+            String sumTypeString = parsedArgs.getString("SUMMARY");
+            if(sumTypeString != null){
+                summaryType = getSupportedSummaryTypeByCommand(sumTypeString);
+                sum = true;
+                if (summaryType == null) {
+                    throw new ArgumentParserException("Invalid summary type specified: " + sumTypeString, parser);
+                }
+            }
 
-            boolean sum = parsedArgs.getBoolean("Summary");
-            boolean combined = parsedArgs.getBoolean("Combined");
+            String detailedSumType = parsedArgs.getString("DETAILED");
+            if(detailedSumType != null){
+                detSumType = getSupportedDetailedSummaryTypeByCommand(detailedSumType);
+                detailedSummary = true;
+                if(detSumType == null){
+                    throw new ArgumentParserException("Invalid detailed summary type specified: " + detailedSumType, parser);
+                }
+            }
+
+//            boolean combined = parsedArgs.getBoolean("Combined");
             boolean assoc = parsedArgs.getBoolean("association");
-            boolean side_by_side = parsedArgs.getBoolean("Side_x_side");
-            boolean multi_column = parsedArgs.getBoolean("MultiColumns");
-            boolean detailedSummary = parsedArgs.getBoolean("Detailed");
+//            boolean side_by_side = parsedArgs.getBoolean("Side_x_side");
+//            boolean multi_column = parsedArgs.getBoolean("MultiColumns");
             
             HashMap<String, VariantPoolSummary> summaries = new HashMap<String, VariantPoolSummary>();
             
             AllVPs = UtilityBelt.createVariantPools(vcfArgs, true);
             if(sum){
             	summaries = VariantPoolSummarizer.summarizeVariantPools(AllVPs);
-            	if(side_by_side)
+            	if(summaryType == SupportedSummaryTypes.SIDE_BY_SIDE)
             		VariantPoolSummarizer.PrintSide_by_Side(summaries);
-            	else if(multi_column)
+            	else if(summaryType == SupportedSummaryTypes.TABLE)
             		VariantPoolSummarizer.Print_Columns(summaries);
-            	else
-            		VariantPoolSummarizer.printSummary(summaries, combined);
+            	else if(summaryType == SupportedSummaryTypes.COMBINED){
+            		VariantPoolSummarizer.printSummary(summaries, true);
+            	}
+            	else if(summaryType == SupportedSummaryTypes.INDIVIDUAL){
+            		VariantPoolSummarizer.printSummary(summaries, false);
+            	}
             	
             }
             if(detailedSummary){
             	// generate detailed summary
             	
-            	if(combined){
+            	if(detSumType == SupportedDetailedSummaryTypes.COMBINED){
                     VariantPoolDetailedSummary summary =
                             VariantPoolSummarizer.summarizeVariantPoolsDetailedCombined(AllVPs);
                     String fileName = "unionedVP_detailed_summary.txt";
                     printDetailedSummaryToFile(summary, fileName);
             	}
-            	else{
+            	else if(detSumType == SupportedDetailedSummaryTypes.INDIVIDUAL){
                     HashMap<String, VariantPoolDetailedSummary> detailedSummaries =
                             VariantPoolSummarizer.summarizeVariantPoolsDetailed(AllVPs);
                     printDetailedSummariesToFile(detailedSummaries);
@@ -158,6 +192,44 @@ public class VarStatsEngine implements Engine {
             printDetailedSummaryToFile(summary, fileName);
         }
 	}
+	
+	private static String createSupportedDetailedSummaryTypeString(){
+		StringBuilder sb = new StringBuilder();
+		int count = 1;
+		for(SupportedDetailedSummaryTypes t : SupportedDetailedSummaryTypes.values()){
+			sb.append("\n" + Integer.toString(count) + ". " + t.toString());
+			count++;
+		}
+		return sb.toString();
+	}
+
+	private static String createSupportedSummaryTypeString(){
+		StringBuilder sb = new StringBuilder();
+		int count = 1;
+		for(SupportedSummaryTypes t : SupportedSummaryTypes.values()){
+			sb.append("\n" + Integer.toString(count) + ". " + t.toString());
+			count++;
+		}
+		return sb.toString();
+	}
+
+    private static SupportedSummaryTypes getSupportedSummaryTypeByCommand(String commandString) {
+        for (SupportedSummaryTypes s : SupportedSummaryTypes.values()) {
+            if (s.permittedCommandsContain(commandString)) {
+                return s;
+            }
+        }
+        return null;
+    }	
+
+    private static SupportedDetailedSummaryTypes getSupportedDetailedSummaryTypeByCommand(String commandString) {
+        for (SupportedDetailedSummaryTypes s : SupportedDetailedSummaryTypes.values()) {
+            if (s.permittedCommandsContain(commandString)) {
+                return s;
+            }
+        }
+        return null;
+    }
     
     /**
      * Print a single detailed summary to the given file

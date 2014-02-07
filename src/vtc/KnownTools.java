@@ -10,7 +10,7 @@ import java.util.Arrays;
  * @author markebbert
  *
  */
-public enum Tool {
+public enum KnownTools {
 
 	SET_OPERATOR("SetOperator", "SO", "Perform set operations on variant sets",
 			new ArrayList<String>(Arrays.asList(new String[]{"SO", "SetOperator"}))),
@@ -22,7 +22,7 @@ public enum Tool {
 	
 	private String name, shortCommand, briefDescription;
 	private ArrayList<String> permittedCommands;
-	private Tool(String name, String shortCommand, String briefDescription, ArrayList<String> permittedCommands){
+	private KnownTools(String name, String shortCommand, String briefDescription, ArrayList<String> permittedCommands){
 		this.name = name;
 		this.shortCommand = shortCommand;
 		this.briefDescription = briefDescription;

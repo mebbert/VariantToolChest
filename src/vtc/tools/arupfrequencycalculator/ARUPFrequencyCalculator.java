@@ -147,9 +147,17 @@ public class ARUPFrequencyCalculator {
 				sampleName = manifestMap.get(SAMPLE_NAME_KEY);
 				vcfFile = path + sampleName + "_all_sites.vcf";
 				
+				/* If the '*_all_sites.vcf' file doesn't exist, see
+				 * if the .gz file exists. If not, log that it didn't
+				 * exist and continue on next loop.
+				 */
 				if(!new File(vcfFile).exists()){
-					logFileWriter.write(sampleName + "\t" + analType + "\tCould not find " + vcfFile + "\n");
-					continue;
+					vcfFile += ".gz";
+
+                    if(!new File(vcfFile).exists()){
+                        logFileWriter.write(sampleName + "\t" + analType + "\tCould not find " + vcfFile + "\n");
+                        continue;
+                    }
 				}
 
 				logger.info("Parsing VCF: " + vcfFile);
@@ -159,7 +167,7 @@ public class ARUPFrequencyCalculator {
 				logger.info("Summarizing VCF: " + vcfFile);
                 vpDetailedSummary = VariantPoolSummarizer.summarizeVariantPoolDetailed(vp);
 
-                String freqsFileName = vcfFile.substring(0, vcfFile.lastIndexOf(".")) + "-freqs.txt";
+                String freqsFileName = vcfFile.substring(0, vcfFile.lastIndexOf(".vcf")) + "-freqs.txt";
                 printSimpleVPSummaryToFile(vpDetailedSummary, freqsFileName);
                 
                 /* Add the recent detailed summary to the master, or make it
