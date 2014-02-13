@@ -266,6 +266,7 @@ public class ARUPFrequencyCalculator {
 					return;
 				}
 				
+				System.out.println("Test");
 
 				/* Collect the manifestMaps by analType */
 				ArrayList<HashMap<String, String>> manifestList = sampleManifests.get(analType); 
