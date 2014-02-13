@@ -156,16 +156,40 @@ public class VariantPoolDetailedSummary extends VariantPoolSummary {
 		/* Add all of the values specific to general VariantPoolSummary objects */
 		VariantPoolDetailedSummary newVPDS = new VariantPoolDetailedSummary(VariantPoolSummary.addVariantPoolSummaries(s1, s2));
 		VariantRecordSummary vrs, tmpVrs;
+		
+		/* Loop over VariantRecordSummary objects in s1 */
 		for(String vrsKey : s1.getVariantRecordSummaries().keySet()){
+
+			/* Get the corresponding VariantRecordSummary from both s1 and s2, if possible */
 			vrs = s1.getVariantRecordSummary(vrsKey);
-			tmpVrs = s2.getVariantRecordSummary(vrs.getID());
+			tmpVrs = s2.getVariantRecordSummary(vrsKey);
+			
+			if(vrs.getPosition() == 189877298){
+				logger.info("HERE");
+			}
+			
+			/* If s2, had the same VariantRecordSummary, add them together */
 			if(tmpVrs != null){
 				newVPDS.addVariantRecordSummary(VariantRecordSummary.addVariantRecordSummaries(vrs, tmpVrs));
 			}
+			
+			/* s2 did not have the VariantRecordSummary. */
 			else{
+				
+				/* If s2 had coverage at this locus (chr:pos) for any ref or alt allele,
+				 * increment the number of samples that have ANY call at this locus.
+				 */
 				if(hasCoverageAtLocus(s2, vrs)){
-                    vrs.setnSamplesWithCall(vrs.getnSamplesWithCall() + 1);
+					ArrayList<VariantRecordSummary> vrsList =
+							s2.getVariantRecordSummariesAtLocus(vrs.getChr() + ":" + vrs.getPosition());
+					if(vrsList.size() > 0){
+                        vrs.setnSamplesWithCall(vrs.getnSamplesWithCall() + vrsList.get(0).getnSamplesWithCall());
+					}
 				}
+				
+				/* Also increment the total number of samples we've seen. This
+				 * value includes those without coverage at this locus
+				 */
 				vrs.setnSamples(vrs.getnSamples() + 1);
 				newVPDS.addVariantRecordSummary(vrs);
 			}
@@ -174,15 +198,30 @@ public class VariantPoolDetailedSummary extends VariantPoolSummary {
 		
 		for(String vrsKey : s2.getVariantRecordSummaries().keySet()){
 			vrs = s2.getVariantRecordSummary(vrsKey);
-			tmpVrs = newVPDS.getVariantRecordSummary(vrs.getID());
-			if(tmpVrs != null){
-				continue; // These were already combined
+			tmpVrs = newVPDS.getVariantRecordSummary(vrsKey);
+			if(vrs.getPosition() == 189877298){
+				logger.info("HERE");
 			}
+			if(tmpVrs != null){
+				continue; // These were already combined in the above loop, so just continue
+		}
 			else{
 				if(hasCoverageAtLocus(newVPDS, vrs)){
-					vrs.setnSamplesWithCall(vrs.getnSamplesWithCall() + 1);
+					ArrayList<VariantRecordSummary> vrsList =
+							newVPDS.getVariantRecordSummariesAtLocus(vrs.getChr() + ":" + vrs.getPosition());
+					if(vrsList.size() > 0){
+						
+						/* Set the number of samples with call to be those from another
+						 * variant at the same location because this will have already
+						 * been added to the other in the previous loop. 
+						 */
+                        vrs.setnSamplesWithCall(vrsList.get(0).getnSamplesWithCall());
+                        vrs.setnSamples(vrsList.get(0).getnSamples());
+					}
 				}
-				vrs.setnSamples(vrs.getnSamples() + 1);
+				else{
+                    vrs.setnSamples(vrs.getnSamples() + 1);
+				}
 				newVPDS.addVariantRecordSummary(vrs);
 			}
 		}
@@ -330,21 +369,21 @@ public class VariantPoolDetailedSummary extends VariantPoolSummary {
 //		}
         return newVPDS;
 	}
-	
-	/**
-	 * Check if vpsd has a record corresponding to the same chr:pos:ref as vrs
-	 * @param vpsd
-	 * @param vrs
-	 * @return
-	 */
-	private static boolean hasCorrespondingRecord(VariantPoolDetailedSummary vpsd, VariantRecordSummary vrs){
-
-		/* Check if vpsd has a corresponding record. */
-		if(vpsd.getVariantRecordSummary(vrs.getID()) == null){
-			return false;
-		}
-		return true;
-	}
+//	
+//	/**
+//	 * Check if vpsd has a record corresponding to the same chr:pos:ref as vrs
+//	 * @param vpsd
+//	 * @param vrs
+//	 * @return
+//	 */
+//	private static boolean hasCorrespondingRecord(VariantPoolDetailedSummary vpsd, VariantRecordSummary vrs){
+//
+//		/* Check if vpsd has a corresponding record. */
+//		if(vpsd.getVariantRecordSummary(vrs.getID()) == null){
+//			return false;
+//		}
+//		return true;
+//	}
 	
 	/**
 	 * Check if vpsd has any callable locus at the same chr:pos as vrs. If so, we assume
