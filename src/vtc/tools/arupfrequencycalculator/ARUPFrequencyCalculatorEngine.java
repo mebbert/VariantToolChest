@@ -16,6 +16,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import org.apache.log4j.Logger;
 import org.broad.tribble.TribbleException;
 
+import vtc.Engine;
 import vtc.datastructures.InvalidInputFileException;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.utilitybelt.UtilityBelt;
@@ -24,7 +25,7 @@ import vtc.tools.utilitybelt.UtilityBelt;
  * @author markebbert
  *
  */
-public class ARUPFrequencyCalculatorEngine {
+public class ARUPFrequencyCalculatorEngine implements Engine{
 	
 	private static Logger logger = Logger.getLogger(ARUPFrequencyCalculatorEngine.class);
 	private static ArgumentParser parser;

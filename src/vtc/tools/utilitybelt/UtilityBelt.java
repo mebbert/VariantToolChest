@@ -3,6 +3,7 @@
  */
 package vtc.tools.utilitybelt;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -59,8 +60,9 @@ public class UtilityBelt {
 	 * @return
 	 * @throws InvalidInputFileException
 	 * @throws InvalidOperationException 
+	 * @throws IOException 
 	 */
-	public static TreeMap<String, VariantPool> createVariantPools(ArrayList<Object> inputFiles, boolean addChr) throws InvalidInputFileException, InvalidOperationException{
+	public static TreeMap<String, VariantPool> createVariantPools(ArrayList<Object> inputFiles, boolean addChr) throws InvalidInputFileException, InvalidOperationException, IOException{
 		
 		TreeMap<String, VariantPool> vpMap = new TreeMap<String, VariantPool>();
 		for(Object o : inputFiles){

@@ -649,7 +649,7 @@ public class VariantRecordSummary {
 	 */
 	public String toStringSimpleByAlt(){
 		if(this.getAlts().size() == 0){
-			return null;
+			return generateString(null);
 		}
 		boolean first = true;
 		StringBuilder sb = new StringBuilder();
@@ -657,24 +657,40 @@ public class VariantRecordSummary {
 			if(!first){ // If more than one alt, add newline
 				sb.append("\n");
 			}
-            sb.append(this.getChr());
-            sb.append("\t");
-            sb.append(this.getPosition());
-            sb.append("\t");
-            sb.append(this.getRef().getBaseString());
-            sb.append("\t");
-            sb.append(alt.getBaseString());
-            sb.append("\t");
-            sb.append(this.getHetSampleCount(alt));
-            sb.append("\t");
-            sb.append(this.getHomoVarSampleCount(alt));
-            sb.append("\t");
-            sb.append(this.getnSamplesWithCall());
-            sb.append("\t");
-            sb.append(this.getnSamples());
+			sb.append(generateString(alt));
             first = false;
 		}
 		return sb.toString();
+	}
+	
+	public String generateString(Allele alt){
+		StringBuilder sb = new StringBuilder();
+        sb.append(this.getChr());
+        sb.append(",");
+        sb.append(this.getPosition());
+        sb.append(",");
+        sb.append(this.getRef().getBaseString());
+        sb.append(",");
+        if(alt != null){
+            sb.append(alt.getBaseString());
+            sb.append(",");
+            sb.append(this.getHetSampleCount(alt));
+            sb.append(",");
+            sb.append(this.getHomoVarSampleCount(alt));
+            sb.append(",");
+            sb.append(this.getnSamplesWithCall());
+            sb.append(",");
+            sb.append(this.getnSamples());	
+        }
+        else{
+            sb.append(",");
+            sb.append(",");
+            sb.append(",");
+            sb.append(this.getnSamplesWithCall());
+            sb.append(",");
+            sb.append(this.getnSamples());	
+        }
+        return sb.toString();
 	}
 
 	public String toString(){

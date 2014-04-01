@@ -5,14 +5,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,7 +69,7 @@ public class VariantPool implements Pool{
 
 	private HashMap<String, VariantContext> hMap;
 	private HashMap<String, HashMap<String, VariantContext>> hMapChrPos;
-	private TreeMap<String, VariantContext> tMap;
+//	private TreeMap<String, VariantContext> tMap;
 	private TreeSet<String> contigs;
 	private SamplePool samples;
 	private String poolID;
@@ -91,30 +93,30 @@ public class VariantPool implements Pool{
 		init(addChr);
 	}
 
-	public VariantPool(VariantPool vp){
+	public VariantPool(VariantPool vp) throws IOException{
 		this(vp.file, vp.poolID, vp.addChr());
 	}
 	
-	public VariantPool(String filePath, String poolID, boolean addChr){
+	public VariantPool(String filePath, String poolID, boolean addChr) throws IOException{
 		this(new File(filePath), poolID, addChr);
 	}
 	
-	public VariantPool(File file, String poolID, boolean addChr){
+	public VariantPool(File file, String poolID, boolean addChr) throws IOException{
 		this(file, poolID, false, addChr);
 	}
 
-	public VariantPool(File file, String poolID, boolean requireIndex, boolean addChr){
+	public VariantPool(File file, String poolID, boolean requireIndex, boolean addChr) throws IOException{
 		logger.info("Creating new VariantPool from " + file.getName() + " with poolID " + poolID);
 		init(file, poolID, requireIndex, addChr);
 				
 	}
 	
-	public VariantPool(String inputString, boolean requireIndex, boolean addChr) throws InvalidInputFileException{
+	public VariantPool(String inputString, boolean requireIndex, boolean addChr) throws InvalidInputFileException, IOException{
 		HashMap<String, String> fileAndPoolIDMap = this.parseInputString(inputString);
 		init(new File(fileAndPoolIDMap.get("file")), fileAndPoolIDMap.get("poolID"), requireIndex, addChr);
 	}
 
-	private void init(File file, String poolID, boolean requireIndex, boolean addChr){
+	private void init(File file, String poolID, boolean requireIndex, boolean addChr) throws IOException{
 		init(addChr);
 
 		this.setFile(file);
@@ -124,7 +126,7 @@ public class VariantPool implements Pool{
 	}
 	
 	private void init(boolean addChr){
-		this.tMap = new TreeMap<String, VariantContext>(new NaturalOrderComparator());
+//		this.tMap = new TreeMap<String, VariantContext>(new NaturalOrderComparator());
 		this.hMap = new HashMap<String, VariantContext>();
 		this.hMapChrPos = new HashMap<String, HashMap<String,VariantContext>>();
 		this.contigs = new TreeSet<String>();
@@ -200,7 +202,10 @@ public class VariantPool implements Pool{
 	 * @return
 	 */
 	public Iterator<String> getVariantIterator(){
-		return this.tMap.keySet().iterator();
+//		return this.tMap.keySet().iterator();
+		ArrayList<String> keys = new ArrayList<String>(this.hMap.keySet());
+		Collections.sort(keys, new NaturalOrderComparator());
+		return keys.iterator();
 	}	
 	
 	public TreeSet<String> getSamples(){
@@ -427,7 +432,7 @@ public class VariantPool implements Pool{
 		}
 		else{
 			hMap.put(chrPosRef, v);
-			tMap.put(chrPosRef, v);
+//			tMap.put(chrPosRef, v);
 			if(!hMapChrPos.containsKey(chrPos)){
 				HashMap<String, VariantContext> newHMap = new HashMap<String, VariantContext>();
 				newHMap.put(chrPosRef, v);
@@ -441,7 +446,7 @@ public class VariantPool implements Pool{
 	
 	public void updateVariant(String key, VariantContext newVar){
 		hMap.put(key, newVar);
-		tMap.put(key, newVar);
+//		tMap.put(key, newVar);
 	}
 	
 	/**
@@ -606,9 +611,11 @@ public class VariantPool implements Pool{
 	 * @param filename
 	 * @param requireIndex
 	 * @return
+	 * @throws IOException 
 	 */
-	private void parseVCF(String filename, boolean requireIndex){
+	private void parseVCF(String filename, boolean requireIndex) throws IOException{
 		logger.info("Parsing " + filename + " ...");
+        NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
 		/** latest VCF specification */
 		final VCFCodec vcfCodec = new VCFCodec();
@@ -622,35 +629,32 @@ public class VariantPool implements Pool{
 
 		/** loop over each Variation */
 		Iterator<VariantContext> it = null;
-		try {
-			it = reader.iterator();
-			VariantContext vc;
-			int count = 0;
-			while ( it.hasNext() ) {
-				
-				if(count > 1 && count % 10000 == 0) System.out.print("Parsed variants: " + count + "\r");
+        it = reader.iterator();
+        VariantContext vc;
+        int count = 0;
+        while ( it.hasNext() ) {
+            
+            if(count > 1 && count % 10000 == 0) System.out.print("Parsed variants: "
+            		+ nf.format(count) + "\r");
 
-				/* get next variation and save it */
-				vc = it.next();
-				
-				/* Create a new SamplePool and add it to the VariantPool */
-				if(count == 0){
-					SamplePool sp = new SamplePool();
-					sp.addSamples(new TreeSet<String>(vc.getSampleNames()));
-					sp.setPoolID(this.getPoolID());
-					this.setSamples(sp);
-				}
-				
-				this.addVariant(vc, false);
-				count++;
-			}
+            /* get next variation and save it */
+            vc = it.next();
+            
+            /* Create a new SamplePool and add it to the VariantPool */
+            if(count == 0){
+                SamplePool sp = new SamplePool();
+                sp.addSamples(new TreeSet<String>(vc.getSampleNames()));
+                sp.setPoolID(this.getPoolID());
+                this.setSamples(sp);
+            }
+            
+            this.addVariant(vc, false);
+            count++;
+        }
 
-			/* we're done */
-			reader.close();
+        /* we're done */
+        reader.close();
 
-		} catch (IOException e) {
-			// TODO: add logger, print error, and throw exception
-		}
 	}
 	
 	/**

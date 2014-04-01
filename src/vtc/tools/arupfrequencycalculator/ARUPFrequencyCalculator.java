@@ -12,12 +12,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -32,10 +35,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
+import org.broad.tribble.AbstractFeatureReader;
+import org.broad.tribble.FeatureReader;
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
+import org.broadinstitute.variant.vcf.VCFCodec;
 
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.SupportedFileType;
@@ -124,12 +130,18 @@ public class ARUPFrequencyCalculator {
 	private void calculateAllSiteVCFFreqs() throws InvalidInputFileException, IOException{
 		logger.info("Calculating frequencies for all-site vcfs.");
 		Iterator<String> manifestIT = sampleManifests.keySet().iterator();
-		String analType, origVCFFile, vcfFile, vcfFileArgs, masterAnalSummaryFileName, sampleName, path;
+		String freqsFileName, analType, origVCFFile, vcfFile, vcfFileArgs,
+				masterAnalSummaryFileName, sampleName, path;
 		ArrayList<HashMap<String, String>> manifestMaps;
 		HashMap<String, String> manifestMap;
-		boolean addChr = false;
+		boolean addChr = false, requireIndex = false;
 		VariantPool vp;
         VariantPoolDetailedSummary vpDetailedSummary, masterDetailedSummary;
+        final VCFCodec vcfCodec = new VCFCodec();
+        NumberFormat nf = NumberFormat.getInstance(Locale.US);
+        String header = "Chr,Pos,Ref,Alt,Het_count,Homo_var_count,N_samples_with_coverage,N_total_samples";
+        FileWriter fw;
+        VariantRecordSummary vrs;
 		while(manifestIT.hasNext()){
 			analType = manifestIT.next();
 			masterDetailedSummary = null;
@@ -159,34 +171,73 @@ public class ARUPFrequencyCalculator {
                         continue;
                     }
 				}
+				
+                freqsFileName = vcfFile.substring(0, vcfFile.lastIndexOf(".vcf")) + "-freqs.txt";
+		        fw = new FileWriter(freqsFileName);
+		        fw.write(header + "\n");
+				
+                logger.info("Parsing " + vcfFile + " ...");
+                
 
-				logger.info("Parsing VCF: " + vcfFile);
-				vcfFileArgs = "vars=" + vcfFile;
-				vp = new VariantPool(vcfFileArgs, false, addChr);
+                /* get A VCF Reader */
+                FeatureReader<VariantContext> reader = AbstractFeatureReader.getFeatureReader(
+                        vcfFile, vcfCodec, requireIndex);
 
-				logger.info("Summarizing VCF: " + vcfFile);
-                vpDetailedSummary = VariantPoolSummarizer.summarizeVariantPoolDetailed(vp);
+                /* loop over each Variation */
+                Iterator<VariantContext> it = null;
+                it = reader.iterator();
+                VariantContext vc;
+                HashMap<String, String> vrsMap = new HashMap<String, String>();
+                int count = 0;
+                while ( it.hasNext() ) {
+                    
+                    if(count > 1 && count % 100000 == 0) System.out.print("Parsed variants: "
+                                + nf.format(count) + "\r");
+                    
+                    vc = it.next();
+                    vrs = VariantPoolSummarizer.collectVariantStatistics(vc);
+                    vrsMap.put(vc.getChr() + ":" + vc.getStart() + ":" + vc.getReference(), vrs.getAlts().toString() + vrs.getHetSampleCounts().toString() + vrs.getHomoVarSampleCounts().toString());
+                    fw.write(vrs.toStringSimpleByAlt() + "\n");
+                    count++;
+                }
 
-                String freqsFileName = vcfFile.substring(0, vcfFile.lastIndexOf(".vcf")) + "-freqs.txt";
-                printSimpleVPSummaryToFile(vpDetailedSummary, freqsFileName);
+                /* we're done */
+                reader.close();
+                fw.close();
+
+				
+				
+				
+				
+				
+				
+
+//				logger.info("Parsing VCF: " + vcfFile);
+//				vcfFileArgs = "vars=" + vcfFile;
+//				vp = new VariantPool(vcfFileArgs, false, addChr);
+//
+//				logger.info("Summarizing VCF: " + vcfFile);
+//                vpDetailedSummary = VariantPoolSummarizer.summarizeVariantPoolDetailed(vp);
+
+//                printSimpleVPSummaryToFile(vpDetailedSummary, freqsFileName);
                 
                 /* Add the recent detailed summary to the master, or make it
                  * the master if this is the first one.
                  */
-                if(masterDetailedSummary != null){
-                    masterDetailedSummary = VariantPoolDetailedSummary.addVariantPoolDetailedSummaries(masterDetailedSummary, vpDetailedSummary);
-                }
-                else{
-                	masterDetailedSummary = vpDetailedSummary;
-                }
+//                if(masterDetailedSummary != null){
+//                    masterDetailedSummary = VariantPoolDetailedSummary.addVariantPoolDetailedSummaries(masterDetailedSummary, vpDetailedSummary);
+//                }
+//                else{
+//                	masterDetailedSummary = vpDetailedSummary;
+//                }
 			}
-			if(masterDetailedSummary == null){
-                logger.warn("Could not find any all-site vcfs for the following analysis type: " + analType);
-			}
-			else{
-                masterAnalSummaryFileName = analType + "/" + CURR_DATE + "--master_summary--" + analType + ".txt";
-                printSimpleVPSummaryToFile(masterDetailedSummary, masterAnalSummaryFileName);
-			}
+//			if(masterDetailedSummary == null){
+//                logger.warn("Could not find any all-site vcfs for the following analysis type: " + analType);
+//			}
+//			else{
+//                masterAnalSummaryFileName = analType + "/" + CURR_DATE + "--master_summary--" + analType + ".txt";
+//                printSimpleVPSummaryToFile(masterDetailedSummary, masterAnalSummaryFileName);
+//			}
 		}
 	}
 	
@@ -398,7 +449,8 @@ public class ARUPFrequencyCalculator {
 		}
 	}
 	
-	private void generateHomoRefCalls(File refDict) throws FileNotFoundException, JSONException, InvalidInputFileException, URISyntaxException{
+	private void generateHomoRefCalls(File refDict)
+			throws JSONException, InvalidInputFileException, URISyntaxException, IOException{
 		logger.info("Converting No Calls to homozygous reference...");
 
 		long startTime = System.nanoTime();
@@ -446,10 +498,10 @@ public class ARUPFrequencyCalculator {
 	 * @param noCallRegionsBySample
 	 * @throws InvalidInputFileException
 	 * @throws URISyntaxException 
-	 * @throws FileNotFoundException 
+	 * @throws IOException 
 	 */
 	private void generateHomoRefCalls(File master_vcf, HashMap<String, 
-			NoCallRegionList> noCallRegionsBySample, File refDict) throws InvalidInputFileException, FileNotFoundException, URISyntaxException{
+			NoCallRegionList> noCallRegionsBySample, File refDict) throws InvalidInputFileException, URISyntaxException, IOException{
 		
 		// get variant pool
 		VariantPool master = new VariantPool(master_vcf.getAbsolutePath(), false, false);
@@ -648,9 +700,7 @@ public class ARUPFrequencyCalculator {
 	 */
 	private void printSimpleVPSummaryToFile(VariantPoolDetailedSummary summary, String fileName) throws IOException{
 
-		// TODO: CHECK both N sample counts!!!
-
-        String header = "Chr\tPos\tRef\tAlt\tHet_count\tHomo_var_count\tN_samples_with_coverage\tN_total_samples";
+        String header = "Chr,Pos,Ref,Alt,Het_count,Homo_var_count,N_samples_with_coverage,N_total_samples";
         FileWriter fw = new FileWriter(fileName);
         fw.write(header + "\n");
         String line;

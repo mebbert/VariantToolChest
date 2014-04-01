@@ -197,7 +197,7 @@ public class VariantPoolSummarizer {
      * @param var
      * @return
      */
-    private static VariantRecordSummary collectVariantStatistics(VariantContext var){
+    public static VariantRecordSummary collectVariantStatistics(VariantContext var){
 
     	Allele ref = var.getReference();
     	List<Allele> alts = var.getAlternateAlleles();
