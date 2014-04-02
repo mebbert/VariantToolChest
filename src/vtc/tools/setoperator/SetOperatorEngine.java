@@ -35,6 +35,7 @@ import vtc.tools.setoperator.operation.ComplementOperation;
 import vtc.tools.setoperator.operation.IntersectOperation;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.setoperator.operation.Operation;
+import vtc.tools.setoperator.operation.UnionOperation;
 import vtc.tools.utilitybelt.UtilityBelt;
 import vtc.tools.varstats.VariantPoolSummarizer;
 import vtc.tools.varstats.VariantPoolSummary;
@@ -404,7 +405,7 @@ public class SetOperatorEngine implements Engine {
                 result = so.performIntersect((IntersectOperation) op, associatedVPs, intersectType);
             } else if (o == Operator.UNION) {
             	System.out.println("\nPerforming union...");
-                result = so.performUnion(op, associatedVPs, forceUniqueNames);
+                result = so.performUnion((UnionOperation)op, associatedVPs, forceUniqueNames);
             } else {
                 throw new RuntimeException("Something is very wrong! Received an invalid operator: " + o);
             }

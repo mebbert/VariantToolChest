@@ -594,6 +594,7 @@ public class VariantPool implements Pool{
 		/* Start building the new VariantContext */
 		VariantContextBuilder vcBuilder = new VariantContextBuilder();
 		vcBuilder.chr(var.getChr());
+		vcBuilder.id(var.getID());
 		vcBuilder.start(var.getStart());
 		vcBuilder.stop(var.getEnd());
 		vcBuilder.alleles(alleles);

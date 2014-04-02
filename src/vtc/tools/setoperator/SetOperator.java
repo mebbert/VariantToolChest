@@ -29,6 +29,7 @@ import vtc.tools.setoperator.operation.ComplementOperation;
 import vtc.tools.setoperator.operation.IntersectOperation;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.setoperator.operation.Operation;
+import vtc.tools.setoperator.operation.UnionOperation;
 import vtc.tools.utilitybelt.UtilityBelt;
 import vtc.tools.varstats.AltType;
 
@@ -422,7 +423,7 @@ public class SetOperator {
 					allAlleles.addAll(var.getAlternateAlleles());
 					
 					/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
-					genotypes.addAll(getCorrectGenotypes(var, vp.getSamples()));
+					genotypes.addAll(getCorrectGenotypes(var, op.getSamplePool(vp.getPoolID()).getSamples()));
 				}
 			}
 			else{
@@ -806,7 +807,7 @@ public class SetOperator {
 	 * @return VariantPool
 	 * @throws InvalidOperationException 
 	 */
-	public VariantPool performUnion(Operation op, ArrayList<VariantPool> variantPools, boolean forceUniqueNames) throws InvalidOperationException{
+	public VariantPool performUnion(UnionOperation op, ArrayList<VariantPool> variantPools, boolean forceUniqueNames) throws InvalidOperationException{
 		
 		/* TODO: Only perform union on samples specified in operation!
 		 * TODO: Add verbose information
@@ -829,7 +830,7 @@ public class SetOperator {
 
 		/* Add all samples from each VariantPool involved in the intersection */
 		if(forceUniqueNames){
-			uniqueNames = generateUniqueSampleNames(variantPools);
+			uniqueNames = generateUniqueSampleNames(variantPools, op);
 			for(VariantPool vp : variantPools){
 				// TODO: All SamplePool manipulations should happen in the VariantPool! Otherwise they get out of sync!
 				union.addSamples(uniqueNames.get(vp.getPoolID()));
@@ -837,7 +838,7 @@ public class SetOperator {
 		}
 		else{
 			for(VariantPool vp : variantPools){
-				union.addSamples(vp.getSamples());
+				union.addSamples(op.getSamplePool(vp.getPoolID()).getSamples());
 			}
 		}
 		
@@ -872,11 +873,19 @@ public class SetOperator {
 						genotypes.addAll(getCorrectGenotypes(var, uniqueNames.get(vp.getPoolID())));
 					}
 					else{
-						genotypes.addAll(getCorrectGenotypes(var, vp.getSamples()));
+						genotypes.addAll(getCorrectGenotypes(var, op.getSamplePool(vp.getPoolID()).getSamples()));
 					}
 					alleles.addAll(var.getAlleles());
 					
-					
+					/*
+					 * Just add everything from the selected samples if we're only unioning
+                     * within a single VariantPool (i.e., a subset of samples within a single
+                     * VariantPool). This is essentially just extracting the samples from the file
+					 */
+					if(variantPools.size() == 1){
+						union.addVariant(buildVariant(var, alleles, genotypes), true);
+						continue;
+					}
 					
 					for(VariantPool vp2 : variantPools){
 						
@@ -900,7 +909,7 @@ public class SetOperator {
 								genotypes.addAll(getCorrectGenotypes(var2, uniqueNames.get(vp2.getPoolID())));
 							}
 							else{
-								genotypes.addAll(getCorrectGenotypes(var2, vp2.getSamples()));
+								genotypes.addAll(getCorrectGenotypes(var2, op.getSamplePool(vp.getPoolID()).getSamples()));
 							}
 							alleles.addAll(var2.getAlleles());
 						}
@@ -1031,14 +1040,14 @@ public class SetOperator {
 	 * @return
 	 * @throws InvalidOperationException
 	 */
-	private HashMap<String, TreeSet<String>> generateUniqueSampleNames(ArrayList<VariantPool> variantPools) throws InvalidOperationException{
+	private HashMap<String, TreeSet<String>> generateUniqueSampleNames(ArrayList<VariantPool> variantPools, UnionOperation op) throws InvalidOperationException{
 		HashMap<String, TreeSet<String>> vpHash = new HashMap<String, TreeSet<String>>();
 		TreeSet<String> sampleNames, masterSampleNames = new TreeSet<String>();
 
         String name, uniqueName, uniqueNum;
 		for(VariantPool vp : variantPools){
 			sampleNames = new TreeSet<String>();
-			Iterator<String> it = vp.getSamples().iterator();
+			Iterator<String> it = op.getSamplePool(vp.getPoolID()).getSamples().iterator(); // Only get the sample names involved in the operation
 			while(it.hasNext()){
 				name = it.next();
 //				if(masterSampleNames.contains(name)){
@@ -1120,7 +1129,10 @@ public class SetOperator {
 		else{
 			Iterator<String> sampleIT = samples.iterator();
 			ArrayList<Genotype> correctGenos = new ArrayList<Genotype>();
-			for(Genotype geno : var.getGenotypesOrderedByName()){
+            ArrayList<String> varSampleNamesOrdered = new ArrayList<String>(var.getGenotypes(samples).getSampleNamesOrderedByName());
+            Genotype geno;
+			for(String sample : varSampleNamesOrdered){
+				geno = var.getGenotype(sample);
 				correctGenos.add(VariantPool.renameGenotypeForSample(sampleIT.next(), geno));
 			}
 			return correctGenos;
