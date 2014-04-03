@@ -3,7 +3,6 @@
  */
 package vtc.tools.varstats;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +21,7 @@ import vtc.tools.setoperator.SetOperator;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.setoperator.operation.Operation;
 import vtc.tools.setoperator.operation.OperationFactory;
+import vtc.tools.setoperator.operation.UnionOperation;
 import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
@@ -82,7 +82,7 @@ public class VariantPoolSummarizer {
             union += "]";
     			
     		Operation op = OperationFactory.createOperation(union, allVPs);
-    		unionVP = so.performUnion(op, allVPsList, true);
+    		unionVP = so.performUnion((UnionOperation)op, allVPsList, true);
     		
     		return summarizeVariantPoolDetailed(unionVP);
     	}   	

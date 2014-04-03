@@ -12,7 +12,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,6 +49,7 @@ import vtc.tools.setoperator.SetOperator;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.setoperator.operation.Operation;
 import vtc.tools.setoperator.operation.OperationFactory;
+import vtc.tools.setoperator.operation.UnionOperation;
 import vtc.tools.utilitybelt.UtilityBelt;
 import vtc.tools.varstats.VariantPoolDetailedSummary;
 import vtc.tools.varstats.VariantPoolSummarizer;
@@ -420,7 +420,7 @@ public class ARUPFrequencyCalculator {
 					allVPs.put(vp2.getPoolID(), vp2);
 				
 					op = OperationFactory.createOperation(opString, allVPs);
-					masterVP = so.performUnion(op, UtilityBelt.getAssociatedVariantPoolsAsArrayList(op, allVPs), forceUniqueNames);
+					masterVP = so.performUnion((UnionOperation)op, UtilityBelt.getAssociatedVariantPoolsAsArrayList(op, allVPs), forceUniqueNames);
 				}
 				else{
 					manifestMap1 = manifestMaps.get(i);
@@ -439,7 +439,7 @@ public class ARUPFrequencyCalculator {
 					allVPs.put(vp2.getPoolID(), vp2);
 
 					op = OperationFactory.createOperation(opString, allVPs);
-					masterVP = so.performUnion(op, UtilityBelt.getAssociatedVariantPoolsAsArrayList(op, allVPs), forceUniqueNames);
+					masterVP = so.performUnion((UnionOperation)op, UtilityBelt.getAssociatedVariantPoolsAsArrayList(op, allVPs), forceUniqueNames);
 					
 				}
                 logger.info("Printing " + masterVP.getPoolID() + " to file: " + master_vcf.getAbsolutePath());
