@@ -1,11 +1,29 @@
 ### Introduction
+The Variant Tool Chest (VTC) is designed to be a tool chest for analyzing
+variants (particularly VCF files). There are several specific gaps VTC fills
+including:
+* Advanced set operations
+* Simple VCF comparisons
+* Variant summaries (detailed and minimal)
+* Variant statistics (e.g. association studies)
+
+There are currently two tools in VTC known as SetOperator and VarStats. Some
+important features for SetOperator are:
+* Handles multi-sample VCFs
+* Genotype aware set operations
+* Powerful set operation syntax
+* Operation stringing (predefine operations whose result should be passed
+  directly to the next operation
+* Auto 'chr' handling (i.e., we don't care if some VCFs have 'chr' preprended to
+  the #CHROM value and some don't.)
+* INDEL fuzzy matching (sometimes INDELS don't align the same even though they
+  are the same). We'll tell you about these matches.
+
+VarStats is still under development but currently performs association analyses
+on single or multi-sample VCFs and will print out detailed VCF summaries.
 
 
-
-
-
-
-### Set Operators
+### Set Operator (SO)
 
 
 
