@@ -32,7 +32,7 @@ Some important features for SetOperator are:
 * INDEL fuzzy matching (sometimes INDELS don't align the same even though they
   are the same). We'll tell you about these matches.
 
-#### Multi-sample VCFS
+#### Multi-sample VCFs
 Short and sweet. We handle multi-sample VCFs. :)
 
 ```
