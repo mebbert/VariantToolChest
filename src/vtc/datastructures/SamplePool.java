@@ -17,13 +17,14 @@ import vtc.tools.setoperator.operation.InvalidOperationException;
  */
 public class SamplePool implements Pool{
 
-	private static ArrayList<String> usedPoolIDs = new ArrayList<String>();
+	private static TreeSet<String> usedPoolIDs = new TreeSet<String>();
 	
 	/* This poolID must match the poolID of its associated VariantPool object
 	 * since all samples come from the variants anyway.
 	 */
 	private String poolID;
 	private TreeSet<String> samples;
+	private static TreeSet<String> definedVariantPoolIDs; // Keep track of all variantPools defined on the command line
 
 	// Match on the expected pattern for a sample pool (e.g. f1[s1,s3] )
 	private static Pattern samplePoolPattern = Pattern.compile("^(\\w+)(\\[(.+)\\])*$");
@@ -40,6 +41,7 @@ public class SamplePool implements Pool{
 	
 	public SamplePool(){
 		this.samples = new TreeSet<String>();
+		this.definedVariantPoolIDs = new TreeSet<String>();
 	}
 	
 	
@@ -56,7 +58,7 @@ public class SamplePool implements Pool{
 		return this.poolID;
 	}
 	
-	public static ArrayList<String> getAllPoolIDs(){
+	public static TreeSet<String> getAllPoolIDs(){
 		return SamplePool.usedPoolIDs;
 	}
 	

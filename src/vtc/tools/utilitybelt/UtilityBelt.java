@@ -9,6 +9,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -62,7 +63,7 @@ public class UtilityBelt {
 	 * @throws InvalidOperationException 
 	 * @throws IOException 
 	 */
-	public static TreeMap<String, VariantPool> createVariantPools(ArrayList<Object> inputFiles, boolean addChr) throws InvalidInputFileException, InvalidOperationException, IOException{
+	public static TreeMap<String, VariantPool> createVariantPools(List<String> inputFiles, boolean addChr) throws InvalidInputFileException, InvalidOperationException, IOException{
 		
 		TreeMap<String, VariantPool> vpMap = new TreeMap<String, VariantPool>();
 		for(Object o : inputFiles){

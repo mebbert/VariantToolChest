@@ -23,6 +23,8 @@ public class VariantPoolSummary {
 	private int numStructIns;
 	private int numStructDels;
 	private int numMultiAlts;
+	private int numHets;
+	private int numHomos;
 	private double tiCount;
 	private double tvCount;
 	private double genoTiCount;
@@ -53,6 +55,7 @@ public class VariantPoolSummary {
 	 */
 	public VariantPoolSummary(int numVarRecords, int numVars, int numSNVs, int numMNVs,
 			int numStructVars, int numStructIns, int numStructDels, int numMultiAlts,
+			int numHets, int numHomos,
 			double tiCount, double tvCount, double genoTiCount, double genoTvCount,
 			TreeSet<String> allInsertions, TreeSet<String> allDeletions) {
 		this.numVarRecords = numVarRecords;
@@ -63,6 +66,8 @@ public class VariantPoolSummary {
 		this.numStructIns = numStructIns;
 		this.numStructDels = numStructDels;
 		this.numMultiAlts = numMultiAlts;
+		this.numHets = numHets;
+		this.numHomos = numHomos;
 		this.tiCount = tiCount;
 		this.tvCount = tvCount;
 		this.genoTiCount = genoTiCount;
@@ -184,6 +189,34 @@ public class VariantPoolSummary {
 	 */
 	public int getNumDeletions() {
 		return this.allDeletions.size();
+	}
+	
+	/**
+	 * @return the numHets
+	 */
+	public int getNumHets() {
+		return numHets;
+	}
+
+	/**
+	 * @param numHets the numHets to set
+	 */
+	public void setNumHets(int numHets) {
+		this.numHets = numHets;
+	}
+
+	/**
+	 * @return the numHomos
+	 */
+	public int getNumHomos() {
+		return numHomos;
+	}
+
+	/**
+	 * @param numHomos the numHomos to set
+	 */
+	public void setNumHomos(int numHomos) {
+		this.numHomos = numHomos;
 	}
 
 	/**

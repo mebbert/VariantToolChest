@@ -6,9 +6,9 @@ package vtc.tools.varstats;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeMap;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -103,8 +103,8 @@ public class VarStatsEngine implements Engine {
     public void doStats() {
         // lets have all the stats take place here for now..
 
-        ArrayList<Object> vcfArgs = new ArrayList<Object>(parsedArgs.getList("VCF"));
-        ArrayList<Object> phenoArgs = (ArrayList<Object>) parsedArgs.getList("pheno");
+        List<String> vcfArgs = parsedArgs.getList("VCF");
+        List<String> phenoArgs = parsedArgs.getList("pheno");
 
         try {
 

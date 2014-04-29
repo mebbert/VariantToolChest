@@ -145,7 +145,7 @@ public class VariantPoolSummarizer {
 		VariantRecordSummary vrs;
 		TreeSet<String> allInsertions = new TreeSet<String>(), allDeletions = new TreeSet<String>();
     	int totalVarCount = 0, snvCount = 0, mnvCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0,
-    			multiAltCount = 0, tiCount = 0, tvCount = 0, genoTiCount = 0, genoTvCount = 0;
+    			multiAltCount = 0, tiCount = 0, tvCount = 0, genoTiCount = 0, genoTvCount = 0, hetCount = 0, homCount = 0;
 		while (varIT.hasNext()) {
 			currVarKey = varIT.next();
 

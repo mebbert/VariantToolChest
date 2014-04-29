@@ -49,7 +49,7 @@ public class VarStats {
 
     // constructors
 
-    public VarStats(TreeMap<String, VariantPool> allVPs, ArrayList<Object> phenoArgs/*, boolean printMulti, boolean sum, boolean assoc*/) {
+    public VarStats(TreeMap<String, VariantPool> allVPs, List<String> phenoArgs/*, boolean printMulti, boolean sum, boolean assoc*/) {
        /* if (sum)
             IterateAndCount(allVPs, printMulti);
         if (assoc)*/
@@ -62,7 +62,7 @@ public class VarStats {
     // Functions
 
     @SuppressWarnings("unused")
-	public void doAssociation(TreeMap<String, VariantPool> AllVPs, ArrayList<Object> phenoArgs) {
+	public void doAssociation(TreeMap<String, VariantPool> AllVPs, List<String> phenoArgs) {
 
         if (phenoArgs != null) {
             // Make a structure to read in the phenotype information...
@@ -133,7 +133,7 @@ public class VarStats {
 
     }
 
-    private HashMap<String, String> ParsePhenoFile(ArrayList<Object> phenofiles) {
+    private HashMap<String, String> ParsePhenoFile(List<String> phenofiles) {
         HashMap<String, String> phenos = new HashMap<String, String>();
         for (Object o : phenofiles) {
             // lets parse the phenotype file.
@@ -178,17 +178,5 @@ public class VarStats {
         }
     }
 
-    /*
-     * 
-     * 
-     * 
-     * Association functions above, Summary functions below
-     */
-
-	private void IterateAndCount(TreeMap<String, VariantPool> allVPs, boolean printMulti) {
-
-        Summary s = new Summary(allVPs, printMulti);
-
-    }
 
 }

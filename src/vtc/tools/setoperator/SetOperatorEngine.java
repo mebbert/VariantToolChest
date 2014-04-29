@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeMap;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -35,6 +36,7 @@ import vtc.tools.setoperator.operation.ComplementOperation;
 import vtc.tools.setoperator.operation.IntersectOperation;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.setoperator.operation.Operation;
+import vtc.tools.setoperator.operation.OperationFactory;
 import vtc.tools.setoperator.operation.UnionOperation;
 import vtc.tools.utilitybelt.UtilityBelt;
 import vtc.tools.varstats.VariantPoolSummarizer;
@@ -208,14 +210,14 @@ public class SetOperatorEngine implements Engine {
 
         try {
 
-            ArrayList<Object> vcfArgs = null, operations = null;
+            List<String> vcfArgs = null, operations = null;
             if (parsedArgs.getList("VCF") != null) {
-                vcfArgs = new ArrayList<Object>(parsedArgs.getList("VCF"));
+                vcfArgs = parsedArgs.getList("VCF");
             } else {
                 throw new RuntimeException("No input files!");
             }
             if (parsedArgs.getList("OP") != null) {
-                operations = new ArrayList<Object>(parsedArgs.getList("OP"));
+                operations = parsedArgs.getList("OP");
             }
 
             /* Collect and verify arguments */
@@ -310,7 +312,7 @@ public class SetOperatorEngine implements Engine {
      * @throws IOException
      * @throws URISyntaxException
      */
-    private void performComparison(ArrayList<Object> vcfArgs, boolean verbose, boolean addChr,
+    private void performComparison(List<String> vcfArgs, boolean verbose, boolean addChr,
     		ComplementType complementType, IntersectType intersectType, SupportedFileType outputFormat,
     		File outFile, File refGenome, boolean repairHeader, boolean forceUniqueNames)
             throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
@@ -326,7 +328,7 @@ public class SetOperatorEngine implements Engine {
         String complement2 = complement2OperID + "=c[" + allVPIDs.get(1) + ":" + allVPIDs.get(0) + "]";
 
         /* prepare arguments for 'performOperations()' */
-        ArrayList<Object> operations = new ArrayList<Object>();
+        ArrayList<String> operations = new ArrayList<String>();
         operations.add(intersect);
         operations.add(union);
         operations.add(complement1);
@@ -371,8 +373,8 @@ public class SetOperatorEngine implements Engine {
      * @throws IOException
      * @throws URISyntaxException
      */
-    private TreeMap<String, VariantPool> performOperations(ArrayList<Object> vcfArgs, TreeMap<String, VariantPool> allVPs,
-    		ArrayList<Object> operations, boolean verbose, boolean addChr, ComplementType complementType,
+    private TreeMap<String, VariantPool> performOperations(List<String> vcfArgs, TreeMap<String, VariantPool> allVPs,
+    		List<String> operations, boolean verbose, boolean addChr, ComplementType complementType,
     		IntersectType intersectType, boolean printIntermediateFiles, SupportedFileType outputFormat,
     		File outFile, File refGenome, boolean repairHeader, boolean forceUniqueNames)
     				throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
@@ -383,7 +385,7 @@ public class SetOperatorEngine implements Engine {
 	        allVPs = UtilityBelt.createVariantPools(vcfArgs, addChr);
         }
 
-        ArrayList<Operation> ops = UtilityBelt.createOperations(operations, allVPs);
+//        ArrayList<Operation> ops = UtilityBelt.createOperations(operations, allVPs);
 
         ArrayList<VariantPool> associatedVPs;
         ArrayList<VCFHeader> associatedVPHeaders;
@@ -391,7 +393,9 @@ public class SetOperatorEngine implements Engine {
         Operator o;
         String intermediateOut, canonicalPath;
         VCFHeader header;
-        for (Operation op : ops) {
+//        for (Operation op : ops) {
+        for (String oper : operations) {
+        	Operation op = OperationFactory.createOperation(oper, allVPs);
             SetOperator so = new SetOperator(verbose, addChr);
             associatedVPs = UtilityBelt.getAssociatedVariantPoolsAsArrayList(op, allVPs);
             result = null;

@@ -89,8 +89,8 @@ public class VariantPool implements Pool{
 	 * Create an empty VariantPool. Use this for building a
 	 * VariantPool from scratch rather than reading from a file.
 	 */
-	public VariantPool(boolean addChr){
-		init(addChr);
+	public VariantPool(boolean addChr, String poolID){
+		init(addChr, poolID);
 	}
 
 	public VariantPool(VariantPool vp) throws IOException{
@@ -117,15 +117,15 @@ public class VariantPool implements Pool{
 	}
 
 	private void init(File file, String poolID, boolean requireIndex, boolean addChr) throws IOException{
-		init(addChr);
+		init(addChr, poolID);
 
 		this.setFile(file);
-		this.setPoolID(poolID);
-		addPoolID(this.poolID);
 		this.parseVCF(file.getPath(), requireIndex);
 	}
 	
-	private void init(boolean addChr){
+	private void init(boolean addChr, String poolID){
+		this.setPoolID(poolID);
+		addPoolID(poolID);
 //		this.tMap = new TreeMap<String, VariantContext>(new NaturalOrderComparator());
 		this.hMap = new HashMap<String, VariantContext>();
 		this.hMapChrPos = new HashMap<String, HashMap<String,VariantContext>>();

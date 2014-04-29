@@ -4,6 +4,7 @@
 package vtc.tools.setoperator;
 
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +41,7 @@ import vtc.tools.varstats.AltType;
  */
 public class SetOperator {
 
+    NumberFormat nf = NumberFormat.getInstance(Locale.US);
 	private static Logger logger = Logger.getLogger(SetOperator.class);
 	private boolean verbose;
 	private boolean addChr;
@@ -126,13 +129,13 @@ public class SetOperator {
 		 */
 		VariantPool vp1 = vpQueue.pop();
 		VariantPool vp2 = vpQueue.pop();
-		VariantPool complement = performAComplementB(op.getOperationID(), vp1, vp2, type);
+		VariantPool complement = performAComplementB(op, vp1, vp2, type);
 		
 		/* If more VariantPools specified, take previous result and
 		 * subtract the next VariantPool from it.
 		 */
 		while(vpQueue.peekFirst() != null){
-			complement = performAComplementB(op.getOperationID(), complement, vpQueue.pop(), type);
+			complement = performAComplementB(op, complement, vpQueue.pop(), type);
 		}
 
 		return complement;
@@ -147,13 +150,13 @@ public class SetOperator {
 	 * @return
 	 * @throws InvalidOperationException 
 	 */
-	private VariantPool performAComplementB(String operationID, VariantPool vp1,
+	private VariantPool performAComplementB(ComplementOperation op, VariantPool vp1,
 			VariantPool vp2, ComplementType type) throws InvalidOperationException{
 		
-		VariantPool complement = new VariantPool(addChr());
-		complement.setFile(new File(operationID));
-		complement.setPoolID(operationID);	
-		complement.addSamples(vp1.getSamples());
+		VariantPool complement = new VariantPool(addChr(), op.getOperationID());
+		complement.setFile(new File(op.getOperationID()));
+//		complement.setPoolID(operationID);	
+		complement.addSamples(op.getSamplePool(vp1.getPoolID()).getSamples());
 		
 		Iterator<String> it = vp1.getVariantIterator();
 		String currVarKey;
@@ -192,17 +195,17 @@ public class SetOperator {
 					ArrayList<VariantPool> vps = new ArrayList<VariantPool>();
 					vps.add(vp1);
 					vps.add(vp2);
-					if(!allVariantPoolsContainVariant(vps, currVarKey, operationID)){
+					if(!allVariantPoolsContainVariant(vps, currVarKey, op.getOperationID())){
 						keep = true;
 					}
 					else{
 						if(verbose()){
 							String s = "Not all variant pools contained variant.";
-							emitExcludedVariantWarning(s, currVarKey, operationID, null);
+							emitExcludedVariantWarning(s, currVarKey, op.getOperationID(), null);
 						}
 					}
 				}
-				else if(!subtractByGenotype(var1.getGenotypes(), var2.getGenotypes(), type, currVarKey, operationID)){
+				else if(!subtractByGenotype(var1.getGenotypes(), var2.getGenotypes(), type, currVarKey, op.getOperationID())){
 					keep = true;
 				}
 			}
@@ -254,9 +257,13 @@ public class SetOperator {
 		
 		if(type == ComplementType.HET_OR_HOMO_ALT){
 
-			if(genotypesHetOrHomoAlt(gc1) && genotypesHetOrHomoAlt(gc2)){
+			/* If any genotypes in gc2 are not homo ref, return true */
+			if(anyGenotypeNotHomoRef(gc2)){
 				return true;
 			}
+//			if(genotypesHetOrHomoAlt(gc1) && genotypesHetOrHomoAlt(gc2)){
+//				return true;
+//			}
 			if(verbose()){
 				String s = "Not all genotypes were het or homo alt.";
 				emitExcludedVariantWarning(s, currVarKey, operationID, null);
@@ -277,23 +284,22 @@ public class SetOperator {
 	}
 	
 	/**
-	 * Iterate over GenotypesContext and verify all Genotypes meet ComplementType
-	 * requirements
+	 * Determine if any Genotypes in gc are not homozygous ref. 
 	 * @param gc
-	 * @return
+	 * @return true, if any Genotype is not homozygous ref
 	 */
-	private boolean genotypesHetOrHomoAlt(GenotypesContext gc){
+	private boolean anyGenotypeNotHomoRef(GenotypesContext gc){
 		Iterator<Genotype> genoIT = gc.iterator();
 		Genotype geno;
 		
 		/* Iterate over gc1 and verify they are all het or homo var */
 		while(genoIT.hasNext()){
 			geno = genoIT.next();
-			if(!(geno.isHet() && genoContainsRefAllele(geno)) && !geno.isHomVar()){
-				return false;
+			if(!geno.isHomRef()){
+				return true;
 			}
 		}	
-		return true;
+		return false;
 	}
 	
 	/**
@@ -371,13 +377,14 @@ public class SetOperator {
 			throw new RuntimeException("Unable to identify the smallest VariantPool. Something is very wrong.");
 		}
 
-		VariantPool intersection = new VariantPool(addChr());
+		VariantPool intersection = new VariantPool(addChr(), op.getOperationID());
 		intersection.setFile(new File(op.getOperationID()));
-		intersection.setPoolID(op.getOperationID());
+//		intersection.setPoolID(op.getOperationID());
 
 		/* Add all samples from each VariantPool involved in the intersection */
 		for(VariantPool vp : variantPools){
-			intersection.addSamples(vp.getSamples());
+//			intersection.addSamples(vp.getSamples());
+			intersection.addSamples(op.getSamplePool(vp.getPoolID()).getSamples());
 		}
 
 		Iterator<String> it = smallest.getVariantIterator();
@@ -520,6 +527,8 @@ public class SetOperator {
 
 				// Build the VariantContext and add to the VariantPool
 				intersection.addVariant(buildVariant(var, allAlleles, genotypes), false);
+				if(intersection.getNumVarRecords() > 1 && intersection.getNumVarRecords() % 100 == 0)
+					System.out.print("Added " + nf.format(intersection.getNumVarRecords()) + " variant records to intersection.\r");
 			}
 		}
 		intersection.setPotentialMatchingIndelRecords(potentialMatchingIndelRecords);
@@ -809,7 +818,7 @@ public class SetOperator {
 	 */
 	public VariantPool performUnion(UnionOperation op, ArrayList<VariantPool> variantPools, boolean forceUniqueNames) throws InvalidOperationException{
 		
-		/* TODO: Only perform union on samples specified in operation!
+		/*
 		 * TODO: Add verbose information
 		 */
 
@@ -824,9 +833,9 @@ public class SetOperator {
 		int potentialMatchingIndelRecords = 0;
 		HashMap<String,TreeSet<String>> uniqueNames = null;
 		
-		VariantPool union = new VariantPool(addChr());
+		VariantPool union = new VariantPool(addChr(), op.getOperationID());
 		union.setFile(new File(op.getOperationID()));
-		union.setPoolID(op.getOperationID());
+//		union.setPoolID(op.getOperationID());
 
 		/* Add all samples from each VariantPool involved in the intersection */
 		if(forceUniqueNames){
