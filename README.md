@@ -35,7 +35,7 @@ Some important features for SetOperator are:
 #### Multi-sample VCFS
 Short and sweet. We handle multi-sample VCFs. :)
 
-<pre><code>
+```
 ##fileformat=VCFv4.1
 ##fileDate=20090805
 ##source=myImputationProgramV3.1
@@ -60,8 +60,7 @@ Short and sweet. We handle multi-sample VCFs. :)
 20     1110696 rs6040355 A      G,T     67   PASS NS=2;DP=10;AF=0.333,0.667;AA=T;DB GT:GQ:DP:HQ 1|2:21:6:23,27 2|1:2:0:18,2 2/2:35:4
 20     1230237 .         T      .       47   PASS   NS=3;DP=13;AA=T GT:GQ:DP:HQ 0|0:54:7:56,60 0|0:48:4:51,51 0/0:61:2
 20     1234567 microsat1 GTC    G,GTCT  50   PASS   NS=3;DP=9;AA=G GT:GQ:DP    0/1:35:4       0/2:17:2       1/1:40:3
-</code></pre>
-
+```
 
 
 
