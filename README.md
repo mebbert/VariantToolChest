@@ -67,7 +67,11 @@ spec](http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-varia
 
 
 
+#### Genotype-aware set operations
 
+
+
+---
 ### VarStat (vs)
 
 This portion of the program will output the the variant statistical report as a summary or the association test or both.
