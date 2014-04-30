@@ -36,7 +36,7 @@ Some important features for SetOperator are:
 Short and sweet. We handle multi-sample VCFs. In fact, we love them. :)
 
 Here is an example from the [1000G VCF 4.1
-spec](http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-41)
+spec](http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-variant-call-format-version-41):
 
 ```
 ##fileformat=VCFv4.1
