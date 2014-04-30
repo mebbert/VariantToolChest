@@ -18,7 +18,7 @@ There are currently two tools in VTC known as SetOperator and VarStats.
 VarStats is still under development but currently performs association analyses
 on single or multi-sample VCFs and will print out detailed VCF summaries.
 
-
+---
 ### SetOperator (SO)
 Some important features for SetOperator are:
 
