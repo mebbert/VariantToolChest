@@ -1,2 +1,0 @@
-This will test unioning two vcfs with different samples. Any Samples not
-in common between the two vcfs will be added with NO_CALL genotypes.
