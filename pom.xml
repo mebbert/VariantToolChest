@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.vtc</groupId>
+	<groupId>vtc</groupId>
 	<artifactId>VariantToolChest</artifactId>
 	<packaging>jar</packaging>
 	<version>0.9-SNAPSHOT</version>
@@ -11,7 +11,7 @@
 	<repositories>
 		<repository>
 			<id>VTC-repository</id>
-			<url>https://github.com/mebbert/VariantToolChest/tree/mvn-repo/repository</url>
+			<url>https://raw.githubusercontent.com/mebbert/VariantToolChest/mvn-repo/repository</url>
 		</repository>
 	</repositories>
 
@@ -40,22 +40,22 @@
 
 		<dependency>
 			<groupId>broad</groupId>
-			<artifactId>picard-1.96</artifactId>
+			<artifactId>picard</artifactId>
 			<version>1.96</version>
 		</dependency>
 		<dependency>
 			<groupId>broad</groupId>
-			<artifactId>sam-1.96</artifactId>
+			<artifactId>sam</artifactId>
 			<version>1.96</version>
 		</dependency>	
 		<dependency>
 			<groupId>broad</groupId>
-			<artifactId>tribble-1.96</artifactId>
+			<artifactId>tribble</artifactId>
 			<version>1.96</version>
 		</dependency>	
 		<dependency>
 			<groupId>broad</groupId>
-			<artifactId>variant-1.96</artifactId>
+			<artifactId>variant</artifactId>
 			<version>1.96</version>
 		</dependency>	
 
@@ -81,8 +81,8 @@
 							<mainClass>vtc.VTCEngine</mainClass>
 						</manifest>
 					</archive>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -99,8 +99,8 @@
 							<mainClass>vtc.VTCEngine</mainClass>
 						</manifest>
 					</archive>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>
