@@ -9,7 +9,7 @@ press--to be published May 28, 2014). VTC is still under development and we
 are working to improve features and reliability, but there are
 several specific gaps VTC currently fills including:
 
-* Advanced set operations
+* Advanced, genotype-aware set operations
 * Simple VCF comparisons
 * Variant summaries (detailed and minimal)
 * Variant statistics (e.g. association studies)
