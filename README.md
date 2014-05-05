@@ -114,6 +114,22 @@ samples. The result would be as follows:
 
 
 
+
+#### Pop quiz!
+Why didn't the variant at 1110696 intersect? This example addresses a couple
+critical decisions we made while implementing the intersect logic: (1) to be
+considered heterozygous, we're assuming most researchers will expect (perhaps
+subconsciously) 'heterozygous' to mean they genotype includes one reference
+allele; and (2) while all of the samples are technically 'homozygous variant'
+(meaning they only have variants, though not necessarily the same one), neither
+of the alternate alleles are common in all samples. Thus, based on the first
+assumption, none of them intersect as heterozygotes and likewise do not
+intersect as homozygous variant since they do not share the same alleles (i.e.,
+the third sample only has alt two).
+
+
+
+
 ---
 ### VarStat (vs)
 

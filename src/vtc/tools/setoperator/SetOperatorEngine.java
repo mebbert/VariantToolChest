@@ -226,12 +226,14 @@ public class SetOperatorEngine implements Engine {
             if (intersectType == null) {
                 throw new ArgumentParserException("Invalid intersect type specified: " + intersectString, parser);
             }
+            System.out.println("Intersect type: " + intersectString);
 
             String complementString = parsedArgs.getString("COMP_TYPE");
             ComplementType complementType = getComplementTypeByCommand(complementString);
             if (complementType == null) {
                 throw new ArgumentParserException("Invalid complement type specified: " + complementString, parser);
             }
+            System.out.println("Complement type: " + complementString);
 
             String outFileName = parsedArgs.getString("OUT");
             File outFile = null;
