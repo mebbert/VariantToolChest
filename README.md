@@ -20,6 +20,8 @@ on single or multi-sample VCFs and will print out detailed VCF summaries.
 
 
 ### SetOperator (SO)
+SetOperator will perform intersects, unions, and complements on multi- or
+single-sample VCFs while considering sample genotypes. 
 Some important features for SetOperator are:
 
 * Handles multi-sample VCFs
@@ -31,6 +33,9 @@ Some important features for SetOperator are:
   the #CHROM value and some don't.)
 * INDEL fuzzy matching (sometimes INDELS don't align the same even though they
   are the same). We'll tell you about these matches.
+
+
+
 
 #### Multi-sample VCFs
 Short and sweet. We handle multi-sample VCFs. In fact, we love them. :)
@@ -68,6 +73,15 @@ spec](http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-varia
 
 
 #### Genotype-aware set operations
+Set operations are important for trimming variant sets in numerous situations
+(e.g., family-based genetics studies), but are minimally useful unless
+considering the sample genotypes. VTC's SetOperator currently handles five
+genotype-aware options and two genotype-agnostic options. The genotype-level
+options are as follows: (1) heterozygous; (2) homozygous variant; (3)
+heterozygous or homozygous variant; (4) homozygous reference; and (5) match
+sample exactly across variant pools. The genotype-agnostic methods are: (1)
+variant (i.e., only consider chrom, pos, ref, and alt); and (2) position (i.e.,
+only consider chrom, pos, and ref).
 
 
 
