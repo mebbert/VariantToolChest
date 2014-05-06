@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
-import json.JSONException;
-import json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import org.broadinstitute.variant.variantcontext.Allele;
 

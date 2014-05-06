@@ -6,7 +6,7 @@ package vtc.tools.arupfrequencycalculator;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import json.JSONException;
+import org.json.JSONException;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;

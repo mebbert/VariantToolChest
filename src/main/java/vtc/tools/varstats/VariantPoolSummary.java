@@ -55,7 +55,7 @@ public class VariantPoolSummary {
 	 */
 	public VariantPoolSummary(int numVarRecords, int numVars, int numSNVs, int numMNVs,
 			int numStructVars, int numStructIns, int numStructDels, int numMultiAlts,
-			int numHets, int numHomos,
+//			int numHets, int numHomos,
 			double tiCount, double tvCount, double genoTiCount, double genoTvCount,
 			TreeSet<String> allInsertions, TreeSet<String> allDeletions) {
 		this.numVarRecords = numVarRecords;
