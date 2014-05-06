@@ -1,7 +1,7 @@
 ### Introduction
 The Variant Tool Chest (VTC) is designed to be a tool chest for analyzing
 variants (particularly VCF files) and to be **easily extensible**. We hope you
-will incorporate your valuable tools/algorithms to VTC. These tools/algorithms
+l incorporate your valuable tools/algorithms to VTC. These tools/algorithms
 may be independently published or not. In either case, we want to build a
 well-integrated tool chest. Please see
 our BMC Bioinformatics paper (in
