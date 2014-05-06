@@ -1,0 +1,2 @@
+This will test unioning two vcfs with two overlapping samples, one
+non-overlapping sample, and no overlapping variants.
