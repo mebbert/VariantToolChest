@@ -4,11 +4,8 @@
 package vtc.tools.setoperator.operation;
 
 import static org.junit.Assert.assertEquals;
-
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,6 +18,7 @@ import org.junit.Test;
 
 import vtc.VTCEngine;
 import vtc.datastructures.VariantPool;
+import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
  * @author Kevin
@@ -28,7 +26,7 @@ import vtc.datastructures.VariantPool;
  */
 public class IntersectOperationTest {
 	
-	private static String hgref = getHGREF();
+	private static String hgref = UtilityBelt.getHGREF();
 
 	private static String test_path = "/test_data/IntersectTests";
 	private static String output_path = "/test_data/OUTPUT";
@@ -92,34 +90,6 @@ public class IntersectOperationTest {
 		VTCEngine.main(args);
 
 		this.test2files(answer, out);
-	}
-
-	/**
-	 * Get the absolute pathway to the reference FASTA file
-	 * @return hg reference pathway
-	 */
-	private static String getHGREF() {
-		File refFile = new File("src/main/java/vtc/VTC.properties");
-		try{
-			if(refFile.canRead()){
-				BufferedReader br = new BufferedReader(new FileReader(refFile));
-				String line = br.readLine();
-				while(line != null){
-					line = line.replaceAll("\\s+", "");
-					String[] keyAndVal = line.split("=");
-					if(keyAndVal[0].equals("fasta_ref")){
-						br.close();
-						return keyAndVal[1];
-					}
-				}
-				br.close();
-				throw new IOException("'fasta_ref' not found in VTC.properties");
-			}
-			throw new IOException(refFile.getAbsolutePath() + "is not a valid file path");
-		}catch(IOException e){
-			e.printStackTrace();
-			return null;
-		}
 	}
 
 	/**
