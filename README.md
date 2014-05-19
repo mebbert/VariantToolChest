@@ -134,6 +134,8 @@ We welcome any feedback on this approach. Our goal is to make the VTC useful.
 
 
 #### Running SetOperator
+
+##### SetOperator syntax
 SetOperator includes a powerful syntax for defining and stringing set
 operations. The basic structure is as follows:
 
