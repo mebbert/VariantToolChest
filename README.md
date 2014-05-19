@@ -127,6 +127,24 @@ assumption, none of them intersect as heterozygotes and likewise do not
 intersect as homozygous variant since they do not share the same alleles (i.e.,
 the third sample only has alt two).
 
+We welcome any feedback on this approach. Our goal is to make the VTC useful.
+
+
+
+
+
+#### Running SetOperator
+SetOperator includes a powerful syntax for defining and stringing set
+operations. The basic structure is as follows:
+
+```
+oId=<font color="red">operator</font>[
+	input_id1[sample_id1,sample_id2,etc.]:
+	input_id2[sample_id3,sample_id4,etc.]:
+	input_id3:
+	etc.]
+```
+
 
 
 
