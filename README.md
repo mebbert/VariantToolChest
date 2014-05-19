@@ -141,13 +141,15 @@ operations. The basic structure is as follows:
 text](https://raw.githubusercontent.com/mebbert/VariantToolChest/master/images/so_syntax.png)
 
 * `oId` is a set operator id. If not provided (e.g., `union=`), one will be
-  assigned as `s0`, `s1`, etc.
+  assigned as `s0`, `s1`, etc. The `oId` can be used in subsequent operations
+  specified in the same command line.
 * `operator` is the designated set operation to perform (i.e., union [uU],
   intersect [iI], or complement [cC])
-* `input_idX` is a file identifier as previously described
-* `sample_idX` is a sample name specified in the VCF. This is used to specify
-  which samples to include in the analysis. If no sample names are provided, all
-  samples in the VCF will be used
+* `input_idX` is a file identifier as previously described. File identifiers are
+  colon separated.
+* `sample_idX` is a sample name specified in the VCF. This is a comma-separated
+  list that specifies which samples to include in the analysis. If no sample
+  names are provided, all samples in the VCF will be used.
 
 
 
