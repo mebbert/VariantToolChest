@@ -137,7 +137,8 @@ We welcome any feedback on this approach. Our goal is to make the VTC useful.
 SetOperator includes a powerful syntax for defining and stringing set
 operations. The basic structure is as follows:
 
-![alt text](https://github.com/mebbert/VariantToolChest/blob/master/images/so_syntax.png "Logo Title Text 1")
+![alt
+text](https://raw.githubusercontent.com/mebbert/VariantToolChest/master/images/so_syntax.png)
 
 ```html
 oId=<font color="red">operator</font>[
