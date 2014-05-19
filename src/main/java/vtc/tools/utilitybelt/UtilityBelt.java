@@ -3,6 +3,9 @@
  */
 package vtc.tools.utilitybelt;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -293,5 +296,33 @@ public class UtilityBelt {
         }
         return opList;
     }
+    
+    /**
+	 * Get the absolute pathway to the reference FASTA file
+	 * @return Human Genome (hg) reference pathway
+	 */
+	public static String getHGREF() {
+		File refFile = new File("src/main/java/vtc/VTC.properties");
+		try{
+			if(refFile.canRead()){
+				BufferedReader br = new BufferedReader(new FileReader(refFile));
+				String line = br.readLine();
+				while(line != null){
+					line = line.replaceAll("\\s+", "");
+					String[] keyAndVal = line.split("=");
+					if(keyAndVal[0].equals("fasta_ref")){
+						br.close();
+						return keyAndVal[1];
+					}
+				}
+				br.close();
+				throw new IOException("'fasta_ref' not found in VTC.properties");
+			}
+			throw new IOException(refFile.getAbsolutePath() + "is not a valid file path");
+		}catch(IOException e){
+			e.printStackTrace();
+			return null;
+		}
+	}
     
 }

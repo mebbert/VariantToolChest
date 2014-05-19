@@ -4,7 +4,6 @@
 package vtc.tools.setoperator.operation;
 
 import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -19,14 +18,15 @@ import org.junit.Test;
 
 import vtc.VTCEngine;
 import vtc.datastructures.VariantPool;
+import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
  * @author Kevin
  * 
  */
 public class IntersectOperationTest {
-
-	private static String hgref = "C:\\Users\\Kevin\\Desktop\\Kauwe_Lab\\human_g1k_v37.fasta";
+	
+	private static String hgref = UtilityBelt.getHGREF();
 
 	private static String test_path = "/test_data/IntersectTests";
 	private static String output_path = "/test_data/OUTPUT";
