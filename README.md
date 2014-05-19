@@ -189,22 +189,31 @@ the results. Please see the `--help` option for full details.
 This example assumes we want to know all variants found in affected individuals that are
 absent in unaffected blood relatives. Specifically, we want to see only the
 variants for which the affected individuals are either heterozygous or homozygous for a
-variant, but is entirely absent in unaffected blood relatives. 
+variant, but is entirely absent in unaffected blood relatives. To accomplish this, we
+will perform an intersect on all affected individuals and then subtract all variants
+observed in unaffected individuals.
 
 For this example, we will assume all samples are in the same
 VCF with the following names: (1) mother_aff; (2) father_unaff; (3) sibling1_aff;
 and (4) sibling2_unaff.
 
-To accomplish this, we will perform a union on all affected individuals and then
-subtract all variants observed in unaffected individuals.
 
 ```
 java -Xmx4g -jar vtc.jar -i family=path/to/family.vcf -so
-aff_union=u[family[mother_aff,sibling1_aff]]
-aff_unique=c[aff_union:family[father_unaff,sibling2_unaff]] -o
+aff_inter=u[family[mother_aff,sibling1_aff]]
+aff_unique=c[aff_inter:family[father_unaff,sibling2_unaff]] -o
 unique_variants_to_affected.vcf
 ```
 
+In this example we specified one input file `family=path/to/family.vcf` where
+the fId is `family`. We first perform an intersect on the affected individuals naming
+the set operation `aff_inter`. The resulting variant set is then used in a
+subsequent complement (substraction) where all observed variants in the
+unaffected individuals are subtracted from all common variants observed between the
+affected individuals.
+
+
+Pretty simple, eh?
 
 
 
@@ -376,3 +385,13 @@ The columns are as follows:
 
 ---
 ### 'Compiling'
+
+
+
+
+---
+### Limitations
+The VTC is a powerful toolset that we are working to improve. The main
+limitation at this point is dealing with whole-genome datasets. It's a
+bit...slow...and a memory hog. We're currently working to remedy this situation.
+:)
