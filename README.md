@@ -135,7 +135,28 @@ We welcome any feedback on this approach. Our goal is to make the VTC useful.
 
 #### Running SetOperator
 
-##### SetOperator syntax
+##### Input file syntax (-i)
+Input files are specified using the `--input` or `-i` flag as follows:
+
+```
+--input fId=path/to/input.vcf
+```
+
+* `fId` is the file ID that will be used in defined set operations. If a file ID
+  is not provided, one will assigned as `f0`, `f1`, etc.
+* `path/to/input.vcf` is the input file.
+
+Multiple input files can be specified at once:
+
+```
+-i cases=path/to/cases.vcf ctrls=path/to/controls.vcf
+```
+
+
+
+
+
+##### Set operation syntax (-s)
 SetOperator includes a powerful syntax for defining and stringing set
 operations. The basic structure is as follows:
 
