@@ -395,3 +395,13 @@ The VTC is a powerful toolset that we are working to improve. The main
 limitation at this point is dealing with whole-genome datasets. It's a
 bit...slow...and a memory hog. We're currently working to remedy this situation.
 :)
+
+There are also some periphery bugs that need to be addressed, but do not affect
+the main algorithms involved. For example, there are some extra files printed
+out at times and you may experience an error to the effect of "Something is very
+wrong!" These are bugs where we encounter an unexpected situation. Please
+post a bug in these cases.
+
+Another known bug is if you specify an invalid reference genome. We'll squash
+it, but we don't want you to be overly concerned if you encounter this or
+similar bugs.
