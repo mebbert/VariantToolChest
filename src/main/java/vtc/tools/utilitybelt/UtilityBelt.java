@@ -314,6 +314,7 @@ public class UtilityBelt {
 						br.close();
 						return keyAndVal[1];
 					}
+					line = br.readLine();
 				}
 				br.close();
 				throw new IOException("'fasta_ref' not found in VTC.properties");
