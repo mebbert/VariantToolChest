@@ -434,7 +434,7 @@ public class SetOperator {
 				}
 			}
 			else{
-				/* See if all VariantPools contain this variant before interrogating genotypes.
+				/* See if all VariantPools contain this variant (same ref and at least one common var) before interrogating genotypes.
 				 * This includes the VP we're iterating over, but lookup is O(n) + O(1), where n is the number
 				 * of VariantPools and the O(1) is looking up in a Hash. Not a big deal.
 				 * I believe verifying the var at least exists in all VPs first should save time over
@@ -467,7 +467,7 @@ public class SetOperator {
 						/* Iterate over the sample genotypes in this GenotypeContext
 						 * and determine if they intersect by genotype
 						 */
-						tmpGenotypes = intersectsByGenotype(gc, var, sampleGenotypes, type, currVarKey, op.getOperationID());
+						tmpGenotypes = intersectsByGenotypeAndIntersectType(gc, var, sampleGenotypes, type, currVarKey, op.getOperationID());
 						if(tmpGenotypes == null){
 							intersects = false;
 							break;
@@ -496,7 +496,7 @@ public class SetOperator {
 							int count = 0;
 							for(VariantContext fuzzyVar : fuzzyVars){
 								fuzzyVar = fuzzyVars.get(count);
-								fuzzyGenos = intersectsByGenotype(fuzzyVar.getGenotypes(), fuzzyVar,
+								fuzzyGenos = intersectsByGenotypeAndIntersectType(fuzzyVar.getGenotypes(), fuzzyVar,
 										sampleGenotypes, type, currVarKey, op.getOperationID());
 								if(fuzzyGenos == null){
 									fuzzyIntersects = false;
@@ -537,7 +537,8 @@ public class SetOperator {
 	}
 	
 	/**
-	 * Determine if this variant intersects by genotype.
+	 * Determine if this variant intersects by genotype. All samples must have
+	 * at least one alt in common.
 	 * @param gc
 	 * @param var
 	 * @param sampleGenotypes
@@ -546,7 +547,7 @@ public class SetOperator {
 	 * @param operID
 	 * @return
 	 */
-	private ArrayList<Genotype> intersectsByGenotype(GenotypesContext gc,
+	private ArrayList<Genotype> intersectsByGenotypeAndIntersectType(GenotypesContext gc,
 			VariantContext var, HashMap<String, Genotype> sampleGenotypes,
 			IntersectType type, String currVarKey, String operID){
 		Iterator<Genotype> genoIt = gc.iterator();
@@ -554,7 +555,7 @@ public class SetOperator {
 		ArrayList<Genotype> genotypes = new ArrayList<Genotype>();
 		
 		/* Iterate over the sample genotypes in this GenotypeContext
-		 * and determine if they intersect by genotype
+		 * and determine if they intersect by IntersectType
 		 */
 		while(genoIt.hasNext()){
 			geno = genoIt.next();
@@ -566,11 +567,35 @@ public class SetOperator {
 			else if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, operID)){
 				return null;
 			}
-			correctGeno = getCorrectGenotype(var, geno.getSampleName());
-			genotypes.add(correctGeno);
-			sampleGenotypes.put(geno.getSampleName(), correctGeno);
+//			correctGeno = getCorrectGenotype(var, geno.getSampleName());
+//			genotypes.add(correctGeno);
+			genotypes.add(geno);
+//			sampleGenotypes.put(geno.getSampleName(), correctGeno);
+			sampleGenotypes.put(geno.getSampleName(), geno);
 		}
-		return genotypes;
+		
+		/* Loop over the genotypes to ensure at least
+		 * one alt is common among all samples
+		 */
+		List<Allele> alts = var.getAlternateAlleles();
+		for(Allele alt : alts){
+			boolean allContain = true;
+			for(Genotype g : genotypes){
+				if(g.countAllele(alt) == 0){
+					allContain = false;
+					break;
+				}
+			}
+			
+			/* If all samples contain any of the listed alts, just 
+			 * return the genotypes.
+			 */
+			if(allContain)
+				return genotypes;
+        }
+
+		/* None of the alts were found in all samples */
+        return null;
 	}
 	
 	/**
@@ -767,7 +792,16 @@ public class SetOperator {
 			}
 		}
 		else if(type == IntersectType.HET_OR_HOMO_ALT){
-			if(geno.isHomVar() || (geno.isHet() && genoContainsRefAllele(geno)))
+//			if(geno.isHomVar() || (geno.isHet() && genoContainsRefAllele(geno)))
+			
+			/* In this case I do not enforce that the isHet have a reference allele like I do
+			 * in IntersectType.Heterozygous because '0/1' and '1/2' are both considered 'het'
+			 * by the GATK, and they both satisfy our requirements. We consider '0/1' a het with
+			 * one ref allele and we consider '1/2' a homo alt. And since we've already checked
+			 * that all samples have a variant in common, we can trust all samples have either
+			 * the '1' or the '2'
+			 */
+			if(geno.isHomVar() || geno.isHet())
 				return true;
 			else{
 				if(verbose()){
@@ -1175,16 +1209,6 @@ public class SetOperator {
 		return new GenotypeBuilder(sample, alleles).make();
 	}
 	
-
-	
-	/**
-	 * Generate NO_CALL genotype for a single sample
-	 * @param sample
-	 * @return
-	 */
-//	private Genotype generateGenotypeForSample(String sample, List<Allele> alleles){
-//		return new GenotypeBuilder(sample, alleles).make();
-//	}
 	
 	/**
 	 * Build a new variant from an original and add all alleles and genotypes
