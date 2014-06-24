@@ -13,6 +13,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Iterator;
 
+import org.broadinstitute.variant.variantcontext.Genotype;
+import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Assert;
 import org.junit.Test;
@@ -128,26 +130,42 @@ public class UnionOperationTest {
 
 		//assertEquals(key_pool, test_pool);
 
-		 //make sure they have same number of variants..
-		 assertEquals(key_pool.getNumVarRecords(),test_pool.getNumVarRecords());
+		//make sure they have same number of variants..
+		assertEquals(key_pool.getNumVarRecords(),test_pool.getNumVarRecords());
+		//make sure they have the same number of samples.
+		assertEquals(key_pool.getSamples().size(),test_pool.getSamples().size());
 		
-		 //make sure they have the same number of samples.
-		 assertEquals(key_pool.getSamples().size(),test_pool.getSamples().size());
-		
-		 //Iterate over variants in the key and check if they are equal...
-		 while(key_it.hasNext() && test_it.hasNext()){
+		//Iterate over variants in the key and check if they are equal...
+		while(key_it.hasNext() && test_it.hasNext()){
 			 			
-			 currVarKey = key_it.next();
-			 currVarTest = test_it.next();
+			currVarKey = key_it.next();
+			currVarTest = test_it.next();
 			
-			 var_key = key_pool.getVariant(currVarKey);
-			 var_test = test_pool.getVariant(currVarTest);
+			var_key = key_pool.getVariant(currVarKey);
+			var_test = test_pool.getVariant(currVarTest);
 			 
-			 //assert that they have the same reference and alternate alleles....
-			 Assert.assertTrue(var_key.hasSameAllelesAs(var_test));
-			 Assert.assertTrue(var_key.hasSameAlternateAllelesAs(var_test));
-			 Assert.assertTrue(0==var_key.getGenotype(0).compareTo(var_test.getGenotype(0)));
-		 }
+			GenotypesContext key_genos = var_key.getGenotypes();	
+			GenotypesContext test_genos = var_test.getGenotypes();
+				
+			Iterator<Genotype> key_geno_it = key_genos.iterator();
+			Iterator<Genotype> test_geno_it = test_genos.iterator();
+			while(key_geno_it.hasNext() && test_geno_it.hasNext()){
+			  	Genotype curr_key_geno = key_geno_it.next();
+				Genotype curr_test_geno = test_geno_it.next();
+				
+				Assert.assertTrue(curr_key_geno.compareTo(curr_test_geno)==0);
+				Assert.assertTrue(curr_test_geno.hasDP());
+				Assert.assertTrue(curr_test_geno.hasGQ());
+				Assert.assertTrue(curr_test_geno.hasAnyAttribute("HQ"));
+				
+			}
+			 
+			 
+			//assert that they have the same reference and alternate alleles....
+			Assert.assertTrue(var_key.hasSameAllelesAs(var_test));
+			Assert.assertTrue(var_key.hasSameAlternateAllelesAs(var_test));
+			Assert.assertTrue(0==var_key.getGenotype(0).compareTo(var_test.getGenotype(0)));
+		}
 	}
 
 	private void test2files_usingcmp(String answer, String out) {

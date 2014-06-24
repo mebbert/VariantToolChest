@@ -297,12 +297,14 @@ public class UtilityBelt {
         return opList;
     }
     
+    
     /**
-	 * Get the absolute pathway to the reference FASTA file
-	 * @return Human Genome (hg) reference pathway
-	 */
-	public static String getHGREF() {
-		File refFile = new File("src/main/java/vtc/VTC.properties");
+     * Gets the specified property from the vtc.VTC.properties file.
+     * @param prop
+     * @return The property desired.
+     */
+    public static Object getProperty(String prop){
+    	File refFile = new File("src/main/java/vtc/VTC.properties");
 		try{
 			if(refFile.canRead()){
 				BufferedReader br = new BufferedReader(new FileReader(refFile));
@@ -310,9 +312,9 @@ public class UtilityBelt {
 				while(line != null){
 					line = line.replaceAll("\\s+", "");
 					String[] keyAndVal = line.split("=");
-					if(keyAndVal[0].equals("fasta_ref")){
+					if(keyAndVal[0].equals(prop)){
 						br.close();
-						return keyAndVal[1];
+						return (Object) keyAndVal[1];
 					}
 					line = br.readLine();
 				}
@@ -324,6 +326,14 @@ public class UtilityBelt {
 			e.printStackTrace();
 			return null;
 		}
+    }
+    
+    /**
+	 * Get the absolute pathway to the reference FASTA file
+	 * @return Human Genome (hg) reference pathway
+	 */
+	public static String getHGREF() {
+		return (String) getProperty("fasta_ref");
 	}
     
 }
