@@ -145,13 +145,13 @@ public class IntersectOperationTest {
 	/**
 	 * Test how the intersect operator works
 	 */
-//	@Test
+	@Test
 	public void testIntersectOperation_MatchSamples() {
 		
-		URL in1 = this.getClass().getResource("");
-		URL in2 = this.getClass().getResource("");
-		URL answer = this.getClass().getResource("");
-		URL out = this.getClass().getResource("");
+		String in1 = "target/test-classes/IntersectTests/Match_Sample/Test1/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Match_Sample/Test1/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Match_Sample/Test1/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Match_Sample/i_test1_out.vcf";
 
 		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
 				+ " -g match_sample -s i[var1:var2] -o " + out;
