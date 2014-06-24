@@ -4,6 +4,7 @@
 package vtc.tools.setoperator.operation;
 
 import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
+import org.broadinstitute.variant.variantcontext.Genotype;
+import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Assert;
 import org.junit.Test;
@@ -91,7 +94,9 @@ public class IntersectOperationTest {
 
 		this.test2files(answer, out);
 	}
+	
 
+	
 	/**
 	 * Test how the intersect operator works
 	 */
@@ -196,10 +201,32 @@ public class IntersectOperationTest {
 			var_key = key_pool.getVariant(currVarKey);
 			var_test = test_pool.getVariant(currVarTest);
 
+			
+			GenotypesContext key_genos = var_key.getGenotypes();	
+			GenotypesContext test_genos = var_test.getGenotypes();
+			
+			Iterator<Genotype> key_geno_it = key_genos.iterator();
+			Iterator<Genotype> test_geno_it = test_genos.iterator();
+			while(key_geno_it.hasNext() && test_geno_it.hasNext()){
+				Genotype curr_key_geno = key_geno_it.next();
+				Genotype curr_test_geno = test_geno_it.next();
+				
+				Assert.assertTrue(curr_key_geno.compareTo(curr_test_geno)==0);
+				Assert.assertTrue(curr_test_geno.hasDP());
+				Assert.assertTrue(curr_test_geno.hasGQ());
+				Assert.assertTrue(curr_test_geno.hasAnyAttribute("HQ"));
+				
+			}
+			
+
+
 			// assert that they have the same reference and alternate alleles....
 			Assert.assertTrue("Ref-\nkey: " + var_key.getReference() + " test: " + var_key.getReference() + "\n", var_key.hasSameAllelesAs(var_test));
 			Assert.assertTrue("Alt-\nkey: " + var_key.getAlternateAlleles().toString() + " test: " + var_key.getAlternateAlleles().toString() + "\n", var_key.hasSameAlternateAllelesAs(var_test));
 
+			
+			
+			
 		}
 	}
 

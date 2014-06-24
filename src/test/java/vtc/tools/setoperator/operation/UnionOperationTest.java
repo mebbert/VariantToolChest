@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import vtc.VTCEngine;
 import vtc.datastructures.VariantPool;
+import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
  * @author Kevin
@@ -26,7 +27,7 @@ import vtc.datastructures.VariantPool;
  */
 public class UnionOperationTest {
 
-	private static String hgref = "C:\\Users\\Kevin\\Desktop\\Kauwe_Lab\\human_g1k_v37.fasta";
+	private static String hgref = UtilityBelt.getHGREF();
 
 	/**
 	 * Test how the union operator works
