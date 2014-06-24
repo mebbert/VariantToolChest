@@ -182,7 +182,7 @@ public class IntersectOperationTest {
 		String out = "target/test-classes/OUTPUT/intersect/Homo_Alt/i_test1_out.vcf";
 
 		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
-				+ " -g homo_ref -s i[var1:var2] -o " + out;
+				+ " -g homo_alt -s i[var1:var2] -o " + out;
 
 		String[] args = arguments.split(" ");
 		VTCEngine.main(args);
