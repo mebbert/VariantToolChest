@@ -1,4 +1,4 @@
-This will test comparing two vcfs with no overlapping sample.
+This will test comparing two vcfs with one overlapping sample.
 Any genotype that does not match between two samples with the same name
 will not be considered an intersect. This will also test that the Alt
 alleles intersect. Alt alleles intersect if at least one alternate allele
@@ -6,7 +6,7 @@ is the same. Ref alleles must also be identical
 
 Expected result:
 20	14370	Fail for different Alt alleles
-20	17330	Fail for Het Alleles
-20	1110696	Fail for Alt alleles
-20	1230237	Pass for Homo Ref
+20	17330	Fail for different Ref alleles
+20	1110696	Pass because at least one alt allele overlaps
+20	1230237	Fail for Homo Ref
 20	1234567	Fail because no alt is common among all samples
