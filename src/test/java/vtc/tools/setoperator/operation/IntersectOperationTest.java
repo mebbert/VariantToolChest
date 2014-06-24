@@ -140,7 +140,7 @@ public class IntersectOperationTest {
 	/**
 	 * Test how the intersect operator works
 	 */
-	@Test
+//	@Test
 	public void testIntersectOperation_MatchSamples() {
 		
 		URL in1 = this.getClass().getResource("");

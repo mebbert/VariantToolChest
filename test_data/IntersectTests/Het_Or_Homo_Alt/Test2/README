@@ -9,4 +9,4 @@ Expected result:
 20	17330	Fail for different Ref alleles
 20	1110696	Pass because at least one alt allele overlaps
 20	1230237	Fail for Homo Ref
-20	1234567	Pass
+20	1234567	Fail because no alt is common among all samples
