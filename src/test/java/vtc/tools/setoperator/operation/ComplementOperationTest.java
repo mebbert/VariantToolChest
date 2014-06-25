@@ -118,7 +118,7 @@ public class ComplementOperationTest {
 	
 	
 	/**
-	 * Test how the intersect operator works for homozygous Alternate.
+	 * Test how the intersect operator works for complement based on chr, pos, ref, alt.
 	 */
 	@Test
 	public void testIntersectOperation_Alt_Test1() {
@@ -140,7 +140,7 @@ public class ComplementOperationTest {
 	
 	
 	/**
-	 * Test how the intersect operator works for homozygous Alternate.
+	 * Test how the intersect operator works for complement based on chr, pos, ref, alt.
 	 */
 	@Test
 	public void testIntersectOperation_Alt_Test2() {
@@ -159,10 +159,6 @@ public class ComplementOperationTest {
 
 		this.test2files(answer, out);
 	}	
-	
-	
-	
-	
 	
 	
 	// Compare the answer file with the output file
