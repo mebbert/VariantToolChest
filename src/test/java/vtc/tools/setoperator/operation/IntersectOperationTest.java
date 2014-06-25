@@ -134,6 +134,153 @@ public class IntersectOperationTest {
 	}
 
 	/**
+	 * Test how the intersect operator works for homozygous reference.
+	 */
+	@Test
+	public void testIntersectOperation_HomoRef() {
+
+		// ///////////Test1//////////////
+		String in1 = "target/test-classes/IntersectTests/Homo_Ref/Test1/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Homo_Ref/Test1/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Homo_Ref/Test1/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Homo_Ref/i_test1_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
+				+ " -g homo_ref -s i[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+
+		// /////////Test2///////////
+		in1 = "target/test-classes/IntersectTests/Homo_Ref/Test2/input1.vcf";
+		in2 = "target/test-classes/IntersectTests/Homo_Ref/Test2/input2.vcf";
+		answer = "target/test-classes/IntersectTests/Homo_Ref/Test2/Answer.vcf";
+		out = "target/test-classes/OUTPUT/intersect/Homo_Ref/i_test2_out.vcf";
+
+		arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g homo_ref -s i[var1:var2] -o "
+				+ out;
+
+		args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+
+	}
+	
+	/**
+	 * Test how the intersect operator works for chr, pos, ref.
+	 */
+	@Test
+	public void testIntersectOperation_Pos() {
+
+		// ///////////Test1//////////////
+		String in1 = "target/test-classes/IntersectTests/Pos/Test1/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Pos/Test1/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Pos/Test1/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Pos/i_test1_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
+				+ " -g pos -s i[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+
+		// /////////Test2///////////
+		in1 = "target/test-classes/IntersectTests/Pos/Test2/input1.vcf";
+		in2 = "target/test-classes/IntersectTests/Pos/Test2/input2.vcf";
+		answer = "target/test-classes/IntersectTests/Pos/Test2/Answer.vcf";
+		out = "target/test-classes/OUTPUT/intersect/Pos/i_test2_out.vcf";
+
+		arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g pos -s i[var1:var2] -o "
+				+ out;
+
+		args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+
+	}
+	
+	
+	/**
+	 * Test how the intersect operator works for chr, pos, ref, alt.
+	 */
+	@Test
+	public void testIntersectOperation_Alt() {
+
+		// ///////////Test1//////////////
+		String in1 = "target/test-classes/IntersectTests/Alt/Test1/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Alt/Test1/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Alt/Test1/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Alt/i_test1_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
+				+ " -g alt -s i[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+
+		// /////////Test2///////////
+		in1 = "target/test-classes/IntersectTests/Alt/Test2/input1.vcf";
+		in2 = "target/test-classes/IntersectTests/Alt/Test2/input2.vcf";
+		answer = "target/test-classes/IntersectTests/Alt/Test2/Answer.vcf";
+		out = "target/test-classes/OUTPUT/intersect/Alt/i_test2_out.vcf";
+
+		arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g alt -s i[var1:var2] -o "
+				+ out;
+
+		args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+
+	}
+	
+	
+	/**
+	 * Test how the intersect operator works for homozygous Alternate.
+	 */
+	@Test
+	public void testIntersectOperation_HomoAlt() {
+
+		// ///////////Test1//////////////
+		String in1 = "target/test-classes/IntersectTests/Homo_Alt/Test1/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Homo_Alt/Test1/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Homo_Alt/Test1/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Homo_Alt/i_test1_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
+				+ " -g homo_alt -s i[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+
+		// /////////Test2///////////
+		in1 = "target/test-classes/IntersectTests/Homo_Alt/Test2/input1.vcf";
+		in2 = "target/test-classes/IntersectTests/Homo_Alt/Test2/input2.vcf";
+		answer = "target/test-classes/IntersectTests/Homo_Alt/Test2/Answer.vcf";
+		out = "target/test-classes/OUTPUT/intersect/Homo_Alt/i_test2_out.vcf";
+
+		arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g homo_alt -s i[var1:var2] -o "
+				+ out;
+
+		args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+
+	}
+	
+	
+	/**
 	 * Test how the intersect operator works
 	 */
 	@Test
