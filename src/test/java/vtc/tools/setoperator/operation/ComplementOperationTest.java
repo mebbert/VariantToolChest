@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import vtc.VTCEngine;
 import vtc.datastructures.VariantPool;
-import vtc.tools.setoperator.operation.IntersectOperationTest.Test_Params;
 import vtc.tools.utilitybelt.UtilityBelt;
 
 public class ComplementOperationTest {
@@ -33,10 +32,10 @@ public class ComplementOperationTest {
 	
 	
 	/**
-	 * Test how the intersect operator works for homozygous Alternate.
+	 * Test how the complement operator works for homozygous Alternate.
 	 */
 	@Test
-	public void testIntersectOperation_HetOrHomoAlt_Test1() {
+	public void testComplementOperation_HetOrHomoAlt_Test1() {
 
 		// ///////////Test1//////////////
 		String in1 = "target/test-classes/ComplementTests/Het_or_Homo_Alt/Test1/input1.vcf";
@@ -54,10 +53,10 @@ public class ComplementOperationTest {
 	}
 	
 	/**
-	 * Test how the intersect operator works for homozygous Alternate.
+	 * Test how the complement operator works for homozygous Alternate.
 	 */
 	@Test
-	public void testIntersectOperation_HetOrHomoAlt_Test2() {
+	public void testComplementOperation_HetOrHomoAlt_Test2() {
 
 		// ///////////Test1//////////////
 		String in1 = "target/test-classes/ComplementTests/Het_or_Homo_Alt/Test2/input1.vcf";
@@ -75,10 +74,10 @@ public class ComplementOperationTest {
 	}	
 	
 	/**
-	 * Test how the intersect operator works for the exact option.
+	 * Test how the complement operator works for the exact option.
 	 */
 	@Test
-	public void testIntersectOperation_Exact_Test1() {
+	public void testComplementOperation_Exact_Test1() {
 
 		// ///////////Test1//////////////
 		String in1 = "target/test-classes/ComplementTests/Exact/Test1/input1.vcf";
@@ -96,10 +95,10 @@ public class ComplementOperationTest {
 	}	
 	
 	/**
-	 * Test how the intersect operator works for the exact option.
+	 * Test how the complement operator works for the exact option.
 	 */
 	@Test
-	public void testIntersectOperation_Exact_Test2() {
+	public void testComplementOperation_Exact_Test2() {
 
 		// ///////////Test1//////////////
 		String in1 = "target/test-classes/ComplementTests/Exact/Test2/input1.vcf";
@@ -118,10 +117,10 @@ public class ComplementOperationTest {
 	
 	
 	/**
-	 * Test how the intersect operator works for complement based on chr, pos, ref, alt.
+	 * Test how the complement operator works for complement based on chr, pos, ref, alt.
 	 */
 	@Test
-	public void testIntersectOperation_Alt_Test1() {
+	public void testComplementOperation_Alt_Test1() {
 
 		// ///////////Test1//////////////
 		String in1 = "target/test-classes/ComplementTests/Alt/Test1/input1.vcf";
@@ -140,10 +139,10 @@ public class ComplementOperationTest {
 	
 	
 	/**
-	 * Test how the intersect operator works for complement based on chr, pos, ref, alt.
+	 * Test how the complement operator works for complement based on chr, pos, ref, alt.
 	 */
 	@Test
-	public void testIntersectOperation_Alt_Test2() {
+	public void testComplementOperation_Alt_Test2() {
 
 		// ///////////Test1//////////////
 		String in1 = "target/test-classes/ComplementTests/Alt/Test2/input1.vcf";
