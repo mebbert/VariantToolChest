@@ -136,6 +136,25 @@ public class IntersectOperationTest {
 		this.test2files(answer, out);
 
 	}
+	
+	@Test
+	public void testIntersectOperation_HetorHomoAlt_Test3() {
+
+		// /////////Test3///////////
+		String in1 = "target/test-classes/IntersectTests/Het_Or_Homo_Alt/Test3/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Het_Or_Homo_Alt/Test3/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Het_Or_Homo_Alt/Test3/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Het_Or_Homo_Alt/i_test3_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g het_homo_alt -s i[var1[]:var2] -o "
+				+ out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+
+	}
 
 	/**
 	 * Test how the intersect operator works for homozygous reference.
