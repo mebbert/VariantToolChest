@@ -13,40 +13,152 @@ import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Assert;
 import org.junit.Test;
 
+import vtc.VTCEngine;
 import vtc.datastructures.VariantPool;
 import vtc.tools.setoperator.operation.IntersectOperationTest.Test_Params;
 import vtc.tools.utilitybelt.UtilityBelt;
 
 public class ComplementOperationTest {
 
+
+	private static String hgref = UtilityBelt.getHGREF();
+
+	
+
+	
 	@Test
 	public void test() {
 		assertTrue(true);
 	}
+	
+	
+	/**
+	 * Test how the intersect operator works for homozygous Alternate.
+	 */
+	@Test
+	public void testIntersectOperation_HetOrHomoAlt_Test1() {
 
-	
+		// ///////////Test1//////////////
+		String in1 = "target/test-classes/ComplementTests/Het_or_Homo_Alt/Test1/input1.vcf";
+		String in2 = "target/test-classes/ComplementTests/Het_or_Homo_Alt/Test1/input2.vcf";
+		String answer = "target/test-classes/ComplementTests/Het_or_Homo_Alt/Test1/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/Complement/Het_or_Homo_Alt/c_test1_out.vcf";
 
-	private static String hgref = UtilityBelt.getHGREF();
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
+				+ " -c het_homo_alt -s c[var1:var2] -o " + out;
 
-	private static String test_path = "/test_data/IntersectTests";
-	private static String output_path = "/test_data/OUTPUT";
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
 
+		this.test2files(answer, out);
+	}
+	
+	/**
+	 * Test how the intersect operator works for homozygous Alternate.
+	 */
+	@Test
+	public void testIntersectOperation_HetOrHomoAlt_Test2() {
+
+		// ///////////Test1//////////////
+		String in1 = "target/test-classes/ComplementTests/Het_or_Homo_Alt/Test2/input1.vcf";
+		String in2 = "target/test-classes/ComplementTests/Het_or_Homo_Alt/Test2/input2.vcf";
+		String answer = "target/test-classes/ComplementTests/Het_or_Homo_Alt/Test2/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/Complement/Het_or_Homo_Alt/c_test2_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
+				+ " -c het_homo_alt -s c[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+	}	
+	
+	/**
+	 * Test how the intersect operator works for the exact option.
+	 */
+	@Test
+	public void testIntersectOperation_Exact_Test1() {
+
+		// ///////////Test1//////////////
+		String in1 = "target/test-classes/ComplementTests/Exact/Test1/input1.vcf";
+		String in2 = "target/test-classes/ComplementTests/Exact/Test1/input2.vcf";
+		String answer = "target/test-classes/ComplementTests/Exact/Test1/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/Complement/Exact/c_test1_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
+				+ " -c exact -s c[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+	}	
+	
+	/**
+	 * Test how the intersect operator works for the exact option.
+	 */
+	@Test
+	public void testIntersectOperation_Exact_Test2() {
+
+		// ///////////Test1//////////////
+		String in1 = "target/test-classes/ComplementTests/Exact/Test2/input1.vcf";
+		String in2 = "target/test-classes/ComplementTests/Exact/Test2/input2.vcf";
+		String answer = "target/test-classes/ComplementTests/Exact/Test2/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/Complement/Exact/c_test2_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
+				+ " -c exact -s c[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+	}	
 	
 	
+	/**
+	 * Test how the intersect operator works for homozygous Alternate.
+	 */
+	@Test
+	public void testIntersectOperation_Alt_Test1() {
+
+		// ///////////Test1//////////////
+		String in1 = "target/test-classes/ComplementTests/Alt/Test1/input1.vcf";
+		String in2 = "target/test-classes/ComplementTests/Alt/Test1/input2.vcf";
+		String answer = "target/test-classes/ComplementTests/Alt/Test1/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/Complement/Alt/c_test1_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
+				+ " -c alt -s c[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+	}	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	/**
+	 * Test how the intersect operator works for homozygous Alternate.
+	 */
+	@Test
+	public void testIntersectOperation_Alt_Test2() {
+
+		// ///////////Test1//////////////
+		String in1 = "target/test-classes/ComplementTests/Alt/Test2/input1.vcf";
+		String in2 = "target/test-classes/ComplementTests/Alt/Test2/input2.vcf";
+		String answer = "target/test-classes/ComplementTests/Alt/Test2/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/Complement/Alt/c_test2_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref
+				+ " -c alt -s c[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+	}	
 	
 	
 	
