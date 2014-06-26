@@ -323,8 +323,6 @@ public class IntersectOperationTest {
 	 */
 	@Test
 	public void test() {
-		//ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		//Resource resource = appContext.getResource("classpath:com/mkyong/common/testing.txt");		System.out.println(file);
 	}
 	
 	/**
