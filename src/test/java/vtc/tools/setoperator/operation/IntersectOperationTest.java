@@ -78,7 +78,7 @@ public class IntersectOperationTest {
 	 * Test how the intersect operator works for Heterozygous only
 	 */
 	@Test
-	public void testIntersectOperation_HetOnly() {
+	public void testIntersectOperation_HetOnly_Test1() {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -95,7 +95,24 @@ public class IntersectOperationTest {
 		this.test2files(answer, out);
 	}
 	
+	@Test
+	public void testIntersectOperation_HetOnly_Test2() {
+		//String see = getClass().getResource("/MainConfig.xml").getFile();
+		//System.out.println("got: " + see);
+		
+		String in1 = "target/test-classes/IntersectTests/Het_Only/Test2/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Het_Only/Test2/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Het_Only/Test2/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Het_Only/i_test2_out.vcf";
 
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g het -s i[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+	}
+	
 	
 	/**
 	 * Test how the intersect operator works for Heterozygous and homozygous alternate 

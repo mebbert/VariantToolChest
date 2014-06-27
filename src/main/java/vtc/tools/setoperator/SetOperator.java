@@ -599,6 +599,10 @@ public class SetOperator {
         }
 
 		/* None of the alts were found in all samples */
+		if(verbose()){
+			String s = "no alts were found across all samples.";
+			emitExcludedVariantWarning(s, currVarKey, operID, null);
+		}
         return null;
 	}
 	
@@ -791,7 +795,7 @@ public class SetOperator {
 			}
 			else{
 				if(verbose()){
-					String s = "is not Heterozygous containing a Ref allele.";
+					String s = "is not heterozygous.";
 					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
 			}
@@ -810,7 +814,7 @@ public class SetOperator {
 				return true;
 			else{
 				if(verbose()){
-					String s = "is not Homo Alt or Het containing a Ref allele.";
+					String s = "is not Homo Alt or Het.";
 					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
 			}
