@@ -416,14 +416,11 @@ public class IntersectOperationTest {
 				Assert.assertTrue(curr_test_geno.hasDP());
 				// Assert that the sample has a genotype quality score
 				Assert.assertTrue(curr_test_geno.hasGQ());
-				// Assert that the sample has a halpotype quality score
-				Assert.assertTrue(curr_test_geno.hasAnyAttribute("HQ"));
-				
 			}
 
 			// assert that they have the same reference and alternate alleles....
-			Assert.assertTrue("Ref-\nkey: " + var_key.getReference() + " test: " + var_key.getReference() + "\n", var_key.hasSameAllelesAs(var_test));
-			Assert.assertTrue("Alt-\nkey: " + var_key.getAlternateAlleles().toString() + " test: " + var_key.getAlternateAlleles().toString() + "\n", var_key.hasSameAlternateAllelesAs(var_test));
+			Assert.assertTrue("Ref-\nkey: " + var_key.getReference() + " test: " + var_test.getReference() + "\n", var_key.hasSameAllelesAs(var_test));
+			Assert.assertTrue("Alt-\nkey: " + var_key.getAlternateAlleles().toString() + " test: " + var_test.getAlternateAlleles().toString() + "\n", var_key.hasSameAlternateAllelesAs(var_test));
 			
 		}
 	}
