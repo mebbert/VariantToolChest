@@ -567,6 +567,10 @@ public class SetOperator {
 			else if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, operID)){
 				return null;
 			}
+			/* TODO: Why was I modifying the genotype using 'getCorrectGenotype'? I already
+			 * have the geno object. If I find that I do need this method, I need to update it
+			 * to keep track of DP, AD, etc. like I do in VariantPool when using GenotypeBuilder.
+			 */
 //			correctGeno = getCorrectGenotype(var, geno.getSampleName());
 //			genotypes.add(correctGeno);
 			genotypes.add(geno);
@@ -781,7 +785,8 @@ public class SetOperator {
 			 * both a ref and alt allele. i.e. having two different
 			 * alternate alleles (e.g. 1/2) does not qualify in this logic.
 			 */
-			if(geno.isHet() && genoContainsRefAllele(geno)){
+//			if(geno.isHet() && genoContainsRefAllele(geno)){
+			if(geno.isHet()){
 					return true;
 			}
 			else{
