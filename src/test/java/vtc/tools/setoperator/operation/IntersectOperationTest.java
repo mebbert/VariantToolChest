@@ -78,7 +78,7 @@ public class IntersectOperationTest {
 	 * Test how the intersect operator works for Heterozygous only
 	 */
 	@Test
-	public void testIntersectOperation_HetOnly() {
+	public void testIntersectOperation_HetOnly_Test1() {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -95,7 +95,24 @@ public class IntersectOperationTest {
 		this.test2files(answer, out);
 	}
 	
+	@Test
+	public void testIntersectOperation_HetOnly_Test2() {
+		//String see = getClass().getResource("/MainConfig.xml").getFile();
+		//System.out.println("got: " + see);
+		
+		String in1 = "target/test-classes/IntersectTests/Het_Only/Test2/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Het_Only/Test2/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Het_Only/Test2/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Het_Only/i_test2_out.vcf";
 
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g het -s i[var1:var2] -o " + out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+	}
+	
 	
 	/**
 	 * Test how the intersect operator works for Heterozygous and homozygous alternate 
@@ -128,6 +145,25 @@ public class IntersectOperationTest {
 		String out = "target/test-classes/OUTPUT/intersect/Het_Or_Homo_Alt/i_test2_out.vcf";
 
 		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g het_homo_alt -s i[var1:var2] -o "
+				+ out;
+
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+
+		this.test2files(answer, out);
+
+	}
+	
+	@Test
+	public void testIntersectOperation_HetorHomoAlt_Test3() {
+
+		// /////////Test3///////////
+		String in1 = "target/test-classes/IntersectTests/Het_Or_Homo_Alt/Test3/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Het_Or_Homo_Alt/Test3/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Het_Or_Homo_Alt/Test3/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Het_Or_Homo_Alt/i_test3_out.vcf";
+
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g het_homo_alt -s i[var1[]:var2] -o "
 				+ out;
 
 		String[] args = arguments.split(" ");
@@ -380,13 +416,16 @@ public class IntersectOperationTest {
 				Assert.assertTrue(curr_test_geno.hasDP());
 				// Assert that the sample has a genotype quality score
 				Assert.assertTrue(curr_test_geno.hasGQ());
+<<<<<<< HEAD
 				
 				
+=======
+>>>>>>> d1133b220ef7397802e13daca10c3b8d13ee4309
 			}
 
 			// assert that they have the same reference and alternate alleles....
-			Assert.assertTrue("Ref-\nkey: " + var_key.getReference() + " test: " + var_key.getReference() + "\n", var_key.hasSameAllelesAs(var_test));
-			Assert.assertTrue("Alt-\nkey: " + var_key.getAlternateAlleles().toString() + " test: " + var_key.getAlternateAlleles().toString() + "\n", var_key.hasSameAlternateAllelesAs(var_test));
+			Assert.assertTrue("Ref-\nkey: " + var_key.getReference() + " test: " + var_test.getReference() + "\n", var_key.hasSameAllelesAs(var_test));
+			Assert.assertTrue("Alt-\nkey: " + var_key.getAlternateAlleles().toString() + " test: " + var_test.getAlternateAlleles().toString() + "\n", var_key.hasSameAlternateAllelesAs(var_test));
 			
 			
 		}

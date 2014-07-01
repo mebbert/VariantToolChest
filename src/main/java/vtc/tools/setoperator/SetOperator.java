@@ -205,7 +205,7 @@ public class SetOperator {
 						}
 					}
 				}
-				else if(!subtractByGenotype(var1.getGenotypes(), var2.getGenotypes(), type, currVarKey, op.getOperationID())){
+				else if(!subtractByGenotype(var1.getAlternateAlleles(), var1.getGenotypes(), var2.getGenotypes(), type, currVarKey, op.getOperationID())){
 					keep = true;
 				}
 			}
@@ -252,23 +252,30 @@ public class SetOperator {
 	 * @return
 	 * @throws InvalidOperationException 
 	 */
-	private boolean subtractByGenotype(GenotypesContext gc1, GenotypesContext gc2,
+	private boolean subtractByGenotype(List<Allele> alts, GenotypesContext gc1, GenotypesContext gc2,
 			ComplementType type, String currVarKey, String operationID) throws InvalidOperationException{
 		
 		if(type == ComplementType.HET_OR_HOMO_ALT){
 
 			/* If any genotypes in gc2 are not homo ref, return true */
-			if(anyGenotypeNotHomoRef(gc2)){
-				return true;
+			if(!anyGenotypeNotHomoRef(gc2)){
+				if(verbose()){
+					String s = "Not all genotypes were het or homo alt.";
+					emitExcludedVariantWarning(s, currVarKey, operationID, null);
+				}
+				return false;
+			}
+			if(!commonAlleleAcrossAllSamples(alts, gc1, gc2)){
+				if(verbose()){
+					String s = "No common alt across all samples.";
+					emitExcludedVariantWarning(s, currVarKey, operationID, null);
+				}
+				return false;
 			}
 //			if(genotypesHetOrHomoAlt(gc1) && genotypesHetOrHomoAlt(gc2)){
 //				return true;
 //			}
-			if(verbose()){
-				String s = "Not all genotypes were het or homo alt.";
-				emitExcludedVariantWarning(s, currVarKey, operationID, null);
-			}
-			return false;
+			return true;
 		}
 		else if(type == ComplementType.EXACT){
 			if(allGenotypesExact(gc1, gc2)){
@@ -567,6 +574,10 @@ public class SetOperator {
 			else if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, operID)){
 				return null;
 			}
+			/* TODO: Why was I modifying the genotype using 'getCorrectGenotype'? I already
+			 * have the geno object. If I find that I do need this method, I need to update it
+			 * to keep track of DP, AD, etc. like I do in VariantPool when using GenotypeBuilder.
+			 */
 //			correctGeno = getCorrectGenotype(var, geno.getSampleName());
 //			genotypes.add(correctGeno);
 			genotypes.add(geno);
@@ -574,27 +585,34 @@ public class SetOperator {
 			sampleGenotypes.put(geno.getSampleName(), geno);
 		}
 		
-		/* Loop over the genotypes to ensure at least
-		 * one alt is common among all samples
-		 */
-		List<Allele> alts = var.getAlternateAlleles();
-		for(Allele alt : alts){
-			boolean allContain = true;
-			for(Genotype g : genotypes){
-				if(g.countAllele(alt) == 0){
-					allContain = false;
-					break;
-				}
-			}
-			
-			/* If all samples contain any of the listed alts, just 
-			 * return the genotypes.
-			 */
-			if(allContain)
-				return genotypes;
-        }
+		if(commonAlleleAcrossAllSamples(var.getAlternateAlleles(), GenotypesContext.create(genotypes), null)){
+			return genotypes;
+		}
+//		/* Loop over the genotypes to ensure at least
+//		 * one alt is common among all samples
+//		 */
+//		List<Allele> alts = var.getAlternateAlleles();
+//		for(Allele alt : alts){
+//			boolean allContain = true;
+//			for(Genotype g : genotypes){
+//				if(g.countAllele(alt) == 0){
+//					allContain = false;
+//					break;
+//				}
+//			}
+//			
+//			/* If all samples contain any of the listed alts, just 
+//			 * return the genotypes.
+//			 */
+//			if(allContain)
+//				return genotypes;
+//        }
 
 		/* None of the alts were found in all samples */
+		if(verbose()){
+			String s = "no alts were found across all samples.";
+			emitExcludedVariantWarning(s, currVarKey, operID, null);
+		}
         return null;
 	}
 	
@@ -781,12 +799,13 @@ public class SetOperator {
 			 * both a ref and alt allele. i.e. having two different
 			 * alternate alleles (e.g. 1/2) does not qualify in this logic.
 			 */
-			if(geno.isHet() && genoContainsRefAllele(geno)){
+//			if(geno.isHet() && genoContainsRefAllele(geno)){
+			if(geno.isHet()){
 					return true;
 			}
 			else{
 				if(verbose()){
-					String s = "is not Heterozygous containing a Ref allele.";
+					String s = "is not heterozygous.";
 					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
 			}
@@ -805,7 +824,7 @@ public class SetOperator {
 				return true;
 			else{
 				if(verbose()){
-					String s = "is not Homo Alt or Het containing a Ref allele.";
+					String s = "is not Homo Alt or Het.";
 					emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 				}
 			}
@@ -1075,6 +1094,49 @@ public class SetOperator {
 	 * Useful operations
 	 * 
 	 */
+	
+	
+	/**
+	 * Test if all genotypes in both GenotypesContext objects have at least one
+	 * allele in common across all samples
+	 * 
+	 * @param alts
+	 * @param gc1
+	 * @param gc2
+	 * @return
+	 */
+	private boolean commonAlleleAcrossAllSamples(List<Allele> alts, GenotypesContext gc1, GenotypesContext gc2){
+		
+		/* Loop over the genotypes to ensure at least
+		 * one alt is common among all samples
+		 */
+		for(Allele alt : alts){
+			boolean allContain = true;
+			for(Genotype g : gc1){
+				if(g.countAllele(alt) == 0){
+					allContain = false;
+					break;
+				}
+			}
+			
+			/* If the first group all contain the alt, check the second */
+			if(allContain && gc2 != null){
+				for(Genotype g : gc2){
+					if(g.countAllele(alt) == 0){
+						allContain = false;
+						break;
+					}
+				}
+			}
+			
+			/* If all samples contain any of the listed alts, just 
+			 * return the genotypes.
+			 */
+			if(allContain)
+				return true;
+        }
+		return false;
+	}
 	
 	/**
 	 * Generate unique sample names when looking at multiple VariantPools.

@@ -8,4 +8,4 @@ Expected result:
 20	17330	Fail for non-matching sample genotype
 20	1110696	Pass
 20	1230237	Fail for Homo Ref
-20	1234567	Pass
+20	1234567	Fail because no alts were found across all samples
