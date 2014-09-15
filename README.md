@@ -387,7 +387,7 @@ The columns are as follows:
 ### 'Compiling'
 
 VTC is a Maven project, so you need Maven installed. [HomeBrew](http://brew.sh/) is the easiest way to
-install Maven on OS X. Each Linux distribution has a similar installer (e.g., apt-get, yum, zypper, etc.).
+install Maven on OS X. Once you install HomeBrew run `brew install maven`. Each Linux distribution has a similar installer (e.g., apt-get, yum, zypper, etc.).
 Or you can [download Maven](http://maven.apache.org/download.cgi).
 
 Once you install Maven, run `mvn package assembly:assembly -DskipTests` and you will find
