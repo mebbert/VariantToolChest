@@ -178,5 +178,11 @@ public class VarStats {
         }
     }
 
+	public void doPercentage(TreeMap<String, VariantPool> allVPs) {
+		for(VariantPool vp : allVPs.values()){
+			VariantPoolPercents vpp = new VariantPoolPercents(vp);
+		}
+	}
+
 
 }

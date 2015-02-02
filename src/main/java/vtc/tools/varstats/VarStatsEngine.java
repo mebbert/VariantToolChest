@@ -78,8 +78,9 @@ public class VarStatsEngine implements Engine {
         		.dest("DETAILED")
         		.type(String.class)
         		.setDefault(SupportedDetailedSummaryTypes.INDIVIDUAL.getName())
-        		.help("Prints detailed summary statistics to file. Possible opteions are: "
+        		.help("Prints detailed summary statistics to file. Possible options are: "
         				+ createSupportedDetailedSummaryTypeString());
+        summary.addArgument("-P", "--percentage").dest("percentage").action(Arguments.storeTrue()).type(String.class).help("Get the het-homo-alt and homo-alt percentages and write to accompanying file.");
         assoc.addArgument("-a", "--association").action(Arguments.storeTrue()).dest("association")
                 .help("Performs an association test (also generates allele frequencies).  It only accepts one file. " + "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
         assoc.addArgument("-p", "--pheno").nargs("+").dest("pheno").type(String.class).help("Allows for multiple pheno files.");
@@ -105,7 +106,7 @@ public class VarStatsEngine implements Engine {
 
         List<String> vcfArgs = parsedArgs.getList("VCF");
         List<String> phenoArgs = parsedArgs.getList("pheno");
-
+        boolean doPercentage = parsedArgs.getBoolean("percentage");
         try {
 
             TreeMap<String, VariantPool> AllVPs;
@@ -113,6 +114,7 @@ public class VarStatsEngine implements Engine {
             SupportedSummaryTypes  summaryType = null;
             SupportedDetailedSummaryTypes detSumType = null;
 
+            
             String sumTypeString = parsedArgs.getString("SUMMARY");
             if(sumTypeString != null){
                 summaryType = getSupportedSummaryTypeByCommand(sumTypeString);
@@ -170,6 +172,10 @@ public class VarStatsEngine implements Engine {
             }
             if(assoc){
             	new VarStats(AllVPs, phenoArgs);
+            }
+            if(doPercentage){
+            	VarStats vs = new VarStats();
+            	vs.doPercentage(AllVPs);
             }
             
         } catch (InvalidInputFileException e) {
