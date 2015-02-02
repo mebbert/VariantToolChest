@@ -585,7 +585,10 @@ public class SetOperator {
 			sampleGenotypes.put(geno.getSampleName(), geno);
 		}
 		
-		if(commonAlleleAcrossAllSamples(var.getAlternateAlleles(), GenotypesContext.create(genotypes), null)){
+		if(type == IntersectType.ALT){
+			return genotypes;
+		}
+		else if(commonAlleleAcrossAllSamples(var.getAlternateAlleles(), GenotypesContext.create(genotypes), null)){
 			return genotypes;
 		}
 //		/* Loop over the genotypes to ensure at least
@@ -610,7 +613,7 @@ public class SetOperator {
 
 		/* None of the alts were found in all samples */
 		if(verbose()){
-			String s = "no alts were found across all samples.";
+			String s = "no alts were found in common across all samples.";
 			emitExcludedVariantWarning(s, currVarKey, operID, null);
 		}
         return null;

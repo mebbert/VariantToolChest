@@ -386,6 +386,13 @@ The columns are as follows:
 ---
 ### 'Compiling'
 
+VTC is a Maven project, so you need Maven installed. [HomeBrew](http://brew.sh/) is the easiest way to
+install Maven on OS X. Once you install HomeBrew run `brew install maven`. Each Linux distribution has a similar installer (e.g., apt-get, yum, zypper, etc.).
+Or you can [download Maven](http://maven.apache.org/download.cgi).
+
+Once you install Maven, run `mvn package assembly:assembly -DskipTests` and you will find
+`VariantToolChest-0.9-SNAPSHOT-jar-with-dependencies.jar` in the `target` directory. The `-DskipTests`
+is currently necessary as we refine the unit tests.
 
 
 

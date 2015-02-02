@@ -416,9 +416,7 @@ public class IntersectOperationTest {
 				Assert.assertTrue(curr_test_geno.hasDP());
 				// Assert that the sample has a genotype quality score
 				Assert.assertTrue(curr_test_geno.hasGQ());
-				
-				
-				
+
 			}
 
 			// assert that they have the same reference and alternate alleles....
