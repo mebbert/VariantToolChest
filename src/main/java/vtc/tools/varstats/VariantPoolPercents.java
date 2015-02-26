@@ -24,7 +24,10 @@ public class VariantPoolPercents {
 	public VariantPoolPercents(VariantPool vp){
 		
 		String filepath = vp.getFile().toString();
-		filepath = filepath.replace(".vcf", ".percent.txt");
+		if(filepath.contains(".vcf.gz"))
+			filepath = filepath.replace(".vcf.gz", ".percent.txt");
+		else
+			filepath = filepath.replace(".vcf", ".percent.txt");
 		this.output = new File(filepath);
 		String files = "";
 		try {
@@ -83,11 +86,7 @@ public class VariantPoolPercents {
 				}
 			}
 			
-//			int hetHomoAlt = vc.getHomVarCount();
-//			int hetAlt = vc.getHetCount();
-//			
-//			double hhapercent = hetHomoAlt/Double.valueOf(Samples.size());
-//			double hapercent = hetAlt/Double.valueOf(Samples.size());
+
 			List<Allele> alts = vc.getAlternateAlleles();
 			StringBuilder alt = new StringBuilder();
 			if(alts.size() > 0){
