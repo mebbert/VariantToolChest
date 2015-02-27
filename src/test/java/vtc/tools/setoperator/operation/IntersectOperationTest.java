@@ -17,6 +17,7 @@ import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import vtc.VTCEngine;
@@ -36,6 +37,13 @@ public class IntersectOperationTest {
 
 	private ArrayList<ArrayList<Test_Params>> mytests;
 
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+		System.out.println("========================================================\n"
+				+ "                       IntersectOperationTest                  \n"
+				+ "========================================================\n");	
+	}
+	
 	/**
 	 * This will get the tests and also set up the output folders.
 	 * 

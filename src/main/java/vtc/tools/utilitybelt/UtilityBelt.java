@@ -116,6 +116,9 @@ public class UtilityBelt {
 	 * @return the smallest length or -1 if alleles are empty
 	 */
 	public static int getSmallestLength(TreeSet<String> alleles){
+		if (alleles == null)
+			return -1;
+					
 		if(alleles.size() > 0){
             return alleles.first().length(); // Since this is a TreeSet, it should just be the first
 		}
@@ -139,21 +142,16 @@ public class UtilityBelt {
 	 * @return the largest length or -1 if alleles are empty
 	 */
 	public static int getLargestLength(TreeSet<String> alleles){
-		if(alleles.size() > 0){
-            return alleles.last().length(); // Since this is a TreeSet, it should just be the last
+		if (alleles == null || alleles.size() == 0)
+			return -1;
+		
+		int max_length = 0;
+		for (String al : alleles) {
+			if (al.length() > max_length) {
+				max_length = al.length();
+			}
 		}
-		return -1;
-//		int currSize, largest = -1;
-//		for(String al : alleles){
-//			currSize = al.length();
-//			if(largest == -1){
-//				largest = currSize;
-//			}
-//			else if(currSize > largest){
-//				largest = currSize;
-//			}
-//		}
-//		return largest;
+		return max_length;
 	}
 	
 	/**
@@ -163,10 +161,9 @@ public class UtilityBelt {
 	 * @return Returns -1 if alleles is empty
 	 */
 	public static double getAverageLength(TreeSet<String> alleles){
-		if(alleles.size() == 0){
-			return -1;
-		}
-
+		if (alleles == null || alleles.size() == 0 )
+			return -1.0;
+					
 		int cumLength = 0;
 		for(String al : alleles){
 			cumLength += al.length();

@@ -15,6 +15,7 @@ import java.util.TreeSet;
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import vtc.datastructures.InvalidInputFileException;
@@ -30,13 +31,19 @@ import vtc.tools.varstats.VariantRecordSummary;
 public class UtilityBeltTest {
 
 	private TreeMap<String, VariantPool> AllVPs = new TreeMap<String, VariantPool>();
-
+	
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+		System.out.println("========================================================\n"
+				+ "                       UtilityBeltTest                  \n"
+				+ "========================================================\n");	
+	}
+	
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
-
 		ArrayList<String> testlist = new ArrayList<String>();
 
 		String file1 = "target/test-classes/1000_genomes_example.vcf";
@@ -163,6 +170,7 @@ public class UtilityBeltTest {
 		for (String i : al2) {
 			al.add(i);
 		}
+		
 		largest = UtilityBelt.getLargestLength(al);
 		assertTrue("largest=" + largest, largest == 15);
 
