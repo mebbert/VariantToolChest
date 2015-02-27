@@ -36,13 +36,17 @@ public class IntersectOperationTest {
 	private static String test_path = "/test_data/IntersectTests";
 	private static String output_path = "/test_data/OUTPUT";
 
+	public static final String RED = "\u001B[31m";
+	public static final String GREEN = "\u001B[32m";
+	public static final String RESET = "\u001B[0m";
+	
 	private ArrayList<ArrayList<Test_Params>> mytests;
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		System.out.println("========================================================\n"
+		System.out.println(RED+"========================================================\n"
 				+ "                       IntersectOperationTest                  \n"
-				+ "========================================================\n");	
+				+ "========================================================\n"+RESET);	
 	}
 
 	/**

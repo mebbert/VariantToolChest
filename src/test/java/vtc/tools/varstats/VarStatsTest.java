@@ -27,11 +27,15 @@ import vtc.tools.utilitybelt.UtilityBelt;
  */
 public class VarStatsTest {
 
+	public static final String RED = "\u001B[31m";
+	public static final String GREEN = "\u001B[32m";
+	public static final String RESET = "\u001B[0m";
+	
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		System.out.println("========================================================\n"
+		System.out.println(RED+"========================================================\n"
 				+ "                       VarStatsTest                  \n"
-				+ "========================================================\n");
+				+ "========================================================\n"+RESET);
 	}
 
 

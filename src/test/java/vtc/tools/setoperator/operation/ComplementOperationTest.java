@@ -21,15 +21,18 @@ import vtc.tools.utilitybelt.UtilityBelt;
 
 public class ComplementOperationTest {
 
+	public static final String RED = "\u001B[31m";
+	public static final String GREEN = "\u001B[32m";
+	public static final String RESET = "\u001B[0m";
 
 	private static String hgref = UtilityBelt.getHGREF();
 
 	@BeforeClass
 	public static void setUpClass(){
 		System.out.println();
-		System.out.println("==========================================================================");
+		System.out.println(RED+"==========================================================================");
 		System.out.println("                             Complement");
-		System.out.println("==========================================================================");
+		System.out.println("=========================================================================="+RESET);
 		System.out.println();
 	}
 	

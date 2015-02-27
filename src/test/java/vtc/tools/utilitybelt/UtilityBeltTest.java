@@ -30,13 +30,17 @@ import vtc.tools.varstats.VariantRecordSummary;
 
 public class UtilityBeltTest {
 
+	public static final String RED = "\u001B[31m";
+	public static final String GREEN = "\u001B[32m";
+	public static final String RESET = "\u001B[0m";
+	
 	private TreeMap<String, VariantPool> AllVPs = new TreeMap<String, VariantPool>();
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		System.out.println("========================================================\n"
+		System.out.println(RED+"========================================================\n"
 				+ "                       UtilityBeltTest                  \n"
-				+ "========================================================\n");	
+				+ "========================================================\n"+RESET);	
 	}
 
 

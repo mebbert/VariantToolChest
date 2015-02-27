@@ -951,7 +951,6 @@ public class SetOperator {
 						union.addVariant(buildVariant(var, alleles, genotypes), true);
 						continue;
 					}
-					
 					for(VariantPool vp2 : variantPools){
 						
 						/* Skip this VariantPool if it's the same as vp */
@@ -963,6 +962,8 @@ public class SetOperator {
 						 * add genotypes. Otherwise, create NO_CALL genotypes
 						 */
 						var2 = vp2.getVariant(currVarKey);
+						
+						
 						if(var2 != null){
 	
 							if(!forceUniqueNames && hasMatchingSampleWithDifferentGenotype(var, var2, currVarKey, op.getOperationID())){
@@ -974,7 +975,7 @@ public class SetOperator {
 								genotypes.addAll(getCorrectGenotypes(var2, uniqueNames.get(vp2.getPoolID())));
 							}
 							else{
-								genotypes.addAll(getCorrectGenotypes(var2, op.getSamplePool(vp.getPoolID()).getSamples()));
+								genotypes.addAll(getCorrectGenotypes(var2, op.getSamplePool(vp2.getPoolID()).getSamples()));
 							}
 							alleles.addAll(var2.getAlleles());
 						}
@@ -1232,6 +1233,7 @@ public class SetOperator {
 
 		/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
 		if(var.getGenotypes().size() > 0 && !var.getGenotypes().get(0).isAvailable()){
+
 			return generateNoCallGenotypesForSamples(samples);
 		}
 		else{

@@ -29,26 +29,32 @@ import vtc.tools.utilitybelt.UtilityBelt;
  * 
  */
 public class UnionOperationTest {
+	
+	public static final String RED = "\u001B[31m";
+	public static final String GREEN = "\u001B[32m";
+	public static final String RESET = "\u001B[0m";
 
 	private static String hgref = UtilityBelt.getHGREF();
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		System.out.println("========================================================\n"
+		System.out.println(RED+"========================================================\n"
 				+ "                       UnionOperationTest                  \n"
-				+ "========================================================\n");	
+				+ "========================================================\n"+RESET);	
 	}
 	
 	/**
 	 * Test how the union operator works
 	 */
 	@Test
-	public void testUnionOperation1() {
+	public void testUniqueSampleSetsDifferentVariantSets() {
 
-		String in1 = "src/test/resources/test_data/UnionTests/Test1/input1.vcf";
-		String in2 = "src/test/resources/test_data/UnionTests/Test1/input2.vcf";
-		String answer = "src/test/resources/test_data/UnionTests/Test1/Answer.vcf";
-		String out = "src/test/resources/test_data/OUTPUT/union/u_test1_out.vcf";
+		System.out.println(GREEN+"\ntest Unique Sample Sets Different Variant Sets"+RESET);
+		
+		String in1 = "src/test/resources/test_data/UnionTests/testUniqueSampleSetsDifferentVariantSets/input1.vcf";
+		String in2 = "src/test/resources/test_data/UnionTests/testUniqueSampleSetsDifferentVariantSets/input2.vcf";
+		String answer = "src/test/resources/test_data/UnionTests/testUniqueSampleSetsDifferentVariantSets/Answer.vcf";
+		String out = "src/test/resources/test_data/OUTPUT/union/testUniqueSampleSetsDifferentVariantSets.vcf";
 
 		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -s u[var1:var2] -o " + out;
 
@@ -62,11 +68,14 @@ public class UnionOperationTest {
 	 * Test how the union operator works
 	 */
 	@Test
-	public void testUnionOperation2() {
-		String in1 = "target/test-classes/UnionTests/Test2/input1.vcf";
-		String in2 = "target/test-classes/UnionTests/Test2/input2.vcf";
-		String answer = "target/test-classes/UnionTests/Test2/Answer.vcf";
-		String out = "target/test-classes/OUTPUT/union/u_test2_out.vcf";
+	public void testOverlappingSampleSameVariantSet() {
+		
+		System.out.println(GREEN+"\ntest Overlapping Sample Same Variant Set"+RESET);
+		
+		String in1 = "target/test-classes/UnionTests/testOverlappingSampleSameVariantSet/input1.vcf";
+		String in2 = "target/test-classes/UnionTests/testOverlappingSampleSameVariantSet/input2.vcf";
+		String answer = "target/test-classes/UnionTests/testOverlappingSampleSameVariantSet/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/union/testOverlappingSampleSameVariantSet.vcf";
 
 		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -s u[var1:var2] -o " + out;
 		
@@ -81,13 +90,16 @@ public class UnionOperationTest {
 	 * Test how the union operator works
 	 */
 	@Test
-	public void testUnionOperation3() {
-		String in1 = "target/test-classes/UnionTests/Test3/input1.vcf";
-		String in2 = "target/test-classes/UnionTests/Test3/input2.vcf";
-		String answer = "target/test-classes/UnionTests/Test3/Answer.vcf";
-		String out = "target/test-classes/OUTPUT/union/u_test3_out.vcf";
+	public void testDifferentAltsAdded() {
 
-		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -s u[var1:var2] -o " + out;
+		System.out.println(GREEN+"\ntest Different Alts Added"+RESET);
+
+		String in1 = "target/test-classes/UnionTests/testDifferentAltsAdded/input1.vcf";
+		String in2 = "target/test-classes/UnionTests/testDifferentAltsAdded/input2.vcf";
+		String answer = "target/test-classes/UnionTests/testDifferentAltsAdded/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/union/testDifferentAltsAdded.vcf";
+
+		String arguments = "SO -i var1=" + in2 + " var2=" + in1 + " -R " + hgref + " -s u[var1:var2] -o " + out;
 		
 		String[] args = arguments.split(" ");
 		VTCEngine.main(args);
@@ -100,11 +112,14 @@ public class UnionOperationTest {
 	 * Test how the union operator works
 	 */
 	@Test
-	public void testUnionOperation4() {
-		String in1 = "target/test-classes/UnionTests/Test4/input1.vcf";
-		String in2 = "target/test-classes/UnionTests/Test4/input2.vcf";
-		String answer = "target/test-classes/UnionTests/Test4/Answer.vcf";
-		String out = "target/test-classes/OUTPUT/union/u_test4_out.vcf";
+	public void testOverlappingSamplesDifferentVariantSets() {
+
+		System.out.println("\ntest Overlapping Samples Different Variant Sets");
+		
+		String in1 = "target/test-classes/UnionTests/testOverlappingSamplesDifferentVariantSets/input1.vcf";
+		String in2 = "target/test-classes/UnionTests/testOverlappingSamplesDifferentVariantSets/input2.vcf";
+		String answer = "target/test-classes/UnionTests/testOverlappingSamplesDifferentVariantSets/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/union/testOverlappingSamplesDifferentVariantSets.vcf";
 
 		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -s u[var1:var2] -o " + out;
 		
@@ -163,6 +178,9 @@ public class UnionOperationTest {
 					Genotype curr_test_geno = test_geno_it.next();
 					
 					// Assert that the genotypes are the same
+//					System.out.println(curr_key_geno.toString());
+//					System.out.println(curr_test_geno.toString());
+					Assert.assertArrayEquals(curr_key_geno.getAlleles().toArray(), curr_test_geno.getAlleles().toArray());
 					Assert.assertTrue(curr_key_geno.compareTo(curr_test_geno)==0);
 					// Assert that the sample has a read depth
 //					Assert.assertTrue(curr_test_geno.hasDP());
