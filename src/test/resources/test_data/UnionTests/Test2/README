@@ -4,7 +4,7 @@ omitted because we don't know which one to report.
 
 Expected result:
 20	14370	Pass
-20	17330	Fail for different refs
+20	17330	Fail for different refs( I think that this should actually pass - Mark W.)
 20	1110696	Fail for matching sample with different genotype
 20	1230237	Pass
 20	1234567	Fail for matching sample with different genotype
