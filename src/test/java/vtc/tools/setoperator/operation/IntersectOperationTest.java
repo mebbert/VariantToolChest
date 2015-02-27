@@ -17,6 +17,8 @@ import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import vtc.VTCEngine;
@@ -36,6 +38,21 @@ public class IntersectOperationTest {
 
 	private ArrayList<ArrayList<Test_Params>> mytests;
 
+	
+	@BeforeClass
+	public static void setUpBeforeClass(){
+		System.out.println();
+		System.out.println("==========================================================================");
+		System.out.println("                             Intersect");
+		System.out.println("==========================================================================");
+		System.out.println();
+	}
+	
+	
+	
+	
+	
+	
 	/**
 	 * This will get the tests and also set up the output folders.
 	 * 
@@ -163,7 +180,7 @@ public class IntersectOperationTest {
 		String answer = "target/test-classes/IntersectTests/Het_Or_Homo_Alt/Test3/Answer.vcf";
 		String out = "target/test-classes/OUTPUT/intersect/Het_Or_Homo_Alt/i_test3_out.vcf";
 
-		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g het_homo_alt -s i[var1[]:var2] -o "
+		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g het_homo_alt -s i[var1:var2] -o "
 				+ out;
 
 		String[] args = arguments.split(" ");

@@ -11,6 +11,7 @@ import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import vtc.VTCEngine;
@@ -22,6 +23,15 @@ public class ComplementOperationTest {
 
 	private static String hgref = UtilityBelt.getHGREF();
 
+	@BeforeClass
+	public static void setUpBeforeClass(){
+		System.out.println();
+		System.out.println("==========================================================================");
+		System.out.println("                             Complement");
+		System.out.println("==========================================================================");
+		System.out.println();
+	}
+	
 	
 
 	

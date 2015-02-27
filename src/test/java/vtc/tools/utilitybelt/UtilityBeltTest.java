@@ -15,6 +15,7 @@ import java.util.TreeSet;
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import vtc.datastructures.InvalidInputFileException;
@@ -31,6 +32,17 @@ public class UtilityBeltTest {
 
 	private TreeMap<String, VariantPool> AllVPs = new TreeMap<String, VariantPool>();
 
+	@BeforeClass
+	public static void setUpBeforeClass(){
+		System.out.println();
+		System.out.println("==========================================================================");
+		System.out.println("                             Utility");
+		System.out.println("==========================================================================");
+		System.out.println();
+	}
+	
+	
+	
 	/**
 	 * @throws java.lang.Exception
 	 */

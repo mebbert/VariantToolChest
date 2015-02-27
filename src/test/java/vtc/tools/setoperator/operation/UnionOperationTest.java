@@ -17,6 +17,7 @@ import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import vtc.VTCEngine;
@@ -31,12 +32,31 @@ public class UnionOperationTest {
 
 	private static String hgref = UtilityBelt.getHGREF();
 
+	
+	
+	@BeforeClass
+	public static void setUpBeforeClass(){
+		System.out.println();
+		System.out.println("==========================================================================");
+		System.out.println("                             Union");
+		System.out.println("==========================================================================");
+		System.out.println();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * Test how the union operator works
 	 */
 	@Test
-	public void testUnionOperation1() {
+	public void TestUnionOperation1() {
 
+		System.out.println("I AM IN THE FIRST UNION TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		String in1 = "src/test/resources/test_data/UnionTests/Test1/input1.vcf";
 		String in2 = "src/test/resources/test_data/UnionTests/Test1/input2.vcf";
 		String answer = "src/test/resources/test_data/UnionTests/Test1/Answer.vcf";
@@ -187,7 +207,7 @@ public class UnionOperationTest {
 			while ((line = reader.readLine()) != null) {
 				output.append(line + "\n");
 			}
-			
+
 			assert(output==null);
 			
 		} catch (IOException e) {

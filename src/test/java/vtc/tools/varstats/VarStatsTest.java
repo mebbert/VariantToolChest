@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import vtc.datastructures.InvalidInputFileException;
@@ -27,6 +28,15 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class VarStatsTest {
 
 	VarStats varstat = null;
+	
+	@BeforeClass
+	public static void setUpBeforeClass(){
+		System.out.println();
+		System.out.println("==========================================================================");
+		System.out.println("                             Varstats");
+		System.out.println("==========================================================================");
+		System.out.println();
+	}
 	
 	/**
 	 * @throws java.lang.Exception
