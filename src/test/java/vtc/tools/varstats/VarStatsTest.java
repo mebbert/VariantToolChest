@@ -31,9 +31,10 @@ public class VarStatsTest {
 	public static void setUpClass() throws Exception {
 		System.out.println("========================================================\n"
 				+ "                       VarStatsTest                  \n"
-				+ "========================================================\n");	
+				+ "========================================================\n");
 	}
-	
+
+
 	@Test
 	public void test1() {
 		

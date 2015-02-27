@@ -31,14 +31,15 @@ import vtc.tools.varstats.VariantRecordSummary;
 public class UtilityBeltTest {
 
 	private TreeMap<String, VariantPool> AllVPs = new TreeMap<String, VariantPool>();
-	
+
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		System.out.println("========================================================\n"
 				+ "                       UtilityBeltTest                  \n"
 				+ "========================================================\n");	
 	}
-	
+
+
 	/**
 	 * @throws java.lang.Exception
 	 */

@@ -39,13 +39,13 @@ public class UnionOperationTest {
 				+ "========================================================\n");	
 	}
 	
-	
 	/**
 	 * Test how the union operator works
 	 */
 	@Test
-	public void testUnionOperation1() {
+	public void TestUnionOperation1() {
 
+		System.out.println("I AM IN THE FIRST UNION TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		String in1 = "src/test/resources/test_data/UnionTests/Test1/input1.vcf";
 		String in2 = "src/test/resources/test_data/UnionTests/Test1/input2.vcf";
 		String answer = "src/test/resources/test_data/UnionTests/Test1/Answer.vcf";
@@ -196,7 +196,7 @@ public class UnionOperationTest {
 			while ((line = reader.readLine()) != null) {
 				output.append(line + "\n");
 			}
-			
+
 			assert(output==null);
 			
 		} catch (IOException e) {
