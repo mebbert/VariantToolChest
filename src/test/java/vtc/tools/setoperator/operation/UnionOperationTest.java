@@ -32,23 +32,12 @@ public class UnionOperationTest {
 
 	private static String hgref = UtilityBelt.getHGREF();
 
-	
-	
 	@BeforeClass
-	public static void setUpBeforeClass(){
-		System.out.println();
-		System.out.println("==========================================================================");
-		System.out.println("                             Union");
-		System.out.println("==========================================================================");
-		System.out.println();
+	public static void setUpClass() throws Exception {
+		System.out.println("========================================================\n"
+				+ "                       UnionOperationTest                  \n"
+				+ "========================================================\n");	
 	}
-	
-	
-	
-	
-	
-	
-	
 	
 	/**
 	 * Test how the union operator works

@@ -27,24 +27,13 @@ import vtc.tools.utilitybelt.UtilityBelt;
  */
 public class VarStatsTest {
 
-	VarStats varstat = null;
-	
 	@BeforeClass
-	public static void setUpBeforeClass(){
-		System.out.println();
-		System.out.println("==========================================================================");
-		System.out.println("                             Varstats");
-		System.out.println("==========================================================================");
-		System.out.println();
+	public static void setUpClass() throws Exception {
+		System.out.println("========================================================\n"
+				+ "                       VarStatsTest                  \n"
+				+ "========================================================\n");
 	}
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		varstat = new VarStats();
-	}
+
 
 	@Test
 	public void test1() {
@@ -68,7 +57,6 @@ public class VarStatsTest {
 			summaries = VariantPoolSummarizer.summarizeVariantPools(AllVPs);
 			
 			for (Entry<String, VariantPoolSummary> entry : summaries.entrySet()) {
-			    String key = entry.getKey();
 			    VariantPoolSummary value = entry.getValue();
 
 			    assertEquals(9,value.getNumVars());
@@ -102,20 +90,4 @@ public class VarStatsTest {
 		
 
 	}
-	
-	@Test
-	public void test2() {
-		
-	}
-	
-	@Test
-	public void test3() {
-		
-	}
-	
-	@Test
-	public void test4() {
-		
-	}
-
 }

@@ -33,22 +33,18 @@ public class UtilityBeltTest {
 	private TreeMap<String, VariantPool> AllVPs = new TreeMap<String, VariantPool>();
 
 	@BeforeClass
-	public static void setUpBeforeClass(){
-		System.out.println();
-		System.out.println("==========================================================================");
-		System.out.println("                             Utility");
-		System.out.println("==========================================================================");
-		System.out.println();
+	public static void setUpClass() throws Exception {
+		System.out.println("========================================================\n"
+				+ "                       UtilityBeltTest                  \n"
+				+ "========================================================\n");	
 	}
-	
-	
-	
+
+
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
-
 		ArrayList<String> testlist = new ArrayList<String>();
 
 		String file1 = "target/test-classes/1000_genomes_example.vcf";
@@ -175,6 +171,7 @@ public class UtilityBeltTest {
 		for (String i : al2) {
 			al.add(i);
 		}
+		
 		largest = UtilityBelt.getLargestLength(al);
 		assertTrue("largest=" + largest, largest == 15);
 

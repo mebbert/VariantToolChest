@@ -38,21 +38,13 @@ public class IntersectOperationTest {
 
 	private ArrayList<ArrayList<Test_Params>> mytests;
 
-	
 	@BeforeClass
-	public static void setUpBeforeClass(){
-		System.out.println();
-		System.out.println("==========================================================================");
-		System.out.println("                             Intersect");
-		System.out.println("==========================================================================");
-		System.out.println();
+	public static void setUpClass() throws Exception {
+		System.out.println("========================================================\n"
+				+ "                       IntersectOperationTest                  \n"
+				+ "========================================================\n");	
 	}
-	
-	
-	
-	
-	
-	
+
 	/**
 	 * This will get the tests and also set up the output folders.
 	 * 

@@ -33,7 +33,12 @@ public class ComplementOperationTest {
 	}
 	
 	
-
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+		System.out.println("========================================================\n"
+				+ "                       ComplementOperationTest                  \n"
+				+ "========================================================\n");	
+	}
 	
 	@Test
 	public void test() {
