@@ -24,7 +24,7 @@ public class ComplementOperationTest {
 	private static String hgref = UtilityBelt.getHGREF();
 
 	@BeforeClass
-	public static void setUpBeforeClass(){
+	public static void setUpClass(){
 		System.out.println();
 		System.out.println("==========================================================================");
 		System.out.println("                             Complement");
@@ -33,12 +33,6 @@ public class ComplementOperationTest {
 	}
 	
 	
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		System.out.println("========================================================\n"
-				+ "                       ComplementOperationTest                  \n"
-				+ "========================================================\n");	
-	}
 	
 	@Test
 	public void test() {
