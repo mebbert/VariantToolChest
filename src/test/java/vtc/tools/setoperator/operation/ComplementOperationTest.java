@@ -12,6 +12,7 @@ import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import vtc.VTCEngine;
@@ -43,7 +44,7 @@ public class ComplementOperationTest {
 	/**
 	 * Test how the complement operator works for homozygous Alternate.
 	 */
-	@Test
+	@Ignore
 	public void testComplementOperation_HetOrHomoAlt_Test1() {
 
 		// ///////////Test1//////////////
@@ -64,7 +65,7 @@ public class ComplementOperationTest {
 	/**
 	 * Test how the complement operator works for homozygous Alternate.
 	 */
-	@Test
+	@Ignore
 	public void testComplementOperation_HetOrHomoAlt_Test2() {
 
 		// ///////////Test1//////////////
@@ -85,7 +86,7 @@ public class ComplementOperationTest {
 	/**
 	 * Test how the complement operator works for the exact option.
 	 */
-	@Test
+	@Ignore
 	public void testComplementOperation_Exact_Test1() {
 
 		// ///////////Test1//////////////
@@ -106,7 +107,7 @@ public class ComplementOperationTest {
 	/**
 	 * Test how the complement operator works for the exact option.
 	 */
-	@Test
+	@Ignore
 	public void testComplementOperation_Exact_Test2() {
 
 		// ///////////Test1//////////////
@@ -128,7 +129,7 @@ public class ComplementOperationTest {
 	/**
 	 * Test how the complement operator works for complement based on chr, pos, ref, alt.
 	 */
-	@Test
+	@Ignore
 	public void testComplementOperation_Alt_Test1() {
 
 		// ///////////Test1//////////////
@@ -150,7 +151,7 @@ public class ComplementOperationTest {
 	/**
 	 * Test how the complement operator works for complement based on chr, pos, ref, alt.
 	 */
-	@Test
+	@Ignore
 	public void testComplementOperation_Alt_Test2() {
 
 		// ///////////Test1//////////////

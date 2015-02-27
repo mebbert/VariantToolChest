@@ -163,7 +163,7 @@ public class UnionOperationTest {
 					Genotype curr_test_geno = test_geno_it.next();
 					
 					// Assert that the genotypes are the same
-					Assert.assertTrue(curr_key_geno.equals(curr_test_geno));
+					Assert.assertTrue(curr_key_geno.compareTo(curr_test_geno)==0);
 					// Assert that the sample has a read depth
 //					Assert.assertTrue(curr_test_geno.hasDP());
 					// Assert that the sample has a genotype quality score
