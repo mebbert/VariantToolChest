@@ -1,0 +1,1 @@
+Two VCF with unique sets of samples. Variants unique to one VCF will have NOCALLs(./.) for the samples in the other file.
