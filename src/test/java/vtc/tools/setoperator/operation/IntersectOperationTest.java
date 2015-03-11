@@ -50,55 +50,19 @@ public class IntersectOperationTest {
 	}
 
 	/**
-	 * This will get the tests and also set up the output folders.
-	 * 
-	 * @throws java.lang.Exception
-	 */
-	// @Before
-	// public void setUp() throws Exception {
-	// // This will make it so it will automatically generate and run tests for all folders
-	// // within the specific test.
-	//
-	// // List the directories.
-	// File folder = new File(test_path);
-	// File[] types_of_tests = folder.listFiles(); // These are the het_only, het_or_homo, etc...
-	//
-	// for (int i = 0; i < types_of_tests.length; i++) {
-	// ArrayList<Test_Params> test_group = new ArrayList<Test_Params>();
-	//
-	// if (types_of_tests[i].isDirectory()) {
-	// //lets create the output folder for this test group..
-	// File
-	// File specific_test = new File(test_path + "/" + types_of_tests[i].getName());
-	// File[] test_list = specific_test.listFiles(); // these are the test1, test2, test3,
-	//
-	// Test_Params param = new Test_Params();
-	// for (int j = 0; j < test_list.length; j++) {
-	// param.setInputfiles((ArrayList<File>) Arrays.asList(listFilesMatching(new
-	// File(test_list[j].getPath()), "input\\d+\\.vcf"))); //get all the input files..
-	// param.setAnwser(listFilesMatching(new File(test_list[j].getPath()),
-	// "input\\d+\\.vcf")[0].getPath());
-	//
-	// param.setOutfile(outfile);
-	// test_group.add(param);
-	// }
-	// }
-	// mytests.add(test_group);
-	// }
-	// }
-
-	/**
 	 * Test how the intersect operator works for Heterozygous only
 	 */
 	@Test
-	public void testIntersectOperation_HetOnly_Test1() {
+	public void testHetOnlyHomoRef() {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
-		String in1 = "target/test-classes/IntersectTests/Het_Only/Test1/input1.vcf";
-		String in2 = "target/test-classes/IntersectTests/Het_Only/Test1/input2.vcf";
-		String answer = "target/test-classes/IntersectTests/Het_Only/Test1/Answer.vcf";
-		String out = "target/test-classes/OUTPUT/intersect/Het_Only/i_test1_out.vcf";
+		System.out.println(GREEN+"\ntest Het Only Homo Ref"+RESET);
+		
+		String in1 = "target/test-classes/IntersectTests/Het_Only/HomoRef/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Het_Only/HomoRef/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Het_Only/HomoRef/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Het_Only/HomoRef.vcf";
 
 		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g het -s i[var1:var2] -o " + out;
 
@@ -109,14 +73,15 @@ public class IntersectOperationTest {
 	}
 	
 	@Test
-	public void testIntersectOperation_HetOnly_Test2() {
+	public void testHetOnlyMultipleAlts() {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
+		System.out.println(GREEN+"\ntest Het Only Multiple Alts"+RESET);
 		
-		String in1 = "target/test-classes/IntersectTests/Het_Only/Test2/input1.vcf";
-		String in2 = "target/test-classes/IntersectTests/Het_Only/Test2/input2.vcf";
-		String answer = "target/test-classes/IntersectTests/Het_Only/Test2/Answer.vcf";
-		String out = "target/test-classes/OUTPUT/intersect/Het_Only/i_test2_out.vcf";
+		String in1 = "target/test-classes/IntersectTests/Het_Only/MultipleAlts/input1.vcf";
+		String in2 = "target/test-classes/IntersectTests/Het_Only/MultipleAlts/input2.vcf";
+		String answer = "target/test-classes/IntersectTests/Het_Only/MultipleAlts/Answer.vcf";
+		String out = "target/test-classes/OUTPUT/intersect/Het_Only/MultipleAlts.vcf";
 
 		String arguments = "SO -i var1=" + in1 + " var2=" + in2 + " -R " + hgref + " -g het -s i[var1:var2] -o " + out;
 
@@ -124,6 +89,7 @@ public class IntersectOperationTest {
 		VTCEngine.main(args);
 
 		this.test2files(answer, out);
+		
 	}
 	
 	
@@ -348,12 +314,6 @@ public class IntersectOperationTest {
 	}
 	
 	
-	/**
-	 * Generic test
-	 */
-	@Test
-	public void test() {
-	}
 	
 	/**
 	 * Test how the intersect operator works for matching samples

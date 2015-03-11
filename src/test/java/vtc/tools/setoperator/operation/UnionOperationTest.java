@@ -114,7 +114,7 @@ public class UnionOperationTest {
 	@Test
 	public void testOverlappingSamplesDifferentVariantSets() {
 
-		System.out.println("\ntest Overlapping Samples Different Variant Sets");
+		System.out.println(GREEN+"\ntest Overlapping Samples Different Variant Sets"+RESET);
 		
 		String in1 = "target/test-classes/UnionTests/testOverlappingSamplesDifferentVariantSets/input1.vcf";
 		String in2 = "target/test-classes/UnionTests/testOverlappingSamplesDifferentVariantSets/input2.vcf";
