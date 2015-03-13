@@ -693,6 +693,7 @@ public class VariantRecordSummary {
         return sb.toString();
 	}
 
+	@Override
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getChr());

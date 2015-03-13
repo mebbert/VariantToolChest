@@ -7,13 +7,9 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.broadinstitute.variant.variantcontext.Allele;
-import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,7 +17,6 @@ import org.junit.Test;
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.VariantPool;
 import vtc.tools.setoperator.operation.InvalidOperationException;
-import vtc.tools.varstats.VariantRecordSummary;
 
 /**
  * @author Kevin

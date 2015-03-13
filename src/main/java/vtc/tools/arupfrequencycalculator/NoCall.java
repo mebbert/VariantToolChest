@@ -196,6 +196,7 @@ public class NoCall implements Comparable<NoCall>{
     	return false;
 	}
 	
+	@Override
 	public String toString(){
 		return this.gene + ":" + this.chr + ":" + this.start +
 				":" + this.end + "\tsize: " + this.size +

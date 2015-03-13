@@ -43,6 +43,7 @@ public enum IntersectType {
 		return this.fullDescription;
 	}
 
+	@Override
 	public String toString(){
 		return "'" + getCommand() + "' -- " +
 				getBriefDescription() + ".";

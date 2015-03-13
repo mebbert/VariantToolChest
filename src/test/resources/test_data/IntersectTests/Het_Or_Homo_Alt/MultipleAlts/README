@@ -1,0 +1,7 @@
+This will test comparing two vcfs with the one overlapping sample using the 
+Het option. The Het option requires that the samples contain two different alleles.
+
+Expected result:
+20	17330	Pass
+20	1110696	Pass
+20	1234567	Fail No common alts between all samples

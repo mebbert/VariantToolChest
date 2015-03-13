@@ -1,0 +1,8 @@
+This will test comparing two vcfs with the one overlapping sample using the 
+Het option. If the overlapping sample has a differnt genotype in one file than in 
+the other it should not be added.
+
+Expected result:
+20	14370	Fail for Different genotype
+20	17330	Pass
+20	1230237	Fail for different genotype alt

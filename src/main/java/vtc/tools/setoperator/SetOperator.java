@@ -801,6 +801,8 @@ public class SetOperator {
 			/* Intersecting on HETEROZYGOUS assumes that there is
 			 * both a ref and alt allele. i.e. having two different
 			 * alternate alleles (e.g. 1/2) does not qualify in this logic.
+			 * TODO: What is actually happening is that 1/2 is considered a heterozygote.
+			 * We need to give the option to make heterozygote an alternate with a reference only.
 			 */
 //			if(geno.isHet() && genoContainsRefAllele(geno)){
 			if(geno.isHet()){

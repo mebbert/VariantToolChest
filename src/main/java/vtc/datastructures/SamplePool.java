@@ -41,7 +41,7 @@ public class SamplePool implements Pool{
 	
 	public SamplePool(){
 		this.samples = new TreeSet<String>();
-		this.definedVariantPoolIDs = new TreeSet<String>();
+		SamplePool.definedVariantPoolIDs = new TreeSet<String>();
 	}
 	
 	
@@ -54,6 +54,7 @@ public class SamplePool implements Pool{
 		return this.samples;
 	}
 	
+	@Override
 	public String getPoolID(){
 		return this.poolID;
 	}

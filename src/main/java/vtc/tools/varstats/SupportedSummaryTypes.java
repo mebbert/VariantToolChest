@@ -56,6 +56,7 @@ public enum SupportedSummaryTypes {
 		return false;
 	}
 	
+	@Override
 	public String toString(){
 		return  getName() + " (" +
 				getShortCommand() +

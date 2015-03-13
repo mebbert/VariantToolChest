@@ -10,7 +10,6 @@ import java.util.TreeSet;
 
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
-import org.broadinstitute.variant.variantcontext.GenotypesContext;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.datastructures.VariantPool;
