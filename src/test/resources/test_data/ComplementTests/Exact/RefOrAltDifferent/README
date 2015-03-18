@@ -1,7 +1,7 @@
 This will test comparing two vcfs with the one overlapping sample using the 
-homo_alt. This tests if variants with REF or ALT columns that are different are excluded.
+homo_alt. This tests if variants with REF or ALT columns that are different are included form the first file.
 
 Expected result:
-20	17330	Fail	
+20	17330	Fail because of all genotypes are the same
 20	1110696	Pass for different reference allele
 20	1230237	Pass for different alternate allele

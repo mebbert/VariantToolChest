@@ -1,11 +1,7 @@
 This will test comparing two vcfs with one overlapping sample.
-Any genotype that does not match between two samples with the same name
-will not be considered an intersect. This will also test that no variants with
-a Homo Ref sample are returned.
+input1 has 2 vars and input2 has 1 var. This tests if 
+the complement works with the same sample in each file.
 
 Expected result:
-20	14370	Fail for Homo Ref
-20	17330	Fail for non-matching sample genotype
-20	1110696	Pass
-20	1230237	Fail for Homo Ref
+20	1110696	Fail because it is the same in both files
 20	1234567	Pass

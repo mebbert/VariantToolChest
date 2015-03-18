@@ -1,0 +1,6 @@
+This will test comparing two vcfs with one overlapping sample.
+If the position or chromosome is different then variant is included from the first file
+
+Expected result:
+20	14371	Pass	
+21	17330	Pass
