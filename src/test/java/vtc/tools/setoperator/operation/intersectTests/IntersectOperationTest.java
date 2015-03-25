@@ -26,7 +26,7 @@ import vtc.datastructures.VariantPool;
    Pos.class,
    Alt.class,
    HomoAlt.class,
-   MatchSamples.class
+//   MatchSamples.class
 })
 public class IntersectOperationTest {
 	public static final String RED = "\u001B[31m";

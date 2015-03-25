@@ -37,7 +37,7 @@ public class MatchSamples {
 	/**
 	 * Test how the intersect operator works for matching samples
 	 */
-	@Ignore
+	@Test
 	public void testMismatchingSamples() {
 		
 		

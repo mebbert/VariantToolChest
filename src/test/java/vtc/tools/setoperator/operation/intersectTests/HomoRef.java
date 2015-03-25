@@ -59,7 +59,7 @@ public class HomoRef {
 	
 	
 	
-	@Ignore
+	@Test
 	public void testBaseTest() {
 
 		System.out.println(GREEN+"\ntest Base Test"+RESET);
