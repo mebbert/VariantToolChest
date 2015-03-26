@@ -182,6 +182,9 @@ public class UtilityBelt {
 	 * @return
 	 */
 	public static AltType determineAltType(Allele ref, Allele alt){
+		if (ref == null || alt == null){
+			throw new RuntimeException("Reference or alternate alleles are null.");
+		}
 		if(ref.length() == 1 && alt.length() == 1 && !ref.equals(alt, true)){
 			return AltType.SNV;
 		}
@@ -236,6 +239,11 @@ public class UtilityBelt {
 	public static int getDiffCount(Allele ref, Allele alt){
 		String refNucs = ref.getBaseString();
 		String altNucs = alt.getBaseString();
+		if(refNucs.length() != altNucs.length()){
+			System.err.println("Error: Running getDiffCount on two alleles of different lengths.");
+			return -1;
+		}
+		
 		int count = 0;
 		for(int i = 0; i < refNucs.length(); i++){
 			if(refNucs.charAt(i) != altNucs.charAt(i)){

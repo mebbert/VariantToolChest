@@ -3,12 +3,12 @@
  */
 package vtc.tools.utilitybelt;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -21,7 +21,12 @@ import org.junit.Test;
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.VariantPool;
 import vtc.tools.setoperator.operation.InvalidOperationException;
-import vtc.tools.varstats.VariantRecordSummary;
+import vtc.tools.varstats.AltType;
+
+import org.junit.Rule;
+import org.junit.Test;
+
+import rules.OnFail;
 
 /**
  * @author Kevin
@@ -44,26 +49,15 @@ public class UtilityBeltTest {
 	}
 
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		ArrayList<String> testlist = new ArrayList<String>();
-
-		String file1 = "target/test-classes/1000_genomes_example.vcf";
-		String file2 = "target/test-classes/1000_genomes_example-modified.vcf";
-		testlist.add(file1);
-		testlist.add(file2);
-
-		AllVPs = UtilityBelt.createVariantPools(testlist, true);
-	}
-
+    @Rule
+    public OnFail ruleExample = new OnFail();
+    
 	/**
 	 * Test method for {@link vtc.tools.utilitybelt.UtilityBelt#roundDouble(double)}.
 	 */
 	@Test
 	public void testRoundDouble() {
+		System.out.println(GREEN+"\nTest Round Double"+RESET);
 		double num = 1.1450239;
 		String newnum = UtilityBelt.roundDoubleToString(num);
 		assertTrue(newnum.equals("1.15"));
@@ -78,6 +72,7 @@ public class UtilityBeltTest {
 	 */
 	@Test
 	public void testCreateVariantPools() throws InvalidInputFileException, InvalidOperationException {
+		System.out.println(GREEN+"\nTest Create Variant Pools"+RESET);
 
 		ArrayList<String> testlist = new ArrayList<String>();
 
@@ -107,6 +102,8 @@ public class UtilityBeltTest {
 	 */
 	@Test
 	public void testGetSmallestLength() {
+		System.out.println(GREEN+"\nTest Get Smallest Length"+RESET);
+
 		int smallest = 0;
 		TreeSet<String> al = new TreeSet<String>();
 
@@ -166,6 +163,8 @@ public class UtilityBeltTest {
 	 */
 	@Test
 	public void testGetLargestLength() {
+		System.out.println(GREEN+"\nTest Get Largest Length"+RESET);
+
 		int largest = -1;
 		TreeSet<String> al = new TreeSet<String>();
 
@@ -226,6 +225,8 @@ public class UtilityBeltTest {
 	 */
 	@Test
 	public void testGetAverageLength() {
+		System.out.println(GREEN+"\nTest Get Average Length"+RESET);
+
 		double average = -1.0;
 		TreeSet<String> al = new TreeSet<String>();
 
@@ -269,19 +270,53 @@ public class UtilityBeltTest {
 	 */
 	@Test
 	public void testDetermineAltType() {
+		System.out.println(GREEN+"\nTest Determine Alt Type"+RESET);
+		ArrayList<String> testlist = new ArrayList<String>();
 
-//		ArrayList<VariantPool> allVPsList = new ArrayList<VariantPool>(AllVPs.values());
-//		for (VariantPool vp : allVPsList) {
-//			Iterator<String> varIT = vp.getVariantIterator();
-//			String currVarKey;
-//			while (varIT.hasNext()) {
-//				currVarKey = varIT.next();
-//				VariantContext var = vp.getVariant(currVarKey);
-//				for(Allele a : var.getAlternateAlleles()) {
-//					UtilityBelt.determineAltType(var.getReference(), a);
-//				}
-//			}
-//		}
+		String file1 = "target/test-classes/1000_genomes_example.vcf";
+		ArrayList<AltType> answers = new ArrayList<AltType>();
+		answers.add(AltType.SNV);
+		answers.add(AltType.SNV);
+		answers.add(AltType.SNV);
+		answers.add(AltType.SNV);
+		answers.add(AltType.SNV);
+		answers.add(AltType.MNP);
+		answers.add(AltType.DELETION);
+		answers.add(AltType.INSERTION);
+		
+		testlist.add(file1);
+
+		TreeMap<String, VariantPool> AllVPs;
+		try {
+			AllVPs = UtilityBelt.createVariantPools(testlist, true);
+			ArrayList<VariantPool> allVPsList = new ArrayList<VariantPool>(AllVPs.values());
+			System.out.println(allVPsList);
+			int i=0;
+			for (VariantPool vp : allVPsList) {
+				Iterator<String> varIT = vp.getVariantIterator();
+				String currVarKey;
+				while (varIT.hasNext()) {
+					currVarKey = varIT.next();
+					VariantContext var = vp.getVariant(currVarKey);
+					// SNV, MNP, insertion, deletion or structural insertion or deletion
+					for(Allele a : var.getAlternateAlleles()) {
+						 AltType alt_type = UtilityBelt.determineAltType(var.getReference(), a);
+						 //System.out.println("Comparing: " + answers.get(i) + " with " + alt_type);
+						 assertTrue(answers.get(i)==alt_type);
+						 i += 1;
+					}
+				}
+			}
+		} catch (InvalidInputFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidOperationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -290,6 +325,8 @@ public class UtilityBeltTest {
 	 */
 	@Test
 	public void testAltTypeIsIndel() {
+		System.out.println(GREEN+"\nTest Alt Type Is Indel"+RESET);
+		assertTrue(true); // This function is so simple..
 	}
 
 	/**
@@ -299,6 +336,50 @@ public class UtilityBeltTest {
 	 */
 	@Test
 	public void testGetDiffCount() {
+		System.out.println(GREEN+"\nTest Get Diff Count"+RESET);
+		
+		ArrayList<String> testlist = new ArrayList<String>();
+
+		String file1 = "target/test-classes/1000_genomes_example.vcf";
+		Integer[] answers = new Integer[] {1,1,1,1,1,3,-1,-1};
+		System.out.println(Arrays.toString(answers));
+		testlist.add(file1);
+
+		TreeMap<String, VariantPool> AllVPs;
+		try {
+			AllVPs = UtilityBelt.createVariantPools(testlist, true);
+			ArrayList<VariantPool> allVPsList = new ArrayList<VariantPool>(AllVPs.values());
+			System.out.println(allVPsList);
+			int i=0;
+			for (VariantPool vp : allVPsList) {
+				Iterator<String> varIT = vp.getVariantIterator();
+				String currVarKey;
+				while (varIT.hasNext()) {
+					currVarKey = varIT.next();
+					VariantContext var = vp.getVariant(currVarKey);
+					// SNV, MNP, insertion, deletion or structural insertion or deletion
+					for(Allele a : var.getAlternateAlleles()) {
+						 //System.out.println("Comparing: " + var.getReference() + " with " + a+"\n");
+						 int diff_count = UtilityBelt.getDiffCount(var.getReference(), a);
+						 //System.out.println("Comparing: " + answers[i] + " with " + diff_count+"\n");
+						 assertTrue(answers[i]==diff_count);
+						 i += 1;
+					}
+				}
+			}
+		} catch (InvalidInputFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidOperationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			
+
+
 	}
 
 	/**
@@ -308,6 +389,8 @@ public class UtilityBeltTest {
 	 */
 	@Test
 	public void testPrintErrorUsageHelpAndExit() {
+		System.out.println(GREEN+"\nTest Print Error Usage Help And Exit"+RESET);
+
 		// fail("Not yet implemented");
 	}
 
@@ -318,6 +401,8 @@ public class UtilityBeltTest {
 	 */
 	@Test
 	public void testPrintErrorUsageAndExit() {
+		System.out.println(GREEN+"\nTest Print Error Usage And Exit"+RESET);
+
 		// fail("Not yet implemented");
 	}
 
@@ -328,6 +413,8 @@ public class UtilityBeltTest {
 	 */
 	@Test
 	public void testPrintUsageHelpAndExit() {
+		System.out.println(GREEN+"\nTest Print Usage Help And Exit"+RESET);
+
 		// fail("Not yet implemented");
 	}
 
