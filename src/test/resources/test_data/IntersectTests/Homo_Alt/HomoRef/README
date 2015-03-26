@@ -1,0 +1,8 @@
+This will test comparing two vcfs with one overlapping sample.
+Using the Homo_Alt command only variants that are homozygous
+alternate will be returned.  This tests for homozygous reference
+calls.  
+
+Expected result:
+20	1110696	Pass
+20	1230237	Fail for Homo Ref

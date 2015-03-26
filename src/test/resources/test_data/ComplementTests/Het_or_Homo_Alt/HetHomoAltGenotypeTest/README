@@ -1,0 +1,8 @@
+This tests if the exact function is working.
+If all genotypes are het or homo alt same they are excluded.
+
+Expected result:
+20	14370	Fail same genotypes
+20	17330	Fail same genotypes
+20	1110696	Pass one genotype homo alt for different alt
+20	1234567	Pass one genotype homo ref

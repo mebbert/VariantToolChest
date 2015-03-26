@@ -1,0 +1,7 @@
+This will test comparing two vcfs with the exact same samples using the 
+MATCH_SAMPLE option. This will require that all samples match themselves
+across variant pools.
+
+Expected result:
+20	14370	Pass
+20	17330	Fail for non-matching sample genotype

@@ -320,7 +320,7 @@ public class UtilityBelt {
 					String[] keyAndVal = line.split("=");
 					if(keyAndVal[0].equals(prop)){
 						br.close();
-						return (Object) keyAndVal[1];
+						return keyAndVal[1];
 					}
 					line = br.readLine();
 				}

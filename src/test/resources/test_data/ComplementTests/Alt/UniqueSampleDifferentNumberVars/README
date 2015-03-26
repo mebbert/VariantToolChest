@@ -1,0 +1,7 @@
+This will test comparing two vcfs with one overlapping sample.
+input1 has 2 vars and input2 has 1 var. This tests if 
+the complement works with two different samples between the files.
+
+Expected result:
+20	1110696	Fail because it is the same in both files
+20	1234567	Pass

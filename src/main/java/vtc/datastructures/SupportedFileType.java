@@ -42,6 +42,7 @@ public enum SupportedFileType {
 		return this.expectedExtensions;
 	}
 
+	@Override
 	public String toString(){
 		return getName();
 	}

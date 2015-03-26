@@ -1,0 +1,7 @@
+This will test comparing two vcfs with one sample in each file named the same. 
+Tests whether it will elimitate the variant when genotypes are different for the same individual.
+
+Expected result:
+20	14370	Fail all genotypes are the same.  
+20	17330	Fail because the same sample genotypes are different
+20	1110696	Pass

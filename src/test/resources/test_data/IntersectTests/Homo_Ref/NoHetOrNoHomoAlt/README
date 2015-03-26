@@ -1,0 +1,9 @@
+This will test comparing two vcfs with one overlapping sample.
+This will test that only vairants with a homo ref genotype are included.
+
+Expected result:
+20	14370	Fail for Homo Alt and Het
+20	17330	Fail for Het
+20	1110696	Fail for het & homo alt
+20	1230237	Pass
+20	1234567	Fail for no Homo Ref

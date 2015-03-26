@@ -14,19 +14,15 @@ import java.util.TreeSet;
 
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.VariantContext;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-
-import vtc.datastructures.InvalidInputFileException;
-import vtc.datastructures.VariantPool;
-import vtc.tools.setoperator.operation.InvalidOperationException;
-import vtc.tools.varstats.AltType;
-
 import org.junit.Rule;
 import org.junit.Test;
 
 import rules.OnFail;
+import vtc.datastructures.InvalidInputFileException;
+import vtc.datastructures.VariantPool;
+import vtc.tools.setoperator.operation.InvalidOperationException;
+import vtc.tools.varstats.AltType;
 
 /**
  * @author Kevin

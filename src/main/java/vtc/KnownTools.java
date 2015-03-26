@@ -54,6 +54,7 @@ public enum KnownTools {
 		return false;
 	}
 	
+	@Override
 	public String toString(){
 		return  getName() + " (" +
 				getShortCommand() +

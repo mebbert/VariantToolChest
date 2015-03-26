@@ -42,7 +42,7 @@ public class Depth {
 			int depth = var.getGenotypes().get(s).getDP();
 			if(depth>0){
 				numSamples++;
-				avgDepth+=(double)depth;
+				avgDepth+=depth;
 				if(depth>maxDepth)
 					maxDepth=depth;
 				if(depth<minDepth)
@@ -50,9 +50,9 @@ public class Depth {
 			}
 			else{
 				if(error.isEmpty())
-					error += (String) s;
+					error += s;
 				else
-					error += ", "+(String) s;
+					error += ", "+s;
 			}
 		}
 		if(numSamples != 0)
@@ -63,6 +63,7 @@ public class Depth {
 	}
 	
 
+	@Override
 	public String toString(){
 		String temp  = "";
 		

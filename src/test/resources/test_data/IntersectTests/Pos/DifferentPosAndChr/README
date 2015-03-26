@@ -1,0 +1,9 @@
+This will test comparing two vcfs with one overlapping sample.
+If the position or chromosome is different then variant is excluded
+
+Expected result:
+20	14370	Fail for different positions
+20	17330	Fail for different chromosomes
+20	1110696	Pass
+20	1230237	Pass
+20	1234567	Pass

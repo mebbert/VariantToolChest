@@ -265,7 +265,7 @@ public class SetOperator {
 				}
 				return false;
 			}
-			if(!commonAlleleAcrossAllSamples(alts, gc1, gc2)){
+			if(!commonAltAlleleAcrossAllSamples(alts, gc1, gc2)){
 				if(verbose()){
 					String s = "No common alt across all samples.";
 					emitExcludedVariantWarning(s, currVarKey, operationID, null);
@@ -585,10 +585,10 @@ public class SetOperator {
 			sampleGenotypes.put(geno.getSampleName(), geno);
 		}
 		
-		if(type == IntersectType.ALT){
+		if(type == IntersectType.ALT || type == IntersectType.HOMOZYGOUS_REF){
 			return genotypes;
 		}
-		else if(commonAlleleAcrossAllSamples(var.getAlternateAlleles(), GenotypesContext.create(genotypes), null)){
+		else if(commonAltAlleleAcrossAllSamples(var.getAlternateAlleles(), GenotypesContext.create(genotypes), null)){
 			return genotypes;
 		}
 //		/* Loop over the genotypes to ensure at least
@@ -770,9 +770,9 @@ public class SetOperator {
 			}
 			return false;
 		}
-		else if(type == IntersectType.MATCH_SAMPLE){
-			return true;
-		}
+//		else if(type == IntersectType.MATCH_SAMPLE){
+//			return true;
+//		}
 
 		if(type == IntersectType.HOMOZYGOUS_REF){
 			if(geno.isHomRef())
@@ -801,6 +801,8 @@ public class SetOperator {
 			/* Intersecting on HETEROZYGOUS assumes that there is
 			 * both a ref and alt allele. i.e. having two different
 			 * alternate alleles (e.g. 1/2) does not qualify in this logic.
+			 * TODO: What is actually happening is that 1/2 is considered a heterozygote.
+			 * We need to give the option to make heterozygote an alternate with a reference only.
 			 */
 //			if(geno.isHet() && genoContainsRefAllele(geno)){
 			if(geno.isHet()){
@@ -1109,7 +1111,7 @@ public class SetOperator {
 	 * @param gc2
 	 * @return
 	 */
-	private boolean commonAlleleAcrossAllSamples(List<Allele> alts, GenotypesContext gc1, GenotypesContext gc2){
+	private boolean commonAltAlleleAcrossAllSamples(List<Allele> alts, GenotypesContext gc1, GenotypesContext gc2){
 		
 		/* Loop over the genotypes to ensure at least
 		 * one alt is common among all samples

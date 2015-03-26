@@ -1,0 +1,8 @@
+This will test comparing two vcfs with the one overlapping sample using the 
+Het option. The Het option requires that the samples contain one ref and one alt allele. Of
+course homozygotes will cause exclusion.
+
+Expected result:
+20	14370	Fail for homo ref
+20	17330	Pass
+20	1230237	Fail for homo ref

@@ -1,0 +1,8 @@
+This will test comparing two vcfs with one overlapping sample.
+Using the Homo_Alt command only variants that are homozygous
+alternate, with the same alternate allele, will be returned.
+This tests for homozygous alternate calls that have different alternates. 
+
+Expected result:
+20	1110696	Pass
+20	1234567	Fail because no alt is common among all samples
