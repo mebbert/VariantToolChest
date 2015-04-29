@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import vtc.datastructures.InvalidInputFileException;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.utilitybelt.UtilityBelt;
 
@@ -42,7 +42,7 @@ public class VarStatsTest {
 		String input1 = "target/test-classes/SummaryTests/Test1/input1.vcf";
 		
 		ArrayList<String> vcfArgs = new ArrayList<String>();
-		TreeMap<String, VariantPool> AllVPs = null;
+		TreeMap<String, VariantPoolHeavy> AllVPs = null;
 
 		vcfArgs.add(input1);
 
@@ -50,7 +50,7 @@ public class VarStatsTest {
 
 		try {
 			try {
-				AllVPs = UtilityBelt.createVariantPools(vcfArgs, true);
+				AllVPs = UtilityBelt.createHeavyVariantPools(vcfArgs, true);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

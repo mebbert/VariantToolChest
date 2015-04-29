@@ -18,7 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import vtc.datastructures.InvalidInputFileException;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.varstats.VariantRecordSummary;
 
@@ -29,7 +29,7 @@ import vtc.tools.varstats.VariantRecordSummary;
 
 public class UtilityBeltTest {
 
-	private TreeMap<String, VariantPool> AllVPs = new TreeMap<String, VariantPool>();
+	private TreeMap<String, VariantPoolHeavy> AllVPs = new TreeMap<String, VariantPoolHeavy>();
 
 	/**
 	 * @throws java.lang.Exception
@@ -44,7 +44,7 @@ public class UtilityBeltTest {
 		testlist.add(file1);
 		testlist.add(file2);
 
-		AllVPs = UtilityBelt.createVariantPools(testlist, true);
+		AllVPs = UtilityBelt.createHeavyVariantPools(testlist, true);
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class UtilityBeltTest {
 
 	/**
 	 * Test method for
-	 * {@link vtc.tools.utilitybelt.UtilityBelt#createVariantPools(java.util.ArrayList, boolean)}.
+	 * {@link vtc.tools.utilitybelt.UtilityBelt#createHeavyVariantPools(java.util.ArrayList, boolean)}.
 	 * 
 	 * @throws InvalidOperationException
 	 * @throws InvalidInputFileException
@@ -74,13 +74,13 @@ public class UtilityBeltTest {
 		testlist.add(file1);
 		testlist.add(file2);
 
-		TreeMap<String, VariantPool> AllVPs;
+		TreeMap<String, VariantPoolHeavy> AllVPs;
 		try {
-			AllVPs = UtilityBelt.createVariantPools(testlist, true);
+			AllVPs = UtilityBelt.createHeavyVariantPools(testlist, true);
 			assertTrue(AllVPs.size() == 2);
 
 			testlist.clear();
-			AllVPs = UtilityBelt.createVariantPools(testlist, true);
+			AllVPs = UtilityBelt.createHeavyVariantPools(testlist, true);
 			assertTrue(AllVPs.isEmpty());
 			
 		} catch (IOException e) {

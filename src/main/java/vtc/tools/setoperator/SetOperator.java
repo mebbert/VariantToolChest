@@ -4,6 +4,7 @@
 package vtc.tools.setoperator;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.broadinstitute.variant.variantcontext.VariantContextBuilder;
 
 import vtc.datastructures.SamplePool;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.setoperator.operation.ComplementOperation;
 import vtc.tools.setoperator.operation.IntersectOperation;
 import vtc.tools.setoperator.operation.InvalidOperationException;
@@ -103,9 +104,10 @@ public class SetOperator {
 	 * @param variantPools
 	 * @return
 	 * @throws InvalidOperationException 
+	 * @throws IOException 
 	 */
-	public VariantPool performComplement(ComplementOperation op,
-			ArrayList<VariantPool> variantPools, ComplementType type) throws InvalidOperationException{
+	public VariantPoolHeavy performComplement(ComplementOperation op,
+			ArrayList<VariantPoolHeavy> variantPools, ComplementType type) throws InvalidOperationException, IOException{
 		
 		/* Get VariantPool IDs in order provided to the operation so
 		 * we know which VariantPool to subtract from which
@@ -115,9 +117,9 @@ public class SetOperator {
 		/* Loop over the IDs in order and put in queue
 		 * 
 		 */
-		LinkedList<VariantPool> vpQueue = new LinkedList<VariantPool>();
+		LinkedList<VariantPoolHeavy> vpQueue = new LinkedList<VariantPoolHeavy>();
 		for(String vpID : vPoolIDsInOrder){
-			for(VariantPool vp : variantPools){
+			for(VariantPoolHeavy vp : variantPools){
 				if(vp.getPoolID().equals(vpID)){
 					vpQueue.add(vp);
 				}
@@ -127,9 +129,9 @@ public class SetOperator {
 		/* Perform complement of first two VariantPools
 		 * 
 		 */
-		VariantPool vp1 = vpQueue.pop();
-		VariantPool vp2 = vpQueue.pop();
-		VariantPool complement = performAComplementB(op, vp1, vp2, type);
+		VariantPoolHeavy vp1 = vpQueue.pop();
+		VariantPoolHeavy vp2 = vpQueue.pop();
+		VariantPoolHeavy complement = performAComplementB(op, vp1, vp2, type);
 		
 		/* If more VariantPools specified, take previous result and
 		 * subtract the next VariantPool from it.
@@ -149,11 +151,12 @@ public class SetOperator {
 	 * @param vp2
 	 * @return
 	 * @throws InvalidOperationException 
+	 * @throws IOException 
 	 */
-	private VariantPool performAComplementB(ComplementOperation op, VariantPool vp1,
-			VariantPool vp2, ComplementType type) throws InvalidOperationException{
+	private VariantPoolHeavy performAComplementB(ComplementOperation op, VariantPoolHeavy vp1,
+			VariantPoolHeavy vp2, ComplementType type) throws InvalidOperationException, IOException{
 		
-		VariantPool complement = new VariantPool(addChr(), op.getOperationID());
+		VariantPoolHeavy complement = new VariantPoolHeavy(addChr(), op.getOperationID());
 		complement.setFile(new File(op.getOperationID()));
 //		complement.setPoolID(operationID);	
 		complement.addSamples(op.getSamplePool(vp1.getPoolID()).getSamples());
@@ -192,7 +195,7 @@ public class SetOperator {
 				var1 = vp1.getVariant(currVarKey);
 				
 				if(type == ComplementType.ALT){
-					ArrayList<VariantPool> vps = new ArrayList<VariantPool>();
+					ArrayList<VariantPoolHeavy> vps = new ArrayList<VariantPoolHeavy>();
 					vps.add(vp1);
 					vps.add(vp2);
 					if(!allVariantPoolsContainVariant(vps, currVarKey, op.getOperationID())){
@@ -369,27 +372,28 @@ public class SetOperator {
 	 * @param type
 	 * @return A VariantPool with all variants that intersect, including only the samples of interest.
 	 * @throws InvalidOperationException 
+	 * @throws IOException 
 	 */
-	public VariantPool performIntersect(IntersectOperation op,
-			ArrayList<VariantPool> variantPools, IntersectType type) throws InvalidOperationException{
+	public VariantPoolHeavy performIntersect(IntersectOperation op,
+			ArrayList<VariantPoolHeavy> variantPools, IntersectType type) throws InvalidOperationException, IOException{
 		
 		if(type == null){
 			throw new RuntimeException("Received null IntersectType in \'performIntersect.\' Something is very wrong!");
 		}
 	
 		// Get the smallest VariantPool
-		VariantPool smallest = getSmallestVariantPool(variantPools);
+		VariantPoolHeavy smallest = getSmallestVariantPool(variantPools);
 		
 		if(smallest == null){
 			throw new RuntimeException("Unable to identify the smallest VariantPool. Something is very wrong.");
 		}
 
-		VariantPool intersection = new VariantPool(addChr(), op.getOperationID());
+		VariantPoolHeavy intersection = new VariantPoolHeavy(addChr(), op.getOperationID());
 		intersection.setFile(new File(op.getOperationID()));
 //		intersection.setPoolID(op.getOperationID());
 
 		/* Add all samples from each VariantPool involved in the intersection */
-		for(VariantPool vp : variantPools){
+		for(VariantPoolHeavy vp : variantPools){
 //			intersection.addSamples(vp.getSamples());
 			intersection.addSamples(op.getSamplePool(vp.getPoolID()).getSamples());
 		}
@@ -423,7 +427,7 @@ public class SetOperator {
 			if(type == IntersectType.POS){
 				
 				smallestVar = smallest.getVariant(currVarKey);
-				for(VariantPool vp : variantPools){
+				for(VariantPoolHeavy vp : variantPools){
 					var = vp.getVariant(currVarKey);
 					if(var == null || !var.getReference().equals(smallestVar.getReference(), true)){
 						if(verbose()){
@@ -451,7 +455,7 @@ public class SetOperator {
 				if(allVPsContainVar){
 	
 					sampleGenotypes = new HashMap<String, Genotype>();
-					for(VariantPool vp : variantPools){
+					for(VariantPoolHeavy vp : variantPools){
 						
 						var = vp.getVariant(currVarKey);
 						allAlleles.addAll(var.getAlternateAlleles());
@@ -625,10 +629,10 @@ public class SetOperator {
 	 * @param variantPools
 	 * @return The smallest VariantPool (i.e. the one with the fewest variants)
 	 */
-	private VariantPool getSmallestVariantPool(ArrayList<VariantPool> variantPools){
-		VariantPool smallest = null;
+	private VariantPoolHeavy getSmallestVariantPool(ArrayList<VariantPoolHeavy> variantPools){
+		VariantPoolHeavy smallest = null;
 		int currSize, currSmallest = -1;
-		for(VariantPool vp : variantPools){
+		for(VariantPoolHeavy vp : variantPools){
 			currSize = vp.getNumVarRecords();
 			if(currSize < currSmallest || currSmallest == -1){
 				currSmallest = currSize;
@@ -646,13 +650,13 @@ public class SetOperator {
 	 * @return true if all VariantPools contain the variant of interest. False, otherwise.
 	 * @throws InvalidOperationException 
 	 */
-	private boolean allVariantPoolsContainVariant(ArrayList<VariantPool> variantPools, String varKey, String operationID) throws InvalidOperationException{
+	private boolean allVariantPoolsContainVariant(ArrayList<VariantPoolHeavy> variantPools, String varKey, String operationID) throws InvalidOperationException{
 		VariantContext var;
 		Allele ref = null; 
 		ArrayList<Allele> alts = null;
 		int count = 0;
 		boolean commonAlt;
-		for(VariantPool vp : variantPools){
+		for(VariantPoolHeavy vp : variantPools){
 			var = vp.getVariant(varKey);
 			if(var == null){
 				return false;
@@ -710,13 +714,13 @@ public class SetOperator {
 	 * @return An ArrayList<VariantContext> with the match from each VariantPool, or null if
 	 * any didn't have a match.
 	 */
-	private ArrayList<VariantContext> allVariantPoolsContainINDELFuzzyMatching(ArrayList<VariantPool> variantPools,
+	private ArrayList<VariantContext> allVariantPoolsContainINDELFuzzyMatching(ArrayList<VariantPoolHeavy> variantPools,
 			VariantContext var, String varKey){
 		
 		VariantContext tmpVar;
 		ArrayList<VariantContext> matches = new ArrayList<VariantContext>();
 		int indelLength;
-		for(VariantPool vp : variantPools){
+		for(VariantPoolHeavy vp : variantPools){
 
 			tmpVar = vp.getVariant(varKey);
 
@@ -798,10 +802,6 @@ public class SetOperator {
 			}
 		}
 		else if(type == IntersectType.HETEROZYGOUS){
-			/* Intersecting on HETEROZYGOUS assumes that there is
-			 * both a ref and alt allele. i.e. having two different
-			 * alternate alleles (e.g. 1/2) does not qualify in this logic.
-			 */
 //			if(geno.isHet() && genoContainsRefAllele(geno)){
 			if(geno.isHet()){
 					return true;
@@ -871,8 +871,9 @@ public class SetOperator {
 	 * @param variantPools
 	 * @return VariantPool
 	 * @throws InvalidOperationException 
+	 * @throws IOException 
 	 */
-	public VariantPool performUnion(UnionOperation op, ArrayList<VariantPool> variantPools, boolean forceUniqueNames) throws InvalidOperationException{
+	public VariantPoolHeavy performUnion(UnionOperation op, ArrayList<VariantPoolHeavy> variantPools, boolean forceUniqueNames) throws InvalidOperationException, IOException{
 		
 		/*
 		 * TODO: Add verbose information
@@ -889,26 +890,26 @@ public class SetOperator {
 		int potentialMatchingIndelRecords = 0;
 		HashMap<String,TreeSet<String>> uniqueNames = null;
 		
-		VariantPool union = new VariantPool(addChr(), op.getOperationID());
+		VariantPoolHeavy union = new VariantPoolHeavy(addChr(), op.getOperationID());
 		union.setFile(new File(op.getOperationID()));
 //		union.setPoolID(op.getOperationID());
 
 		/* Add all samples from each VariantPool involved in the intersection */
 		if(forceUniqueNames){
 			uniqueNames = generateUniqueSampleNames(variantPools, op);
-			for(VariantPool vp : variantPools){
+			for(VariantPoolHeavy vp : variantPools){
 				// TODO: All SamplePool manipulations should happen in the VariantPool! Otherwise they get out of sync!
 				union.addSamples(uniqueNames.get(vp.getPoolID()));
 			}
 		}
 		else{
-			for(VariantPool vp : variantPools){
+			for(VariantPoolHeavy vp : variantPools){
 				union.addSamples(op.getSamplePool(vp.getPoolID()).getSamples());
 			}
 		}
 		
 		/* Loop over variantPools */
-		for(VariantPool vp : variantPools){
+		for(VariantPoolHeavy vp : variantPools){
 			logger.info("Processing variant pool '" + vp.getPoolID() + "'...");
 			int nVars = vp.getNumVarRecords();
 			it = vp.getVariantIterator();
@@ -952,7 +953,7 @@ public class SetOperator {
 						continue;
 					}
 					
-					for(VariantPool vp2 : variantPools){
+					for(VariantPoolHeavy vp2 : variantPools){
 						
 						/* Skip this VariantPool if it's the same as vp */
 						if(vp2.getPoolID().equals(vp.getPoolID())){
@@ -1148,12 +1149,12 @@ public class SetOperator {
 	 * @return
 	 * @throws InvalidOperationException
 	 */
-	private HashMap<String, TreeSet<String>> generateUniqueSampleNames(ArrayList<VariantPool> variantPools, UnionOperation op) throws InvalidOperationException{
+	private HashMap<String, TreeSet<String>> generateUniqueSampleNames(ArrayList<VariantPoolHeavy> variantPools, UnionOperation op) throws InvalidOperationException{
 		HashMap<String, TreeSet<String>> vpHash = new HashMap<String, TreeSet<String>>();
 		TreeSet<String> sampleNames, masterSampleNames = new TreeSet<String>();
 
         String name, uniqueName, uniqueNum;
-		for(VariantPool vp : variantPools){
+		for(VariantPoolHeavy vp : variantPools){
 			sampleNames = new TreeSet<String>();
 			Iterator<String> it = op.getSamplePool(vp.getPoolID()).getSamples().iterator(); // Only get the sample names involved in the operation
 			while(it.hasNext()){
@@ -1241,7 +1242,7 @@ public class SetOperator {
             Genotype geno;
 			for(String sample : varSampleNamesOrdered){
 				geno = var.getGenotype(sample);
-				correctGenos.add(VariantPool.renameGenotypeForSample(sampleIT.next(), geno));
+				correctGenos.add(VariantPoolHeavy.renameGenotypeForSample(sampleIT.next(), geno));
 			}
 			return correctGenos;
 		}
@@ -1322,7 +1323,7 @@ public class SetOperator {
 	 * @param op
 	 * @throws InvalidOperationException
 	 */
-	private void throwMissingSamplesError(GenotypesContext gc, SamplePool sp, VariantPool vp, Operation op) throws InvalidOperationException{
+	private void throwMissingSamplesError(GenotypesContext gc, SamplePool sp, VariantPoolHeavy vp, Operation op) throws InvalidOperationException{
 		ArrayList<String> missing = getMissingSamples(gc, sp);
 		StringBuilder sb = new StringBuilder();
 		String delim = "";

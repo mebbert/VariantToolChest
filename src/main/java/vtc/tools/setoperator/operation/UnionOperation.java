@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import vtc.datastructures.SamplePool;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.setoperator.Operator;
 
 /**
@@ -33,7 +33,7 @@ public class UnionOperation extends Operation {
 	 * @param operationString
 	 * @throws InvalidOperationException
 	 */
-	public UnionOperation(String operationString, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
+	public UnionOperation(String operationString, TreeMap<String, VariantPoolHeavy> variantPools) throws InvalidOperationException{
 		super(operationString, variantPools);
 		samplePools = new HashMap<String, SamplePool>();
 	}

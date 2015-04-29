@@ -15,6 +15,7 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class VariantPoolSummary {
 
 	private int numSamples;
+	private int numRecords;
 	private int numVarRecords;
 	private int numVars;
 	private int numSNVs;
@@ -53,11 +54,12 @@ public class VariantPoolSummary {
 	 * @param genoTiCount
 	 * @param genoTvCount
 	 */
-	public VariantPoolSummary(int numVarRecords, int numVars, int numSNVs, int numMNVs,
+	public VariantPoolSummary(int numRecords, int numVarRecords, int numSamples, int numVars, int numSNVs, int numMNVs,
 			int numStructVars, int numStructIns, int numStructDels, int numMultiAlts,
-//			int numHets, int numHomos,
 			double tiCount, double tvCount, double genoTiCount, double genoTvCount,
 			TreeSet<String> allInsertions, TreeSet<String> allDeletions) {
+		this.numRecords = numRecords;
+		this.numSamples = numSamples;
 		this.numVarRecords = numVarRecords;
 		this.numVars = numVars;
 		this.numSNVs = numSNVs;
@@ -66,8 +68,6 @@ public class VariantPoolSummary {
 		this.numStructIns = numStructIns;
 		this.numStructDels = numStructDels;
 		this.numMultiAlts = numMultiAlts;
-		this.numHets = numHets;
-		this.numHomos = numHomos;
 		this.tiCount = tiCount;
 		this.tvCount = tvCount;
 		this.genoTiCount = genoTiCount;
@@ -81,6 +81,7 @@ public class VariantPoolSummary {
 	
 	public VariantPoolSummary() {
 		numSamples = 0;
+		numRecords = 0;
 		numVars = 0;
 		numSNVs = 0;
 		numMNVs = 0;
@@ -110,6 +111,14 @@ public class VariantPoolSummary {
 	 */
 	public void setNumSamples(int numSamples) {
 		this.numSamples = numSamples;
+	}
+
+	public int getNumRecords(){
+		return numRecords;
+	}
+	
+	public void setNumRecords(int numRecords){
+		this.numRecords = numRecords;
 	}
 
 	/**
@@ -444,6 +453,7 @@ public class VariantPoolSummary {
 	public static VariantPoolSummary addVariantPoolSummaries(VariantPoolSummary vps1, VariantPoolSummary vps2) {
 		VariantPoolSummary newVPS = new VariantPoolSummary();
 		newVPS.setNumSamples(vps1.getNumSamples() + vps2.getNumSamples());
+		newVPS.setNumRecords(vps1.getNumRecords() + vps2.getNumRecords());
         newVPS.setNumVars(vps1.getNumVars() + vps2.getNumVars());
         newVPS.setNumSNVs(vps1.getNumSNVs() + vps2.getNumSNVs());
         newVPS.setNumMNVs(vps1.getNumMNVs() + vps2.getNumMNVs());	
@@ -475,6 +485,7 @@ public class VariantPoolSummary {
 		int length = 0;
 		ArrayList<String> values = new ArrayList<String>();
 		values.add(Integer.toString(this.getNumSamples()));
+		values.add(Integer.toString(this.getNumRecords()));
 		values.add(Integer.toString(this.getNumVars()));
 		values.add(Integer.toString(this.getNumSNVs()));
 		values.add(Integer.toString(this.getNumMNVs()));

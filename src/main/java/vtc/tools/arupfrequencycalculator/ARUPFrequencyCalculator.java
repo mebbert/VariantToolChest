@@ -44,7 +44,7 @@ import org.broadinstitute.variant.vcf.VCFCodec;
 
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.SupportedFileType;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.setoperator.SetOperator;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.setoperator.operation.Operation;
@@ -135,7 +135,7 @@ public class ARUPFrequencyCalculator {
 		ArrayList<HashMap<String, String>> manifestMaps;
 		HashMap<String, String> manifestMap;
 		boolean addChr = false, requireIndex = false;
-		VariantPool vp;
+		VariantPoolHeavy vp;
         VariantPoolDetailedSummary vpDetailedSummary, masterDetailedSummary;
         final VCFCodec vcfCodec = new VCFCodec();
         NumberFormat nf = NumberFormat.getInstance(Locale.US);
@@ -354,13 +354,13 @@ public class ARUPFrequencyCalculator {
 		logger.info("Unioning vcfs...");
 		HashMap<String, String> manifestMap1, manifestMap2;
 		String vcfFile1Args, vcfFile2Args, vcfFile1, vcfFile2;
-		TreeMap<String, VariantPool> allVPs;
+		TreeMap<String, VariantPoolHeavy> allVPs;
 		String opString = "masterVP=u[vars1:vars2]";
 		Operation op;
 		boolean forceUniqueNames = false;
 		SetOperator so = new SetOperator();
 		File master_vcf;
-		VariantPool masterVP = null, vp1, vp2;
+		VariantPoolHeavy masterVP = null, vp1, vp2;
 		ArrayList<String> newSampleNames1, newSampleNames2;
         String sampleName1, sampleName2;
 
@@ -389,7 +389,7 @@ public class ARUPFrequencyCalculator {
 
 				newSampleNames1 = new ArrayList<String>();
 				newSampleNames2 = new ArrayList<String>();
-				allVPs = new TreeMap<String, VariantPool>();
+				allVPs = new TreeMap<String, VariantPoolHeavy>();
 				
 				// If i == 0, union the first two to create the master
 				if(i == 0){
@@ -410,10 +410,10 @@ public class ARUPFrequencyCalculator {
 					vcfFile1Args = "vars1=" + vcfFile1;
 					vcfFile2Args = "vars2=" + vcfFile2;
 					
-					vp1 = new VariantPool(vcfFile1Args, false, addChr);
+					vp1 = new VariantPoolHeavy(vcfFile1Args, false, addChr);
 					vp1.changeSampleNames(newSampleNames1);
 
-					vp2 = new VariantPool(vcfFile2Args, false, addChr);
+					vp2 = new VariantPoolHeavy(vcfFile2Args, false, addChr);
 					vp2.changeSampleNames(newSampleNames2);
 					
 					allVPs.put(vp1.getPoolID(), vp1);
@@ -431,9 +431,9 @@ public class ARUPFrequencyCalculator {
 					vcfFile1Args = "vars1=" + vcfFile1;
 					vcfFile2Args = "vars2=" + master_vcf.getAbsolutePath();
 					
-					vp1 = new VariantPool(vcfFile1Args, false, addChr);
+					vp1 = new VariantPoolHeavy(vcfFile1Args, false, addChr);
 					vp1.changeSampleNames(newSampleNames1);
-					vp2 = new VariantPool(vcfFile2Args, false, addChr);
+					vp2 = new VariantPoolHeavy(vcfFile2Args, false, addChr);
 					
 					allVPs.put(vp1.getPoolID(), vp1);
 					allVPs.put(vp2.getPoolID(), vp2);
@@ -443,7 +443,7 @@ public class ARUPFrequencyCalculator {
 					
 				}
                 logger.info("Printing " + masterVP.getPoolID() + " to file: " + master_vcf.getAbsolutePath());
-                VariantPool.printVariantPool(master_vcf.getAbsolutePath(), masterVP, refDict, SupportedFileType.VCF, false);
+                VariantPoolHeavy.printVariantPool(master_vcf.getAbsolutePath(), masterVP, refDict, SupportedFileType.VCF, false);
                 logger.info(masterVP.getNumVarRecords() + " variant record(s) written.");
 			}
 		}
@@ -504,7 +504,7 @@ public class ARUPFrequencyCalculator {
 			NoCallRegionList> noCallRegionsBySample, File refDict) throws InvalidInputFileException, URISyntaxException, IOException{
 		
 		// get variant pool
-		VariantPool master = new VariantPool(master_vcf.getAbsolutePath(), false, false);
+		VariantPoolHeavy master = new VariantPoolHeavy(master_vcf.getAbsolutePath(), false, false);
 		
 		// loop over variants
 		Iterator<String> it = master.getVariantIterator();
@@ -532,17 +532,17 @@ public class ARUPFrequencyCalculator {
 						 alleles = new ArrayList<Allele>();
 						 alleles.add(var.getReference());
 						 alleles.add(var.getReference());
-						 geno = VariantPool.changeAllelesForGenotype(geno, alleles);
+						 geno = VariantPoolHeavy.changeAllelesForGenotype(geno, alleles);
 					}
 				}
 				newGenos.add(geno);
 			}
-			newVar = VariantPool.buildVariant(var, var.getAlleles(), newGenos);
+			newVar = VariantPoolHeavy.buildVariant(var, var.getAlleles(), newGenos);
 			master.updateVariant(currVarKey, newVar);
 		}
 
         logger.info("Printing " + master.getPoolID() + " to file: " + master_vcf.getAbsolutePath());
-        VariantPool.printVariantPool(master_vcf.getAbsolutePath(), master, refDict, SupportedFileType.VCF, false);
+        VariantPoolHeavy.printVariantPool(master_vcf.getAbsolutePath(), master, refDict, SupportedFileType.VCF, false);
         logger.info(master.getNumVarRecords() + " variant record(s) written.");
 	}
 	
@@ -660,7 +660,7 @@ public class ARUPFrequencyCalculator {
         logger.info(masterVCFs.get(analType));
         String arg = "all_samples=" + masterVCFs.get(analType);
         boolean requireIndex = false, addChr = false;
-        VariantPool vp = new VariantPool(arg, requireIndex, addChr);
+        VariantPoolHeavy vp = new VariantPoolHeavy(arg, requireIndex, addChr);
         VariantPoolDetailedSummary summary =
                 VariantPoolSummarizer.summarizeVariantPoolDetailed(vp);
         return summary;

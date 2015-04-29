@@ -34,7 +34,7 @@ public class SamplePool implements Pool{
 	 * Constructors
 	 */
 	
-	public SamplePool(String pool, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
+	public SamplePool(String pool, TreeMap<String, VariantPoolHeavy> variantPools) throws InvalidOperationException{
 		this();
 		parseSamplePool(pool, variantPools);
 	}
@@ -90,7 +90,7 @@ public class SamplePool implements Pool{
 	 * @param pool
 	 * @throws InvalidOperationException
 	 */
-	private void parseSamplePool(String pool, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
+	private void parseSamplePool(String pool, TreeMap<String, VariantPoolHeavy> variantPools) throws InvalidOperationException{
 		Matcher m = samplePoolPattern.matcher(pool);
 		
 		if(!m.find()){
@@ -101,7 +101,7 @@ public class SamplePool implements Pool{
 			SamplePool.usedPoolIDs.add(this.getPoolID());
 			
 			/* Verify this poolID maps to an existing VariantPool poolID. */
-			ArrayList<String> allVariantPoolIDs = VariantPool.getAllPoolIDs();
+			ArrayList<String> allVariantPoolIDs = VariantPoolHeavy.getAllPoolIDs();
 			if(!allVariantPoolIDs.contains(this.getPoolID())){
 				throw new InvalidOperationException("Invalid sample pool ID. Sample pool " +
 						"IDs must be defined as an input file or in a previous set operation: " + this.getPoolID());

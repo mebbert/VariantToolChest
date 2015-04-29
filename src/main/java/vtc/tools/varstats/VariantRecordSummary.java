@@ -628,7 +628,7 @@ public class VariantRecordSummary {
 		boolean first = true;
 		for(Allele alt : this.getAlts()){
 			if(!first){
-				sb.append(",");
+				sb.append(";");
 			}
             sb.append(altStat.get(alt));
             first = false;

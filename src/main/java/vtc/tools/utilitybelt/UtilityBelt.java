@@ -22,7 +22,8 @@ import org.apache.log4j.Logger;
 import org.broadinstitute.variant.variantcontext.Allele;
 
 import vtc.datastructures.InvalidInputFileException;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
+import vtc.datastructures.VariantPoolLight;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.setoperator.operation.Operation;
 import vtc.tools.setoperator.operation.OperationFactory;
@@ -59,18 +60,37 @@ public class UtilityBelt {
 	
 	
 	/**
-	 * Will create VariantPool objects from command line-provided input file strings and return as ArrayList<VariantPool>
+	 * Will create VariantPoolHeavy objects from command line-provided input file strings and return as ArrayList<VariantPool>
 	 * @param inputFiles
 	 * @return
 	 * @throws InvalidInputFileException
 	 * @throws InvalidOperationException 
 	 * @throws IOException 
 	 */
-	public static TreeMap<String, VariantPool> createVariantPools(List<String> inputFiles, boolean addChr) throws InvalidInputFileException, InvalidOperationException, IOException{
+	public static TreeMap<String, VariantPoolHeavy> createHeavyVariantPools(List<String> inputFiles, boolean addChr) throws InvalidInputFileException, InvalidOperationException, IOException{
 		
-		TreeMap<String, VariantPool> vpMap = new TreeMap<String, VariantPool>();
+		TreeMap<String, VariantPoolHeavy> vpMap = new TreeMap<String, VariantPoolHeavy>();
 		for(Object o : inputFiles){
-			VariantPool vp = new VariantPool(o.toString(), false, addChr);
+			VariantPoolHeavy vp = new VariantPoolHeavy(o.toString(), false, addChr);
+			vpMap.put(vp.getPoolID(), vp);
+		}
+		return vpMap;
+	}
+	
+	
+	/**
+	 * Will create VariantPoolLight objects from command line-provided input file strings and return as ArrayList<VariantPool>
+	 * @param inputFiles
+	 * @return
+	 * @throws InvalidInputFileException
+	 * @throws InvalidOperationException 
+	 * @throws IOException 
+	 */
+	public static TreeMap<String, VariantPoolLight> createLightVariantPools(List<String> inputFiles, boolean addChr) throws InvalidInputFileException, InvalidOperationException, IOException{
+		
+		TreeMap<String, VariantPoolLight> vpMap = new TreeMap<String, VariantPoolLight>();
+		for(Object o : inputFiles){
+			VariantPoolLight vp = new VariantPoolLight(o.toString(), false, addChr);
 			vpMap.put(vp.getPoolID(), vp);
 		}
 		return vpMap;
@@ -85,14 +105,14 @@ public class UtilityBelt {
      * @param vps
      * @return
      */
-    public static ArrayList<VariantPool> getAssociatedVariantPoolsAsArrayList(Operation op, TreeMap<String, VariantPool> vps) {
+    public static ArrayList<VariantPoolHeavy> getAssociatedVariantPoolsAsArrayList(Operation op, TreeMap<String, VariantPoolHeavy> vps) {
 
         /*
          * Get all pool IDs associated with this Operation. Note: All SamplePool
          * objects have a pool ID that matches a VariantPool pool ID.
          */
         Collection<String> pids = op.getAllPoolIDs();
-        ArrayList<VariantPool> vpList = new ArrayList<VariantPool>();
+        ArrayList<VariantPoolHeavy> vpList = new ArrayList<VariantPoolHeavy>();
         Iterator<String> it = vps.keySet().iterator();
         String pid;
 
@@ -287,7 +307,7 @@ public class UtilityBelt {
      * @return
      * @throws InvalidOperationException
      */
-    public static ArrayList<Operation> createOperations(ArrayList<Object> operations, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException {
+    public static ArrayList<Operation> createOperations(ArrayList<Object> operations, TreeMap<String, VariantPoolHeavy> variantPools) throws InvalidOperationException {
 
         ArrayList<Operation> opList = new ArrayList<Operation>();
         for (Object o : operations) {

@@ -20,7 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import vtc.VTCEngine;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
@@ -110,11 +110,11 @@ public class UnionOperationTest {
 	// Compare the answer file with the output file
 		private void test2files(String answer, String out) {
 			// Create key and program response answers
-			VariantPool key_pool = null;
-			VariantPool test_pool = null;
+			VariantPoolHeavy key_pool = null;
+			VariantPoolHeavy test_pool = null;
 			try {
-				key_pool = new VariantPool(new File(answer), "1", false);
-				test_pool = new VariantPool(new File(out), "2", false);
+				key_pool = new VariantPoolHeavy(new File(answer), "1", false);
+				test_pool = new VariantPoolHeavy(new File(out), "2", false);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

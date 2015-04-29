@@ -31,7 +31,7 @@ import org.broadinstitute.variant.vcf.VCFUtils;
 import vtc.Engine;
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.SupportedFileType;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.setoperator.operation.ComplementOperation;
 import vtc.tools.setoperator.operation.IntersectOperation;
 import vtc.tools.setoperator.operation.InvalidOperationException;
@@ -319,7 +319,7 @@ public class SetOperatorEngine implements Engine {
     		File outFile, File refGenome, boolean repairHeader, boolean forceUniqueNames)
             throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
 
-        TreeMap<String, VariantPool> allVPs = UtilityBelt.createVariantPools(vcfArgs, addChr);
+        TreeMap<String, VariantPoolHeavy> allVPs = UtilityBelt.createHeavyVariantPools(vcfArgs, addChr);
         ArrayList<String> allVPIDs = new ArrayList<String>(allVPs.keySet());
 
         /* create operations. Need to do an intersect and two complements */
@@ -341,7 +341,7 @@ public class SetOperatorEngine implements Engine {
         File complement2Outfile = new File(complement2OutPath + complement2OperID);
 
         /* perform the operations */
-        TreeMap<String, VariantPool> resultingVPs = performOperations(vcfArgs, allVPs, operations,
+        TreeMap<String, VariantPoolHeavy> resultingVPs = performOperations(vcfArgs, allVPs, operations,
         		verbose, addChr, complementType, intersectType, printIntermediateFiles, outputFormat,
         		complement2Outfile, refGenome, repairHeader, forceUniqueNames);
 
@@ -375,23 +375,23 @@ public class SetOperatorEngine implements Engine {
      * @throws IOException
      * @throws URISyntaxException
      */
-    private TreeMap<String, VariantPool> performOperations(List<String> vcfArgs, TreeMap<String, VariantPool> allVPs,
+    private TreeMap<String, VariantPoolHeavy> performOperations(List<String> vcfArgs, TreeMap<String, VariantPoolHeavy> allVPs,
     		List<String> operations, boolean verbose, boolean addChr, ComplementType complementType,
     		IntersectType intersectType, boolean printIntermediateFiles, SupportedFileType outputFormat,
     		File outFile, File refGenome, boolean repairHeader, boolean forceUniqueNames)
     				throws InvalidInputFileException, InvalidOperationException, IOException, URISyntaxException {
 
-        TreeMap<String, VariantPool> resultingVPs = new TreeMap<String, VariantPool>();
+        TreeMap<String, VariantPoolHeavy> resultingVPs = new TreeMap<String, VariantPoolHeavy>();
         
         if(allVPs == null){
-	        allVPs = UtilityBelt.createVariantPools(vcfArgs, addChr);
+	        allVPs = UtilityBelt.createHeavyVariantPools(vcfArgs, addChr);
         }
 
 //        ArrayList<Operation> ops = UtilityBelt.createOperations(operations, allVPs);
 
-        ArrayList<VariantPool> associatedVPs;
+        ArrayList<VariantPoolHeavy> associatedVPs;
         ArrayList<VCFHeader> associatedVPHeaders;
-        VariantPool result = null;
+        VariantPoolHeavy result = null;
         Operator o;
         String intermediateOut, canonicalPath;
         VCFHeader header;
@@ -464,7 +464,7 @@ public class SetOperatorEngine implements Engine {
 	            	System.out.println("\nPrinting intermediate file for " + op.getOperationID());
                     intermediateOut = op.getOperationID() + outputFormat.getDefaultExtension();
                     canonicalPath = outFile.getCanonicalPath();
-                    VariantPool.printVariantPool(intermediateOut,
+                    VariantPoolHeavy.printVariantPool(intermediateOut,
                     		canonicalPath.substring(0, canonicalPath.lastIndexOf(File.separator) + 1),
                     		result, refGenome, outputFormat, repairHeader);
 
@@ -478,7 +478,7 @@ public class SetOperatorEngine implements Engine {
         /* Now print the final output file */
         if (result != null) {
             logger.info("Printing " + result.getPoolID() + " to file: " + outFile.getAbsolutePath());
-            VariantPool.printVariantPool(outFile.getAbsolutePath(), result, refGenome, outputFormat, repairHeader);
+            VariantPoolHeavy.printVariantPool(outFile.getAbsolutePath(), result, refGenome, outputFormat, repairHeader);
 
             logger.info(result.getNumVarRecords() + " variant record(s) written.");
         }
@@ -490,13 +490,13 @@ public class SetOperatorEngine implements Engine {
      * 
      * @param resultingVPs
      */
-    private void printComparisonTable(TreeMap<String, VariantPool> resultingVPs) {
+    private void printComparisonTable(TreeMap<String, VariantPoolHeavy> resultingVPs) {
         Iterator<String> it = resultingVPs.keySet().iterator();
 
         String poolID;
         int acompbCount = 0, bcompaCount = 0, intersectCount = 0, unionCount = 0,
         	acompbFuzCount = 0, bcompaFuzCount = 0, intersectFuzCount = 0, unionFuzCount = 0;
-        VariantPool result;
+        VariantPoolHeavy result;
         while (it.hasNext()) {
             poolID = it.next();
             result = resultingVPs.get(poolID);
@@ -560,10 +560,10 @@ public class SetOperatorEngine implements Engine {
      * @param vps
      * @return
      */
-    private ArrayList<VCFHeader> getHeaders(ArrayList<VariantPool> vps) {
+    private ArrayList<VCFHeader> getHeaders(ArrayList<VariantPoolHeavy> vps) {
 
         ArrayList<VCFHeader> headers = new ArrayList<VCFHeader>();
-        for (VariantPool vp : vps) {
+        for (VariantPoolHeavy vp : vps) {
             headers.add(vp.getHeader());
         }
         return headers;
