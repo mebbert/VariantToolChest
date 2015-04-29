@@ -757,6 +757,14 @@ public class VariantPool implements Pool{
 			es = EnumSet.of(Options.INDEX_ON_THE_FLY, Options.ALLOW_MISSING_FIELDS_IN_HEADER);
 		}
 		SAMSequenceDictionary dict = new IndexedFastaSequenceFile(refDict).getSequenceDictionary();
+
+		/* Check if the reference genome has the required .dict file. */
+		if(dict == null){
+			throw new FileNotFoundException("The reference sequence specified ("
+					+ refDict.getAbsolutePath() +
+					") does not have the appropriate dictionary file. Please use"
+					+ " Picard's CreateSequenceDictionary.jar to generate this file.");
+		}
 		VariantContextWriter writer = VariantContextWriterFactory.create(file, dict, es);
 		
 		if(vp.getHeader() == null){
