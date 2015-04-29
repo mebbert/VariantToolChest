@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import vtc.datastructures.SamplePool;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.setoperator.Operator;
 
 /**
@@ -28,7 +28,7 @@ public class OperationFactory {
 	 * @return
 	 * @throws InvalidOperationException
 	 */
-	public static Operation createOperation(String operation, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
+	public static Operation createOperation(String operation, TreeMap<String, VariantPoolHeavy> variantPools) throws InvalidOperationException{
 		return parseOperation(operation, variantPools);
 	}
 	
@@ -40,7 +40,7 @@ public class OperationFactory {
 	 * @param operation
 	 * @throws InvalidOperationException
 	 */
-	private static Operation parseOperation(String operation, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
+	private static Operation parseOperation(String operation, TreeMap<String, VariantPoolHeavy> variantPools) throws InvalidOperationException{
 
 		/* TODO: simplify the set operations to specify operators as '+', '-', and 'n'. Place
 		 * operator between sample pools and drop outer brackets (e.g. out1=f1[s1,s3]+f2[s2,s5]+f3[s6,s7] ).
