@@ -5,7 +5,6 @@ package vtc.datastructures;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.TreeSet;
 
 import org.broadinstitute.variant.variantcontext.VariantContext;

@@ -14,7 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 
 
 
@@ -44,11 +44,11 @@ public class IntersectOperationTest {
 	
 	public static void test2files(String answer, String out) {
 		// Create key and program response answers
-		VariantPool key_pool = null;
-		VariantPool test_pool = null;
+		VariantPoolHeavy key_pool = null;
+		VariantPoolHeavy test_pool = null;
 		try {
-			test_pool = new VariantPool(new File(out), "2", false);
-			key_pool = new VariantPool(new File(answer), "1", false);
+			test_pool = new VariantPoolHeavy(new File(out), "2", false);
+			key_pool = new VariantPoolHeavy(new File(answer), "1", false);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

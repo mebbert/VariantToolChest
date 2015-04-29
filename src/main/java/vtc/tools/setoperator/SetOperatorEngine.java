@@ -338,7 +338,7 @@ public class SetOperatorEngine implements Engine {
 
         boolean printIntermediateFiles = true;
         String complement2OutPath = outFile.getCanonicalPath().substring(0, outFile.getCanonicalPath().lastIndexOf(File.separator) + 1);
-        File complement2Outfile = new File(complement2OutPath + complement2OperID);
+        File complement2Outfile = new File(complement2OutPath + complement2OperID + outputFormat.getDefaultExtension());
 
         /* perform the operations */
         TreeMap<String, VariantPoolHeavy> resultingVPs = performOperations(vcfArgs, allVPs, operations,
@@ -461,8 +461,15 @@ public class SetOperatorEngine implements Engine {
                  * resulting VariantPool to file.
                  */
                 if (printIntermediateFiles) {
+                	
+                	/* If we're on the last operation, use the user's defined output file name */
+                	if(oper.equals(operations.get(operations.size() - 1))){
+                		intermediateOut = outFile.getName();
+                	}
+                	else{
+					    intermediateOut = op.getOperationID() + outputFormat.getDefaultExtension();
+                	}
 	            	System.out.println("\nPrinting intermediate file for " + op.getOperationID());
-                    intermediateOut = op.getOperationID() + outputFormat.getDefaultExtension();
                     canonicalPath = outFile.getCanonicalPath();
                     VariantPoolHeavy.printVariantPool(intermediateOut,
                     		canonicalPath.substring(0, canonicalPath.lastIndexOf(File.separator) + 1),
@@ -475,8 +482,9 @@ public class SetOperatorEngine implements Engine {
             }
         }
 
-        /* Now print the final output file */
-        if (result != null) {
+        /* Now print the final output file, unless we've been printing intermediate files. In this case, the
+         * last file was already printed. */
+        if (result != null && !printIntermediateFiles) {
             logger.info("Printing " + result.getPoolID() + " to file: " + outFile.getAbsolutePath());
             VariantPoolHeavy.printVariantPool(outFile.getAbsolutePath(), result, refGenome, outputFormat, repairHeader);
 

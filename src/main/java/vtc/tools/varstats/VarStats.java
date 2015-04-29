@@ -34,17 +34,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 
-import org.apache.commons.math3.stat.inference.ChiSquareTest;
-
 import jsc.contingencytables.ContingencyTable2x2;
 import jsc.contingencytables.FishersExactTest;
 import jsc.tests.H1;
 
+import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.apache.log4j.Logger;
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
-import vtc.datastructures.AbstractVariantPool;
 import vtc.datastructures.VariantPool;
 import vtc.datastructures.VariantPoolLight;
 
@@ -247,8 +245,8 @@ public class VarStats {
         }
     }
 
-	public void doPercentage(TreeMap<String, VariantPool> allVPs) {
-		for(VariantPool vp : allVPs.values()){
+	public void doPercentage(TreeMap<String, VariantPoolLight> allVPs) throws IOException {
+		for(VariantPoolLight vp : allVPs.values()){
 			VariantPoolPercents vpp = new VariantPoolPercents(vp);
 		}
 	}

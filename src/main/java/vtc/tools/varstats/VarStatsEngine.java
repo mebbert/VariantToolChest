@@ -3,11 +3,7 @@
  */
 package vtc.tools.varstats;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -247,18 +243,18 @@ public class VarStatsEngine implements Engine {
      * @param fileName
      * @throws FileNotFoundException
      */
-    private void printDetailedSummaryToFile(VariantPoolDetailedSummary summary, String fileName) throws FileNotFoundException{
-        logger.info("Writing detailed summary to: " + fileName);
-        String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count" +
-                "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_genos_called\tN_total_samples\t" +
-                "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
-        PrintWriter writer = new PrintWriter(fileName);
-        writer.println(header);
-        VariantRecordSummary vrs;
-        for(String vrsKey : summary.getVariantRecordSummaries().keySet()){
-        	vrs = summary.getVariantRecordSummary(vrsKey);
-            writer.println(vrs.toString());
-        }
-        writer.close();   	
-    }
+//    private void printDetailedSummaryToFile(VariantPoolDetailedSummary summary, String fileName) throws FileNotFoundException{
+//        logger.info("Writing detailed summary to: " + fileName);
+//        String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count" +
+//                "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_genos_called\tN_total_samples\t" +
+//                "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
+//        PrintWriter writer = new PrintWriter(fileName);
+//        writer.println(header);
+//        VariantRecordSummary vrs;
+//        for(String vrsKey : summary.getVariantRecordSummaries().keySet()){
+//        	vrs = summary.getVariantRecordSummary(vrsKey);
+//            writer.println(vrs.toString());
+//        }
+//        writer.close();   	
+//    }
 }

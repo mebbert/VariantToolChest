@@ -1,4 +1,4 @@
-package vtc.tools.setoperator.operation.complementTests;
+package miscSetOperTests;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,17 +14,14 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import vtc.datastructures.VariantPoolHeavy;
+import vtc.datastructures.VariantPool;
 
 
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	Alt.class,
-	Exact.class,
-	HetOrHomoAlt.class
 })
-public class ComplementOperationTest {
+public class MiscSetOperTests {
 	public static final String RED = "\u001B[31m";
 	public static final String GREEN = "\u001B[32m";
 	public static final String RESET = "\u001B[0m";
@@ -33,18 +30,18 @@ public class ComplementOperationTest {
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		System.out.println(RED+"\n==========================================================================\n"
-				+ "                       ComplementOperationTest                  \n"
+				+ "                       MiscSetOperatorTests                  \n"
 				+ "==========================================================================\n"+RESET);	
 	}
 	
 	
 	public static void test2files(String answer, String out) {
 		// Create key and program response answers
-		VariantPoolHeavy key_pool = null;
-		VariantPoolHeavy test_pool = null;
+		VariantPool key_pool = null;
+		VariantPool test_pool = null;
 		try {
-			key_pool = new VariantPoolHeavy(new File(answer), "1", false);
-			test_pool = new VariantPoolHeavy(new File(out), "2", false);
+			key_pool = new VariantPool(new File(answer), "1", false);
+			test_pool = new VariantPool(new File(out), "2", false);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

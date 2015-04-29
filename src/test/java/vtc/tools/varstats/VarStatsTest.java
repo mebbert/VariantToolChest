@@ -38,7 +38,7 @@ public class VarStatsTest {
 
 
 	@Test
-	public void TestBasicSummaryValues() {
+	public void TestBasicSummaryValues() throws IOException {
 		System.out.println(GREEN+"\nTest Basic Summary Values\n"+RESET);	
 		
 		

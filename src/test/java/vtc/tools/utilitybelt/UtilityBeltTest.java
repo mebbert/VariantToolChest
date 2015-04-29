@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import rules.OnFail;
 import vtc.datastructures.InvalidInputFileException;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.varstats.AltType;
 
@@ -35,7 +35,7 @@ public class UtilityBeltTest {
 	public static final String GREEN = "\u001B[32m";
 	public static final String RESET = "\u001B[0m";
 	
-	private TreeMap<String, VariantPool> AllVPs = new TreeMap<String, VariantPool>();
+//	private TreeMap<String, VariantPool> AllVPs = new TreeMap<String, VariantPool>();
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
@@ -77,13 +77,13 @@ public class UtilityBeltTest {
 		testlist.add(file1);
 		testlist.add(file2);
 
-		TreeMap<String, VariantPool> AllVPs;
+		TreeMap<String, VariantPoolHeavy> AllVPs;
 		try {
-			AllVPs = UtilityBelt.createVariantPools(testlist, true);
+			AllVPs = UtilityBelt.createHeavyVariantPools(testlist, true);
 			assertTrue(AllVPs.size() == 2);
 
 			testlist.clear();
-			AllVPs = UtilityBelt.createVariantPools(testlist, true);
+			AllVPs = UtilityBelt.createHeavyVariantPools(testlist, true);
 			assertTrue(AllVPs.isEmpty());
 			
 		} catch (IOException e) {
@@ -282,13 +282,13 @@ public class UtilityBeltTest {
 		
 		testlist.add(file1);
 
-		TreeMap<String, VariantPool> AllVPs;
+		TreeMap<String, VariantPoolHeavy> AllVPs;
 		try {
-			AllVPs = UtilityBelt.createVariantPools(testlist, true);
-			ArrayList<VariantPool> allVPsList = new ArrayList<VariantPool>(AllVPs.values());
+			AllVPs = UtilityBelt.createHeavyVariantPools(testlist, true);
+			ArrayList<VariantPoolHeavy> allVPsList = new ArrayList<VariantPoolHeavy>(AllVPs.values());
 			System.out.println(allVPsList);
 			int i=0;
-			for (VariantPool vp : allVPsList) {
+			for (VariantPoolHeavy vp : allVPsList) {
 				Iterator<String> varIT = vp.getVariantIterator();
 				String currVarKey;
 				while (varIT.hasNext()) {
@@ -304,13 +304,10 @@ public class UtilityBeltTest {
 				}
 			}
 		} catch (InvalidInputFileException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidOperationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -341,13 +338,13 @@ public class UtilityBeltTest {
 		System.out.println(Arrays.toString(answers));
 		testlist.add(file1);
 
-		TreeMap<String, VariantPool> AllVPs;
+		TreeMap<String, VariantPoolHeavy> AllVPs;
 		try {
-			AllVPs = UtilityBelt.createVariantPools(testlist, true);
-			ArrayList<VariantPool> allVPsList = new ArrayList<VariantPool>(AllVPs.values());
+			AllVPs = UtilityBelt.createHeavyVariantPools(testlist, true);
+			ArrayList<VariantPoolHeavy> allVPsList = new ArrayList<VariantPoolHeavy>(AllVPs.values());
 			System.out.println(allVPsList);
 			int i=0;
-			for (VariantPool vp : allVPsList) {
+			for (VariantPoolHeavy vp : allVPsList) {
 				Iterator<String> varIT = vp.getVariantIterator();
 				String currVarKey;
 				while (varIT.hasNext()) {

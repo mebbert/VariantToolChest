@@ -3,24 +3,22 @@ package vtc.tools.varstats;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolLight;
 
 public class VariantPoolPercents {
 
-	private TreeMap<String, String> VariantPercents;
+//	private TreeMap<String, String> VariantPercents;
 	private File output;
 	
 	
-	public VariantPoolPercents(VariantPool vp){
+	public VariantPoolPercents(VariantPoolLight vp) throws IOException{
 		
 		String filepath = vp.getFile().toString();
 		if(filepath.contains(".vcf.gz"))
@@ -50,14 +48,12 @@ public class VariantPoolPercents {
 		
 	}
 
-	private String getPercents(VariantPool vp) throws VarStatsException{
+	private String getPercents(VariantPoolLight vp) throws VarStatsException, IOException{
 		TreeSet<String> Samples = vp.getSamples();
-		Iterator<String> variants = vp.getVariantIterator();
 		StringBuilder percentKey = new StringBuilder();
 		percentKey.append("CHR\tPOS\tREF\tALT\tHOMO_ALT_percent\tHET_ALT_percent\tHET_percent\tHOMO_REF_percent\n");
-		while(variants.hasNext()){
-			String key = variants.next();
-			VariantContext vc = vp.getVariant(key);
+		VariantContext vc;
+		while((vc = vp.getNextVar()) != null){
 			
 			Iterable<Genotype> gts = vc.getGenotypesOrderedByName();
 			

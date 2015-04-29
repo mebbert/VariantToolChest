@@ -562,7 +562,7 @@ public class SetOperator {
 			VariantContext var, HashMap<String, Genotype> sampleGenotypes,
 			IntersectType type, String currVarKey, String operID){
 		Iterator<Genotype> genoIt = gc.iterator();
-		Genotype geno, correctGeno;
+		Genotype geno;
 		ArrayList<Genotype> genotypes = new ArrayList<Genotype>();
 		
 		/* Iterate over the sample genotypes in this GenotypeContext
