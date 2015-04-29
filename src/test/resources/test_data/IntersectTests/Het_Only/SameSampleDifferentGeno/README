@@ -3,6 +3,6 @@ Het option. If the overlapping sample has a differnt genotype in one file than i
 the other it should not be added.
 
 Expected result:
-20	14370	Fail for Different genotype
+20	14370	Pass using the first genotype
 20	17330	Pass
 20	1230237	Fail for different genotype alt

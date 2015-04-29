@@ -3,5 +3,5 @@ het_homo_alt option. If the overlapping sample has a differnt genotype in one fi
 the other it should not be added. 
 
 Expected result:
-20	14370	Fail for different genotype
+20	14370	Pass using the second genotype
 20	17330	Pass

@@ -38,9 +38,11 @@ public class VarStatsTest {
 
 
 	@Test
-	public void test1() {
+	public void TestBasicSummaryValues() {
+		System.out.println(GREEN+"\nTest Basic Summary Values\n"+RESET);	
 		
-		String input1 = "target/test-classes/SummaryTests/Test1/input1.vcf";
+		
+		String input1 = "target/test-classes/SummaryTests/TestBasicSummaryValues/input1.vcf";
 		
 		ArrayList<String> vcfArgs = new ArrayList<String>();
 		TreeMap<String, VariantPool> AllVPs = null;

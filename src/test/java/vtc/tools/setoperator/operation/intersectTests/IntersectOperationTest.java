@@ -90,6 +90,8 @@ public class IntersectOperationTest {
 				
 				// Assert that the genotypes are the same
 				Assert.assertArrayEquals(curr_key_geno.getAlleles().toArray(), curr_test_geno.getAlleles().toArray());
+				//PRINT THE ARRAYS HERE TO DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				
 				// Assert that the sample has a read depth
 //				Assert.assertTrue(curr_test_geno.hasDP());
 				// Assert that the sample has a genotype quality score

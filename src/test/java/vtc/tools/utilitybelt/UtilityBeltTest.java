@@ -297,7 +297,7 @@ public class UtilityBeltTest {
 					// SNV, MNP, insertion, deletion or structural insertion or deletion
 					for(Allele a : var.getAlternateAlleles()) {
 						 AltType alt_type = UtilityBelt.determineAltType(var.getReference(), a);
-						 //System.out.println("Comparing: " + answers.get(i) + " with " + alt_type);
+						 System.out.println("Comparing: " + answers.get(i) + " with " + alt_type);
 						 assertTrue(answers.get(i)==alt_type);
 						 i += 1;
 					}
@@ -357,7 +357,7 @@ public class UtilityBeltTest {
 					for(Allele a : var.getAlternateAlleles()) {
 						 //System.out.println("Comparing: " + var.getReference() + " with " + a+"\n");
 						 int diff_count = UtilityBelt.getDiffCount(var.getReference(), a);
-						 //System.out.println("Comparing: " + answers[i] + " with " + diff_count+"\n");
+						 System.out.println("Comparing: " + answers[i] + " with " + diff_count+"\n");
 						 assertTrue(answers[i]==diff_count);
 						 i += 1;
 					}

@@ -90,7 +90,7 @@ public class HetOrHomoAlt {
 		IntersectOperationTest.test2files(answer, out);
 	}
 	
-	@Ignore	
+	@Test
 	public void testSameSampleDifferentGeno() {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
