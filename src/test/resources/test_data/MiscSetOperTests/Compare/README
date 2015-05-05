@@ -1,0 +1,8 @@
+This tests the --compare option.
+There should be 4 files output
+	(1) AcompB.vcf
+	(2) BcompA.vcf
+	(3) intersect.vcf
+	(4) union.vcf
+	
+If any other files appear there is a problem.
