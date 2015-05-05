@@ -17,7 +17,13 @@ import org.junit.runners.Suite;
 import vtc.datastructures.VariantPool;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ Compare.class, PrintIntermediate.class, RepairHeader.class,AddCHR.class })
+@Suite.SuiteClasses({ 
+	Compare.class, 
+	PrintIntermediate.class,
+	RepairHeader.class,
+	AddCHR.class,
+	SamplesWithinSameFile.class
+	})
 public class MiscSetOperTest {
 	public static final String RED = "\u001B[31m";
 	public static final String GREEN = "\u001B[32m";
