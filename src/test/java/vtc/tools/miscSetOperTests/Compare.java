@@ -3,10 +3,9 @@ package vtc.tools.miscSetOperTests;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.IOException;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import vtc.VTCEngine;
@@ -15,8 +14,8 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class Compare {
 	private static String hgref = UtilityBelt.getHGREF();
 
-	private static String test_path = "/test_data/IntersectTests";
-	private static String output_path = "/test_data/OUTPUT";
+//	private static String test_path = "/test_data/IntersectTests";
+//	private static String output_path = "/test_data/OUTPUT";
 
 	public static final String RED = "\u001B[31m";
 	public static final String GREEN = "\u001B[32m";
@@ -39,9 +38,10 @@ public class Compare {
 	
 	/**
 	 * Test how the complement operator works for the exact option.
+	 * @throws IOException 
 	 */
-	@Test
-	public void testSameSampleDifferentGenoCompare() {
+//	@Test
+	public void testSameSampleDifferentGenoCompare() throws IOException {
 
 		System.out.println(GREEN+"\ntest Same Sample Different Geno Compare"+RESET);
 		

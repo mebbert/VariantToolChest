@@ -2,8 +2,9 @@ package vtc.tools.miscSetOperTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import vtc.VTCEngine;
@@ -12,8 +13,8 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class SamplesWithinSameFile {
 	private static String hgref = UtilityBelt.getHGREF();
 
-	private static String test_path = "/test_data/IntersectTests";
-	private static String output_path = "/test_data/OUTPUT";
+//	private static String test_path = "/test_data/IntersectTests";
+//	private static String output_path = "/test_data/OUTPUT";
 
 	public static final String RED = "\u001B[31m";
 	public static final String GREEN = "\u001B[32m";
@@ -35,9 +36,10 @@ public class SamplesWithinSameFile {
 	
 	
 	/**
+	 * @throws IOException 
 	 */
 	@Test
-	public void test2sampleswithinsamefile() {
+	public void test2sampleswithinsamefile() throws IOException {
 
 		System.out.println(GREEN+"\ntest 2 samples in var1 and 1 in var2"+RESET);
 		
@@ -58,9 +60,10 @@ public class SamplesWithinSameFile {
 	}	
 	
 	/**
+	 * @throws IOException 
 	 */
 	@Test
-	public void testsampleswithinsamefile() {
+	public void testsampleswithinsamefile() throws IOException {
 
 		System.out.println(GREEN+"\ntest 1 vs 2 other samples in same file"+RESET);
 		
