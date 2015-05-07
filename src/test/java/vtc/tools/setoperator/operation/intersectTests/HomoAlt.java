@@ -2,6 +2,8 @@ package vtc.tools.setoperator.operation.intersectTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,9 +37,10 @@ public class HomoAlt {
 	
 	/**
 	 * Test how the intersect operator works for homozygous Alternate.
+	 * @throws IOException 
 	 */
 	@Test
-	public void testHomoRef() {
+	public void testHomoRef() throws IOException {
 
 		System.out.println(GREEN+"\ntest Homo Ref"+RESET);
 		
@@ -58,7 +61,7 @@ public class HomoAlt {
 	}
 	
 	@Test
-	public void testDifferentAlts() {
+	public void testDifferentAlts() throws IOException {
 
 		System.out.println(GREEN+"\ntest Different Alts"+RESET);
 		
@@ -79,7 +82,7 @@ public class HomoAlt {
 	}
 
 	@Test
-	public void testUniqueSamples() {
+	public void testUniqueSamples() throws IOException {
 
 		System.out.println(GREEN+"\ntest Unique Samples"+RESET);
 		
@@ -101,7 +104,7 @@ public class HomoAlt {
 	
 	
 	@Test
-	public void testSameSampleDifferentGeno() {
+	public void testSameSampleDifferentGeno() throws IOException {
 
 		System.out.println(GREEN+"\ntest Same Sample Different Geno"+RESET);
 		
@@ -123,7 +126,7 @@ public class HomoAlt {
 	
 	
 	@Test
-	public void testRefOrAltDifferent() {
+	public void testRefOrAltDifferent() throws IOException {
 
 		System.out.println(GREEN+"\ntest Ref or Alt Different"+RESET);
 		

@@ -161,7 +161,7 @@ public class SetOperator {
 //		complement.setPoolID(operationID);	
 		complement.addSamples(op.getSamplePool(vp1.getPoolID()).getSamples());
 		
-		Iterator<String> it = vp1.getVariantIterator();
+//		Iterator<String> it = vp1.getVariantIterator();
 		String currVarKey;
 		LinkedHashSet<Allele> allAlleles;
 		VariantContext var1 = null, var2 = null;
@@ -183,11 +183,13 @@ public class SetOperator {
 		/* Iterate over variants in vp1. If found in vp2,
 		 * subtract from vp1
 		 */
-		while(it.hasNext()){
+//		while(it.hasNext()){
+		while((var1 = vp1.getNextVar()) != null){
 			keep = false;
 			allAlleles = new LinkedHashSet<Allele>();
 			
-			currVarKey = it.next();
+//			currVarKey = it.next();
+			currVarKey = generateVarKey(var1);
 			
 			/* Check if variant found in vp2 */
 			var2 = vp2.getVariant(currVarKey);
@@ -398,7 +400,7 @@ public class SetOperator {
 			intersection.addSamples(op.getSamplePool(vp.getPoolID()).getSamples());
 		}
 
-		Iterator<String> it = smallest.getVariantIterator();
+//		Iterator<String> it = smallest.getVariantIterator();
 		String currVarKey;
 		ArrayList<VariantContext> fuzzyVars;
 		ArrayList<Genotype> genotypes, fuzzyGenos, tmpGenotypes;
@@ -414,10 +416,12 @@ public class SetOperator {
 
 
 		// Iterate over the smallest VariantPool and lookup each variant in the other(s)
-		while(it.hasNext()){
-			currVarKey = it.next();
+//		while(it.hasNext()){
+//			currVarKey = it.next();
+		while((smallestVar = smallest.getNextVar()) != null){
 			
 			var = null;
+			currVarKey = generateVarKey(smallestVar);
 			intersects = true;
 			genotypes = new ArrayList<Genotype>();
 			tmpGenotypes = new ArrayList<Genotype>();
@@ -889,7 +893,7 @@ public class SetOperator {
 		VariantContext var, var2;
 		HashSet<String> processedVarKeys = new HashSet<String>();
 		HashMap<Integer, String> fuzzyMatches = new HashMap<Integer, String>();
-		Iterator<String> it;
+//		Iterator<String> it;
 		ArrayList<Genotype> genotypes;
 		LinkedHashSet<Allele> alleles;
 		int potentialMatchingIndelAlleles = 0;
@@ -918,12 +922,14 @@ public class SetOperator {
 		for(VariantPoolHeavy vp : variantPools){
 			logger.info("Processing variant pool '" + vp.getPoolID() + "'...");
 			int nVars = vp.getNumVarRecords();
-			it = vp.getVariantIterator();
+//			it = vp.getVariantIterator();
 			
 			/* Iterate over each variant in this pool */
 			int count = 0;
-			while(it.hasNext()){
-				currVarKey = it.next();
+//			while(it.hasNext()){
+//				currVarKey = it.next();
+			while((var = vp.getNextVar()) != null){
+				currVarKey = generateVarKey(var);
 				genotypes = new ArrayList<Genotype>();
 				alleles = new LinkedHashSet<Allele>();
 				
@@ -938,7 +944,7 @@ public class SetOperator {
 					/* Get variant and loop over the other VariantPools
 					 * and add the samples to the new VariantPool
 					 */
-					var = vp.getVariant(currVarKey);
+//					var = vp.getVariant(currVarKey);
 
 					/* Check that the genotypes exist. If they don't create 'NO_CALL' genotypes */
 					if(forceUniqueNames){
@@ -1321,6 +1327,11 @@ public class SetOperator {
 			}
 		}
 		return false;
+	}
+	
+	private String generateVarKey(VariantContext vc){
+		String varKey = vc.getChr() + ":" + Integer.toString(vc.getStart()) + ":" + vc.getReference();
+		return varKey;
 	}
 	
 	/**

@@ -2,6 +2,8 @@ package vtc.tools.setoperator.operation.complementTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,7 +37,7 @@ public class HetOrHomoAlt {
 
 	
 	@Test
-	public void testDifferentPosOrChr() {
+	public void testDifferentPosOrChr() throws IOException {
 
 		System.out.println(GREEN+"\ntest Different Pos or Chr"+RESET);
 		
@@ -56,7 +58,7 @@ public class HetOrHomoAlt {
 	
 	
 	@Test
-	public void testRefOrAltDifferent() {
+	public void testRefOrAltDifferent() throws IOException {
 
 		System.out.println(GREEN+"\ntest Ref or Alt Different"+RESET);
 		
@@ -77,9 +79,10 @@ public class HetOrHomoAlt {
 	
 	/**
 	 * Test how the complement operator works for the het_homo_alt option.
+	 * @throws IOException 
 	 */
 	@Test
-	public void testHetHomoAltGenotypeTest() {
+	public void testHetHomoAltGenotypeTest() throws IOException {
 		System.out.println(GREEN+"\ntest Het or Homo Alt Genotype Test"+RESET);
 
 		// ///////////Test1//////////////

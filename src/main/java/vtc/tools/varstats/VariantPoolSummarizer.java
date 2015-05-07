@@ -21,7 +21,7 @@ import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.AbstractVariantPool;
 import vtc.datastructures.VariantPoolHeavy;
 import vtc.datastructures.VariantPoolLight;
 import vtc.tools.setoperator.SetOperator;
@@ -111,7 +111,7 @@ public class VariantPoolSummarizer {
      * @return
      * @throws IOException 
      */
-    public static VariantPoolSummary summarizeVariantPoolDetailed(VariantPool vp) throws IOException{
+    public static <T extends AbstractVariantPool> VariantPoolSummary summarizeVariantPoolDetailed(T vp) throws IOException{
 //    	Iterator<String> varIT = vp.getVariantIterator();
 //    	String currVarKey;
 //    	ArrayList<VariantRecordSummary> summaries = new ArrayList<VariantRecordSummary>();
@@ -134,12 +134,12 @@ public class VariantPoolSummarizer {
      * @return HashMap<String, VariantPoolSummary>
      * @throws IOException 
      */
-    public static HashMap<String, VariantPoolSummary> summarizeVariantPools(TreeMap<String, ? extends VariantPool> allVPs) throws IOException{
+    public static <T extends AbstractVariantPool> HashMap<String, VariantPoolSummary> summarizeVariantPools(TreeMap<String, T> allVPs) throws IOException{
     	
     	VariantPoolSummary vpSummary;
     	HashMap<String, VariantPoolSummary> vpSummaries = new HashMap<String, VariantPoolSummary>();
     	boolean printDetailedReport = false;
-    	for(VariantPool vp : allVPs.values()){
+    	for(T vp : allVPs.values()){
     		vpSummary = summarizeVariantPool(vp, printDetailedReport);
     		vpSummary.setNumSamples(vp.getSamples().size());
     		//vpSummaries.put(vp.getPoolID(), vpSummary);
@@ -154,7 +154,7 @@ public class VariantPoolSummarizer {
      * @return
      * @throws IOException 
      */
-    public static VariantPoolSummary summarizeVariantPool(VariantPool vp, boolean printDetailed) throws IOException{
+    public static <T extends AbstractVariantPool> VariantPoolSummary summarizeVariantPool(T vp, boolean printDetailed) throws IOException{
     	
 //		Iterator<String> varIT = vp.getVariantIterator();
 //		String currVarKey;
@@ -167,7 +167,9 @@ public class VariantPoolSummarizer {
     	
         NumberFormat nf = NumberFormat.getInstance(Locale.US);
         
-	    detailedSummaryFile = vp.getPoolID() + "_detailed_summary.txt";
+        if(printDetailed){
+            detailedSummaryFile = vp.getPoolID() + "_detailed_summary.txt";
+        }
 
 		VariantContext var = vp.getNextVar();
 		sampleCount = var.getNSamples();
@@ -219,7 +221,9 @@ public class VariantPoolSummarizer {
 			var = vp.getNextVar();
 		}
 		
-		detailedVariantRecordWriter.close();
+		if(printDetailed){
+	        detailedVariantRecordWriter.close();
+		}
 		
 		return new VariantPoolSummary(recordCount, varRecordCount, sampleCount, totalVarCount, snvCount, mnvCount,
 				structIndelCount, structInsCount, structDelCount, multiAltCount,

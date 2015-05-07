@@ -139,21 +139,21 @@ public class UtilityBelt {
 		if (alleles == null)
 			return -1;
 					
-		if(alleles.size() > 0){
-            return alleles.first().length(); // Since this is a TreeSet, it should just be the first
-		}
-		return -1;
-//		int currSize, smallest = -1;
-//		for(String al : alleles){
-//			currSize = al.length();
-//			if(smallest == -1){
-//				smallest = currSize;
-//			}
-//			else if(currSize < smallest){
-//				smallest = currSize;
-//			}
+//		if(alleles.size() > 0){
+//            return alleles.first().length(); // Since this is a TreeSet, it should just be the first
 //		}
-//		return smallest;	
+//		return -1;
+		int currSize, smallest = -1;
+		for(String al : alleles){
+			currSize = al.length();
+			if(smallest == -1){
+				smallest = currSize;
+			}
+			else if(currSize < smallest){
+				smallest = currSize;
+			}
+		}
+		return smallest;	
 	}
 	
 	/**
@@ -165,13 +165,13 @@ public class UtilityBelt {
 		if (alleles == null || alleles.size() == 0)
 			return -1;
 		
-		int max_length = 0;
+		int largest = 0;
 		for (String al : alleles) {
-			if (al.length() > max_length) {
-				max_length = al.length();
+			if (al.length() > largest) {
+				largest = al.length();
 			}
 		}
-		return max_length;
+		return largest;
 	}
 	
 	/**

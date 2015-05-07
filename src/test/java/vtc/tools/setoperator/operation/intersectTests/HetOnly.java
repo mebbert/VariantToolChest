@@ -1,5 +1,7 @@
 package vtc.tools.setoperator.operation.intersectTests;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -27,7 +29,7 @@ public class HetOnly {
 	
 	
 	@Test	
-	public void testHomoRef() {
+	public void testHomoRef() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -47,7 +49,7 @@ public class HetOnly {
 	}
 	
 	@Test	
-	public void testHomoAlt() {
+	public void testHomoAlt() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -67,7 +69,7 @@ public class HetOnly {
 	}
 	
 	@Test
-	public void testMultipleAlts() {
+	public void testMultipleAlts() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		System.out.println(GREEN+"\ntest Multiple Alts"+RESET);
@@ -87,7 +89,7 @@ public class HetOnly {
 	}
 	
 	@Test	
-	public void testUniqueSamples() {
+	public void testUniqueSamples() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -107,7 +109,7 @@ public class HetOnly {
 	}
 	
 	@Test
-	public void testSameSampleDifferentGeno() {
+	public void testSameSampleDifferentGeno() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		

@@ -2,6 +2,8 @@ package vtc.tools.setoperator.operation.intersectTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,9 +38,10 @@ public class HomoRef {
 	
 	/**
 	 * Test how the intersect operator works for homozygous reference.
+	 * @throws IOException 
 	 */
 	@Ignore
-	public void testNoHetOrNoHomoAlt() {
+	public void testNoHetOrNoHomoAlt() throws IOException {
 
 		System.out.println(GREEN+"\ntest No Het or No Homo Alt"+RESET);
 		
@@ -60,7 +63,7 @@ public class HomoRef {
 	
 	
 	@Test
-	public void testBaseTest() {
+	public void testBaseTest() throws IOException {
 
 		System.out.println(GREEN+"\ntest Base Test"+RESET);
 		
@@ -80,7 +83,7 @@ public class HomoRef {
 	}
 	
 	@Ignore
-	public void testIntersectOperation_HomoRef_Test2() {
+	public void testIntersectOperation_HomoRef_Test2() throws IOException {
 		
 		
 		

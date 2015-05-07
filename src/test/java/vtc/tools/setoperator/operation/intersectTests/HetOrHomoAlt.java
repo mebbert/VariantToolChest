@@ -1,5 +1,7 @@
 package vtc.tools.setoperator.operation.intersectTests;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -28,7 +30,7 @@ public class HetOrHomoAlt {
 	
 	
 	@Test	
-	public void testHomoRef() {
+	public void testHomoRef() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -50,7 +52,7 @@ public class HetOrHomoAlt {
 
 	
 	@Test
-	public void testMultipleAlts() {
+	public void testMultipleAlts() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		System.out.println(GREEN+"\ntest Multiple Alts"+RESET);
@@ -70,7 +72,7 @@ public class HetOrHomoAlt {
 	}
 	
 	@Test	
-	public void testUniqueSamples() {
+	public void testUniqueSamples() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -90,7 +92,7 @@ public class HetOrHomoAlt {
 	}
 	
 	@Test
-	public void testSameSampleDifferentGeno() {
+	public void testSameSampleDifferentGeno() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -112,7 +114,7 @@ public class HetOrHomoAlt {
 	
 	
 	@Test
-	public void testRefOrAltDifferent() {
+	public void testRefOrAltDifferent() throws IOException {
 
 		System.out.println(GREEN+"\ntest Ref or Alt Different"+RESET);
 		

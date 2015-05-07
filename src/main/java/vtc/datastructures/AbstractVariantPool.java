@@ -35,10 +35,10 @@ public abstract class AbstractVariantPool implements VariantPool {
 	private VCFHeader header;
 	
 	private final VCFCodec vcfCodec = new VCFCodec();
-	FeatureReader<VariantContext> reader;
-	Iterator<VariantContext> varIter = null;
-	VariantContext currVar = null;
-	int currVarCount;
+	private FeatureReader<VariantContext> reader;
+	private Iterator<VariantContext> varIter = null;
+	private VariantContext currVar = null;
+	private int currVarCount;
 	
 	private static Logger logger = Logger.getLogger(AbstractVariantPool.class);
 	

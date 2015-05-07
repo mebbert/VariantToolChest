@@ -36,43 +36,45 @@ public class UnionOperationTest {
 	}
 	
 	
-	public static void test2files(String answer, String out) {
+	public static void test2files(String answer, String out) throws IOException {
 		// Create key and program response answers
-		VariantPoolHeavy key_pool = null;
+		VariantPoolHeavy answer_pool = null;
 		VariantPoolHeavy test_pool = null;
 		try {
-			key_pool = new VariantPoolHeavy(new File(answer), "1", false);
+			answer_pool = new VariantPoolHeavy(new File(answer), "1", false);
 			test_pool = new VariantPoolHeavy(new File(out), "2", false);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		String currVarKey;
-		String currVarTest;
+//		String currVarAnswerKey;
+//		String currVarTestKey;
 
-		Iterator<String> key_it = key_pool.getVariantIterator();
-		Iterator<String> test_it = test_pool.getVariantIterator();
+//		Iterator<String> answer_it = answer_pool.getVariantIterator();
+//		Iterator<String> test_it = test_pool.getVariantIterator();
 
-		VariantContext var_key;
-		VariantContext var_test;
+		VariantContext answer_var;
+		VariantContext test_var;
 
 		// Make sure they have same number of variants..
-		assertEquals(key_pool.getNumVarRecords(), test_pool.getNumVarRecords());
+		assertEquals(answer_pool.getNumVarRecords(), test_pool.getNumVarRecords());
 
 		// Make sure they have the same number of samples.
-		assertEquals(key_pool.getSamples().size(), test_pool.getSamples().size());
+		assertEquals(answer_pool.getSamples().size(), test_pool.getSamples().size());
 
 		// Iterate over variants in the key and check if they are equal...
-		while (key_it.hasNext() && test_it.hasNext()) {
+//		while (answer_it.hasNext() && test_it.hasNext()) {
+		while((answer_var = answer_pool.getNextVar()) != null
+				&& (test_var = test_pool.getNextVar()) != null){
 
-			currVarKey = key_it.next();
-			currVarTest = test_it.next();
+//			currVarAnswerKey = answer_it.next();
+//			currVarTestKey = test_it.next();
 
-			var_key = key_pool.getVariant(currVarKey);
-			var_test = test_pool.getVariant(currVarTest);
+//			answer_var = answer_pool.getVariant(currVarAnswerKey);
+//			test_var = test_pool.getVariant(currVarTestKey);
 			
-			GenotypesContext key_genos = var_key.getGenotypes();	
-			GenotypesContext test_genos = var_test.getGenotypes();
+			GenotypesContext key_genos = answer_var.getGenotypes();	
+			GenotypesContext test_genos = test_var.getGenotypes();
 			
 			Iterator<Genotype> key_geno_it = key_genos.iterator();
 			Iterator<Genotype> test_geno_it = test_genos.iterator();
@@ -93,8 +95,8 @@ public class UnionOperationTest {
 			}
 
 			// assert that they have the same reference and alternate alleles....
-			Assert.assertTrue("Ref-\nkey: " + var_key.getReference() + " test: " + var_test.getReference() + "\n", var_key.hasSameAllelesAs(var_test));
-			Assert.assertTrue("Alt-\nkey: " + var_key.getAlternateAlleles().toString() + " test: " + var_test.getAlternateAlleles().toString() + "\n", var_key.hasSameAlternateAllelesAs(var_test));
+			Assert.assertTrue("Ref-\nkey: " + answer_var.getReference() + " test: " + test_var.getReference() + "\n", answer_var.hasSameAllelesAs(test_var));
+			Assert.assertTrue("Alt-\nkey: " + answer_var.getAlternateAlleles().toString() + " test: " + test_var.getAlternateAlleles().toString() + "\n", answer_var.hasSameAlternateAllelesAs(test_var));
 			
 			
 		}

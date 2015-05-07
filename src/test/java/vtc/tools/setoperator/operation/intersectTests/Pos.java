@@ -1,5 +1,7 @@
 package vtc.tools.setoperator.operation.intersectTests;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -29,9 +31,10 @@ public class Pos {
 	
 	/**
 	 * Test how the intersect operator works for chr, pos, ref.
+	 * @throws IOException 
 	 */
 	@Test
-	public void testDifferentPosAndChr() {
+	public void testDifferentPosAndChr() throws IOException {
 
 		System.out.println(GREEN+"\ntest Different Pos and Chr"+RESET);
 		

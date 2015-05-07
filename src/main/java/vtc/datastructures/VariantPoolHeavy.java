@@ -68,11 +68,20 @@ public class VariantPoolHeavy extends AbstractVariantPool{
 	private HashMap<String, HashMap<String, VariantContext>> hMapChrPos;
 //	private TreeMap<String, VariantContext> tMap;
 	private TreeSet<String> contigs;
+	
+	private String currVarKey;
+	private Iterator<String> varKeyIter;
 
 	private Boolean hasGenotypeData;
 	
 	private int potentialMatchingIndelAlleles;
 	private int potentialMatchingIndelRecords;
+	
+	/* This boolean will track whether the VCF has been fully read into the
+	 * VariantPoolHeavy object. Once it has been, then getNextVar should use
+	 * the set of variants read into this object.
+	 */
+	private boolean vcfFileFullyParsed = false;
 
 	
 	/****************************************************
@@ -176,12 +185,42 @@ public class VariantPoolHeavy extends AbstractVariantPool{
 	 * the variants. The keys are formatted as 'chr:pos' and ordered 'naturally'.
 	 * @return
 	 */
-	public Iterator<String> getVariantIterator(){
+	private Iterator<String> getVariantIterator(){
 //		return this.tMap.keySet().iterator();
 		ArrayList<String> keys = new ArrayList<String>(this.hMap.keySet());
 		Collections.sort(keys, new NaturalOrderComparator());
 		return keys.iterator();
 	}	
+	
+	public VariantContext getNextVar() throws IOException{
+        VariantContext currVar;
+        
+        /* VariantPoolHeavy objects read the entire VCF into memory.
+         * vcfFileFullyParsed tracks whether we've read the entire VCF
+         * into memory. If not, just call AbstractVariantPool's method
+         * to getNextVar. If we have read the entire file, start iterating
+         * over the stored variants.
+         */
+		if(!vcfFileFullyParsed){
+			currVar = super.getNextVar();
+			if(currVar == null){
+				vcfFileFullyParsed = true;
+				varKeyIter = this.getVariantIterator();
+			}
+			else{
+				return currVar;
+			}
+		}
+
+		else if(vcfFileFullyParsed){
+			if(varKeyIter.hasNext()){
+				currVarKey = varKeyIter.next();
+				currVar = this.getVariant(currVarKey);
+				return currVar;
+			}
+		}
+		return null;
+	}
 
 	
 	public boolean hasGenotypeData(){
@@ -356,6 +395,7 @@ public class VariantPoolHeavy extends AbstractVariantPool{
             }
             
             this.addVariant(currVar, false);
+            count++;
             currVar = getNextVar();
         }
 //

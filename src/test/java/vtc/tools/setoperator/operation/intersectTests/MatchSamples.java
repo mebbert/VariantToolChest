@@ -2,6 +2,8 @@ package vtc.tools.setoperator.operation.intersectTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,9 +37,10 @@ public class MatchSamples {
 	
 	/**
 	 * Test how the intersect operator works for matching samples
+	 * @throws IOException 
 	 */
 	@Test
-	public void testMismatchingSamples() {
+	public void testMismatchingSamples() throws IOException {
 		
 		
 		System.out.println(GREEN+"\ntest Mismatching Samples"+RESET);

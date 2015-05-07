@@ -2,6 +2,8 @@ package vtc.tools.setoperator.operation.intersectTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,9 +37,10 @@ public class Alt {
 	
 	/**
 	 * Test how the intersect operator works for chr, pos, ref, alt.
+	 * @throws IOException 
 	 */
 	@Test
-	public void testDifferentPosAndChr() {
+	public void testDifferentPosAndChr() throws IOException {
 
 		System.out.println(GREEN+"\ntest Different Pos and Chr"+RESET);
 		
@@ -58,7 +61,7 @@ public class Alt {
 	}
 	
 	@Test
-	public void testRefOrAltDifferent() {
+	public void testRefOrAltDifferent() throws IOException {
 
 		System.out.println(GREEN+"\ntest Ref or Alt Different"+RESET);
 		

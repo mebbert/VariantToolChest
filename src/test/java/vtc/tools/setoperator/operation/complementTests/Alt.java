@@ -2,6 +2,8 @@ package vtc.tools.setoperator.operation.complementTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,9 +37,10 @@ public class Alt {
 	
 	/**
 	 * Test how the complement operator works for complement based on chr, pos, ref, alt.
+	 * @throws IOException 
 	 */
 	@Test
-	public void testSameSampleDifferentNumberVars() {
+	public void testSameSampleDifferentNumberVars() throws IOException {
 
 		System.out.println(GREEN+"\ntest Same Sample Different Number Vars"+RESET);
 		
@@ -59,9 +62,10 @@ public class Alt {
 	
 	/**
 	 * Test how the complement operator works for complement based on chr, pos, ref, alt.
+	 * @throws IOException 
 	 */
 	@Test
-	public void testUniqueSampleDifferentNumberVars() {
+	public void testUniqueSampleDifferentNumberVars() throws IOException {
 
 		System.out.println(GREEN+"\ntest Unique Sample Different Number Vars"+RESET);
 		
@@ -81,7 +85,7 @@ public class Alt {
 	}	
 	
 	@Test
-	public void testRefOrAltDifferent() {
+	public void testRefOrAltDifferent() throws IOException {
 
 		System.out.println(GREEN+"\ntest Ref or Alt Different"+RESET);
 		
@@ -102,7 +106,7 @@ public class Alt {
 	
 	
 	@Test
-	public void testDifferentPosOrChr() {
+	public void testDifferentPosOrChr() throws IOException {
 
 		System.out.println(GREEN+"\ntest Different Pos or Chr"+RESET);
 		

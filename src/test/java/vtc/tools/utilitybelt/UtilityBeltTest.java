@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -288,12 +287,14 @@ public class UtilityBeltTest {
 			ArrayList<VariantPoolHeavy> allVPsList = new ArrayList<VariantPoolHeavy>(AllVPs.values());
 			System.out.println(allVPsList);
 			int i=0;
+			VariantContext var;
 			for (VariantPoolHeavy vp : allVPsList) {
-				Iterator<String> varIT = vp.getVariantIterator();
-				String currVarKey;
-				while (varIT.hasNext()) {
-					currVarKey = varIT.next();
-					VariantContext var = vp.getVariant(currVarKey);
+//				Iterator<String> varIT = vp.getVariantIterator();
+//				String currVarKey;
+//				while (varIT.hasNext()) {
+				while((var = vp.getNextVar()) != null){
+//					currVarKey = varIT.next();
+//					VariantContext var = vp.getVariant(currVarKey);
 					// SNV, MNP, insertion, deletion or structural insertion or deletion
 					for(Allele a : var.getAlternateAlleles()) {
 						 AltType alt_type = UtilityBelt.determineAltType(var.getReference(), a);
@@ -344,12 +345,14 @@ public class UtilityBeltTest {
 			ArrayList<VariantPoolHeavy> allVPsList = new ArrayList<VariantPoolHeavy>(AllVPs.values());
 			System.out.println(allVPsList);
 			int i=0;
+			VariantContext var;
 			for (VariantPoolHeavy vp : allVPsList) {
-				Iterator<String> varIT = vp.getVariantIterator();
-				String currVarKey;
-				while (varIT.hasNext()) {
-					currVarKey = varIT.next();
-					VariantContext var = vp.getVariant(currVarKey);
+//				Iterator<String> varIT = vp.getVariantIterator();
+//				String currVarKey;
+//				while (varIT.hasNext()) {
+				while((var = vp.getNextVar()) != null){
+//					currVarKey = varIT.next();
+//					VariantContext var = vp.getVariant(currVarKey);
 					// SNV, MNP, insertion, deletion or structural insertion or deletion
 					for(Allele a : var.getAlternateAlleles()) {
 						 //System.out.println("Comparing: " + var.getReference() + " with " + a+"\n");
