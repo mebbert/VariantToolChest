@@ -2,6 +2,8 @@ package vtc.tools.miscSetOperTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -38,7 +40,7 @@ public class NoCall {
 	 * Test how the complement operator works for the exact option.
 	 */
 	@Test
-	public void testNoCallComplement() {
+	public void testNoCallComplement() throws IOException{
 
 		System.out.println(GREEN+"\ntest No Call complement"+RESET);
 		
@@ -59,7 +61,7 @@ public class NoCall {
 	}	
 	
 	@Test
-	public void testNoCallIntersect() {
+	public void testNoCallIntersect() throws IOException{
 
 		System.out.println(GREEN+"\ntest No Call intersect"+RESET);
 		
