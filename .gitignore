@@ -1,4 +1,3 @@
 /target
 /src/main/java/vtc/VTC.properties 
 *.log
-src/test/resources/test_data/OUTPUT/
