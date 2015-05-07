@@ -16,6 +16,5 @@
 ##phasing=partial
 ##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
 ##source=myImputationProgramV3.1
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00003
-20	17330	.	T	A	.	.	.	GT:GQ:DP:HQ	1/0:41:3
-20	1110696	.	A	G,T	.	.	.	GT:DP:GQ:HQ	2/2:4:35
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001
+chr20	1234567	.	GTC	G,GTCT	.	.	.	GT:GQ:DP	./.:35:4
