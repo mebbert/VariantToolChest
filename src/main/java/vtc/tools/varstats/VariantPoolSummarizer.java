@@ -172,8 +172,8 @@ public class VariantPoolSummarizer {
         }
 
 		VariantContext var = vp.getNextVar();
-		sampleCount = var.getNSamples();
 		while (var != null) {
+	        sampleCount = var.getNSamples();
 
 			if(recordCount > 1 && recordCount % 10000 == 0)
 				System.out.print("Parsed variant records: "

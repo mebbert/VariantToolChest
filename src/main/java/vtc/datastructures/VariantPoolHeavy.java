@@ -219,6 +219,10 @@ public class VariantPoolHeavy extends AbstractVariantPool{
 				return currVar;
 			}
 		}
+		/* Reset the iterator before returning null. This is important
+		 * when the same VariantPool is used more than once.
+		 */
+		varKeyIter = this.getVariantIterator();
 		return null;
 	}
 

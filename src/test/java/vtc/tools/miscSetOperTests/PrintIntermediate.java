@@ -40,7 +40,7 @@ public class PrintIntermediate {
 	 * Test how the complement operator works for the exact option.
 	 * @throws IOException 
 	 */
-//	@Test
+	@Test
 	public void testSameSampleDifferentGeno() throws IOException {
 
 		System.out.println(GREEN+"\ntest Same Sample Different Geno Compare"+RESET);

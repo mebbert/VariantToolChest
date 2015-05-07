@@ -472,6 +472,9 @@ public class SetOperatorEngine implements Engine {
                 	}
 	            	System.out.println("\nPrinting intermediate file for " + op.getOperationID());
                     canonicalPath = outFile.getCanonicalPath();
+                	result.setFile(new File(canonicalPath.substring(0,
+                			canonicalPath.lastIndexOf(File.separator) + 1) +
+                			"/" + intermediateOut));
                     VariantPoolHeavy.printVariantPool(intermediateOut,
                     		canonicalPath.substring(0, canonicalPath.lastIndexOf(File.separator) + 1),
                     		result, refGenome, outputFormat, repairHeader);
@@ -486,6 +489,7 @@ public class SetOperatorEngine implements Engine {
         /* Now print the final output file, unless we've been printing intermediate files. In this case, the
          * last file was already printed. */
         if (result != null && !printIntermediateFiles) {
+	        result.setFile(new File(outFile.getAbsolutePath()));
             logger.info("Printing " + result.getPoolID() + " to file: " + outFile.getAbsolutePath());
             VariantPoolHeavy.printVariantPool(outFile.getAbsolutePath(), result, refGenome, outputFormat, repairHeader);
 
