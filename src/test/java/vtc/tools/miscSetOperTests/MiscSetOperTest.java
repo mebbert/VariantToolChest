@@ -22,7 +22,8 @@ import vtc.datastructures.VariantPool;
 	PrintIntermediate.class,
 	RepairHeader.class,
 	AddCHR.class,
-	SamplesWithinSameFile.class
+	SamplesWithinSameFile.class,
+	NoCall.class
 	})
 public class MiscSetOperTest {
 	public static final String RED = "\u001B[31m";

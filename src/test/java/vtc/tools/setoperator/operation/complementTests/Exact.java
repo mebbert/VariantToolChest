@@ -37,7 +37,7 @@ public class Exact {
 	/**
 	 * Test how the complement operator works for the exact option.
 	 */
-	@Ignore
+	@Test
 	public void testSameSampleDifferentGeno() {
 
 		System.out.println(GREEN+"\ntest Same Sample Different Geno"+RESET);
