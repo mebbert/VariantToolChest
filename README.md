@@ -4,8 +4,8 @@ variants (particularly VCF files) and to be **easily extensible**. We hope you
 will incorporate your valuable tools/algorithms to VTC. These tools/algorithms
 may be independently published or not. In either case, we want to build a
 well-integrated tool chest. Please see
-our BMC Bioinformatics paper (in
-press--to be published May 28, 2014). VTC is still under development and we 
+our [BMC Bioinformatics paper](http://www.biomedcentral.com/1471-2105/15/S7/S12). 
+VTC is still under development and we 
 are working to improve features and reliability, but there are
 several specific gaps VTC currently fills including:
 
@@ -75,19 +75,23 @@ spec](http://www.1000genomes.org/wiki/Analysis/Variant%20Call%20Format/vcf-varia
 #### Genotype-aware set operations
 Set operations are important for trimming variant sets in numerous situations
 (e.g., family-based genetics studies), but are minimally useful unless
-considering the sample genotypes. VTC's SetOperator currently handles five
+considering the sample genotypes. VTC's SetOperator currently handles four
 genotype-aware options and two genotype-agnostic options. The genotype-level
-options are as follows: (1) heterozygous; (2) homozygous variant; (3)
-heterozygous or homozygous variant; (4) homozygous reference; and (5) match
-sample exactly across variant pools. The genotype-agnostic methods are: (1)
-variant (i.e., only consider chrom, pos, ref, and alt); and (2) position (i.e.,
-only consider chrom, pos, and ref).
+options are as follows: (1) heterozygous only; (2) homozygous variant; (3)
+heterozygous or homozygous variant; and (4) homozygous reference. The genotype
+-agnostic methods are: (1) variant (i.e., only consider chrom, pos, ref, and 
+alt); and (2) position (i.e., only consider chrom, pos, and ref).  The union 
+and complement operators only support a subset of these operations (see the 
+-h option for more information).
 
 For example, performing an intersect on the above example from 1000G specifying
 the 'heterozygous or homozygous variant' setting would require that all samples
-be heterozygous (**at least one ref allele!** and one alternate allele) or
-homozygous for the variant, or the variant does not intersect across all
-samples. The result would be as follows:
+be heterozygous or homozygous for the variant. This example addresses a couple
+critical decisions we made while implementing the set operator logic: (1) to be
+considered heterozygous the alleles must be different (this includes variants 
+that could be called homozygous variant, e.g. "1/2"); and (2) all of the samples 
+must have a common alternate allele. Otherwise the variant does not 
+intersect across all samples. The result would be as follows:
 
 ```
 ##fileformat=VCFv4.1
@@ -109,23 +113,16 @@ samples. The result would be as follows:
 ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
 ##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype Quality">
 #CHROM POS     ID        REF    ALT     QUAL FILTER INFO                              FORMAT      NA00001        NA00002        NA00003
-20     1234567 microsat1 GTC    G,GTCT  50   PASS   NS=3;DP=9;AA=G                    GT:GQ:DP    0/1:35:4       0/2:17:2       1/1:40:3
+20     1110696 rs6040355 A      G,T     67   PASS   NS=2;DP=10;AF=0.333,0.667;AA=T;DB GT:GQ:DP:HQ 1|2:21:6:23,27 2|1:2:0:18,2   2/2:35:4
 ```
 
 
 
 
 #### Pop quiz!
-Why didn't the variant at 1110696 intersect? This example addresses a couple
-critical decisions we made while implementing the intersect logic: (1) to be
-considered heterozygous, we're assuming most researchers will expect (perhaps
-subconsciously) 'heterozygous' to mean they genotype includes one reference
-allele; and (2) while all of the samples are technically 'homozygous variant'
-(meaning they only have variants, though not necessarily the same one), neither
-of the alternate alleles are common in all samples. Thus, based on the first
-assumption, none of them intersect as heterozygotes and likewise do not
-intersect as homozygous variant since they do not share the same alleles (i.e.,
-the third sample only has alt two).
+Why didn't the variant at 1234567 intersect? Based on the second assumption mentioned 
+above, the second sample does not share a common alternate allele and therefore the variant 
+does not intersect.
 
 We welcome any feedback on this approach. Our goal is to make the VTC useful.
 
@@ -392,7 +389,7 @@ Or you can [download Maven](http://maven.apache.org/download.cgi).
 
 Once you install Maven, run `mvn package assembly:assembly -DskipTests` and you will find
 `VariantToolChest-0.9-SNAPSHOT-jar-with-dependencies.jar` in the `target` directory. The `-DskipTests`
-is currently necessary as we refine the unit tests.
+is not currently necessary, but will save you the time it takes to go through all of the unit tests.
 
 
 
@@ -404,11 +401,9 @@ bit...slow...and a memory hog. We're currently working to remedy this situation.
 :)
 
 There are also some periphery bugs that need to be addressed, but do not affect
-the main algorithms involved. For example, there are some extra files printed
-out at times and you may experience an error to the effect of "Something is very
+the main algorithms involved. You may experience an error to the effect of "Something is very
 wrong!" These are bugs where we encounter an unexpected situation. Please
-post a bug in these cases.
+post a bug in these cases. Another known bug is if you specify an invalid reference genome. 
 
-Another known bug is if you specify an invalid reference genome. We'll squash
-it, but we don't want you to be overly concerned if you encounter this or
+We'll squash the bugs as soon as possible, but we don't want you to be overly concerned if you encounter these or
 similar bugs.

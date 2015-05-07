@@ -83,8 +83,9 @@ public class SetOperatorEngine implements Engine {
         		.addArgument("--compare")
         		.dest("COMPARE")
         		.action(Arguments.storeTrue())
-        		.help("Automagically perform intersect and complements " +
-        				"between two input files.");
+        		.help("Automagically performs the intersect, union, and both complements " +
+        				"between two input files.  You could use the -g and/or -c command to define the"
+        				+ " type of intersect and complements that you would like to perform.");
         operation
                 .addArgument("-s", "--set-operation")
                 .nargs("+")
@@ -148,7 +149,7 @@ public class SetOperatorEngine implements Engine {
 
         output.addArgument("-o", "--out")
         		.dest("OUT").setDefault("variant_list.out.vcf")
-        		.help("Specify the final output file name.");
+        		.help("Specify the final output file name except when using.");
 
         output.addArgument("-f", "--output-file-format")
         		.dest("FORMAT")

@@ -1,0 +1,3 @@
+This test if the print intermediate files option is functional.
+The last output should be the name given for the output and generic names 
+are given to the intermediate files.
