@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeMap;
 
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.setoperator.Operator;
 
 /**
@@ -41,7 +41,7 @@ public abstract class Operation {
 	 * @param operationString
 	 * @throws InvalidOperationException
 	 */
-	public Operation(String operationString, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
+	public Operation(String operationString, TreeMap<String, VariantPoolHeavy> variantPools) throws InvalidOperationException{
 //		parseOperation(operationString, variantPools);
 		this.operationString = operationString;
 	}

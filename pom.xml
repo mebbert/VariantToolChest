@@ -67,6 +67,11 @@
 			<artifactId>variant</artifactId>
 			<version>1.96</version>
 		</dependency>	
+		<dependency>
+			<groupId>jsc</groupId>
+			<artifactId>jsc</artifactId>
+			<version>1.0</version>
+		</dependency>	
 
 	</dependencies>
 	<build>

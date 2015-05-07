@@ -1,5 +1,7 @@
 package vtc.tools.setoperator.operation.intersectTests;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -9,8 +11,8 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class Pos {
 	private static String hgref = UtilityBelt.getHGREF();
 
-	private static String test_path = "/test_data/IntersectTests";
-	private static String output_path = "/test_data/OUTPUT";
+//	private static String test_path = "/test_data/IntersectTests";
+//	private static String output_path = "/test_data/OUTPUT";
 
 	public static final String RED = "\u001B[31m";
 	public static final String GREEN = "\u001B[32m";
@@ -29,9 +31,10 @@ public class Pos {
 	
 	/**
 	 * Test how the intersect operator works for chr, pos, ref.
+	 * @throws IOException 
 	 */
 	@Test
-	public void testDifferentPosAndChr() {
+	public void testDifferentPosAndChr() throws IOException {
 
 		System.out.println(GREEN+"\ntest Different Pos and Chr"+RESET);
 		

@@ -1,7 +1,8 @@
 package vtc.tools.setoperator.operation.intersectTests;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import vtc.VTCEngine;
@@ -10,8 +11,8 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class HetOnly {
 	private static String hgref = UtilityBelt.getHGREF();
 
-	private static String test_path = "/test_data/IntersectTests";
-	private static String output_path = "/test_data/OUTPUT";
+//	private static String test_path = "/test_data/IntersectTests";
+//	private static String output_path = "/test_data/OUTPUT";
 
 	public static final String RED = "\u001B[31m";
 	public static final String GREEN = "\u001B[32m";
@@ -28,7 +29,7 @@ public class HetOnly {
 	
 	
 	@Test	
-	public void testHomoRef() {
+	public void testHomoRef() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -48,7 +49,7 @@ public class HetOnly {
 	}
 	
 	@Test	
-	public void testHomoAlt() {
+	public void testHomoAlt() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -68,7 +69,7 @@ public class HetOnly {
 	}
 	
 	@Test
-	public void testMultipleAlts() {
+	public void testMultipleAlts() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		System.out.println(GREEN+"\ntest Multiple Alts"+RESET);
@@ -88,7 +89,7 @@ public class HetOnly {
 	}
 	
 	@Test	
-	public void testUniqueSamples() {
+	public void testUniqueSamples() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		
@@ -108,7 +109,7 @@ public class HetOnly {
 	}
 	
 	@Test
-	public void testSameSampleDifferentGeno() {
+	public void testSameSampleDifferentGeno() throws IOException {
 		//String see = getClass().getResource("/MainConfig.xml").getFile();
 		//System.out.println("got: " + see);
 		

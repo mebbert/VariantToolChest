@@ -48,13 +48,13 @@ public class VariantPoolDetailedSummary extends VariantPoolSummary {
 	 * @param genoTvCount
 	 * @param genoTiTv
 	 */
-	public VariantPoolDetailedSummary(int numVarRecords, int numVars,
+	public VariantPoolDetailedSummary(int numRecords, int numVarRecords, int numSamples, int numVars,
 			int numSNVs, int numMNVs, int numStructVars, int numStructIns,
 			int numStructDels, int numMultiAlts, double tiCount,
 			double tvCount, double tiTv, double genoTiCount,
 			double genoTvCount, double genoTiTv, TreeSet<String> allInsertions,
 			TreeSet<String> allDeletions) {
-		super(numVarRecords, numVars, numSNVs, numMNVs, numStructVars, numStructIns,
+		super(numRecords, numVarRecords, numSamples, numVars, numSNVs, numMNVs, numStructVars, numStructIns,
 				numStructDels, numMultiAlts, tiCount, tvCount, genoTiCount, genoTvCount,
 				allInsertions, allDeletions);
 		init();
@@ -64,7 +64,7 @@ public class VariantPoolDetailedSummary extends VariantPoolSummary {
 	 * 
 	 */
 	public VariantPoolDetailedSummary(VariantPoolSummary vps) {
-		super(vps.getNumVarRecords(), vps.getNumVars(), vps.getNumSNVs(), vps.getNumMNVs(),
+		super(vps.getNumRecords(), vps.getNumVarRecords(), vps.getNumSamples(), vps.getNumVars(), vps.getNumSNVs(), vps.getNumMNVs(),
 				vps.getNumStructVars(), vps.getNumStructIns(), vps.getNumStructDels(), vps.getNumMultiAlts(),
 				vps.getTiCount(), vps.getTvCount(), vps.getGenoTiCount(), vps.getGenoTvCount(),
 				vps.getAllInsertions(), vps.getAllDeletions());
@@ -163,10 +163,6 @@ public class VariantPoolDetailedSummary extends VariantPoolSummary {
 			/* Get the corresponding VariantRecordSummary from both s1 and s2, if possible */
 			vrs = s1.getVariantRecordSummary(vrsKey);
 			tmpVrs = s2.getVariantRecordSummary(vrsKey);
-			
-			if(vrs.getPosition() == 189877298){
-				logger.info("HERE");
-			}
 			
 			/* If s2, had the same VariantRecordSummary, add them together */
 			if(tmpVrs != null){

@@ -11,29 +11,23 @@ public class Association {
      * Variables
      */
     private String  Chr;
-
     private String  Id;
-
     private Integer Pos;
-
     private String  Ref;
-
     private String  Alt;
 
     private long    CaseRefCount    = 0;
-
     private long    CaseAltCount    = 0;
-
     private long    ControlRefCount = 0;
-
     private long    ControlAltCount = 0;
 
     private double  OR              = 0;
-
-    private double  PValue          = 0;
+    private double  chiSq_pval          = 0;
+    private double fishersExact_pval = 0;
+    private double midp_pval = 0;
 
     @SuppressWarnings("unused")
-	private double  correctedPValue = 0;
+	private double  correctedChiSq_pval = 0;
 
     /*
      * Constructors
@@ -54,54 +48,62 @@ public class Association {
     }
 
     /*
-     * Setters
+     * setters
      */
-    public void SetChr(String C) {
+    public void setChr(String C) {
         Chr = C;
     }
 
-    public void SetId(String I) {
+    public void setId(String I) {
         Id = I;
     }
 
-    public void SetPos(Integer pos) {
+    public void setPos(Integer pos) {
         Pos = pos;
     }
 
-    public void SetRef(String R) {
+    public void setRef(String R) {
         Ref = R;
     }
 
-    public void SetAlt(String A) {
+    public void setAlt(String A) {
         Alt = A;
     }
 
-    public void SetCaseRefCount(long c) {
+    public void setCaseRefCount(long c) {
         CaseRefCount = c;
     }
 
-    public void SetCaseAltCount(long c) {
+    public void setCaseAltCount(long c) {
         CaseAltCount = c;
     }
 
-    public void SetControlRefCount(long c) {
+    public void setControlRefCount(long c) {
         ControlRefCount = c;
     }
 
-    public void SetControlAltCount(long c) {
+    public void setControlAltCount(long c) {
         ControlAltCount = c;
     }
 
-    public void SetOR(double O) {
-        OR = O;
+    public void setOR(double o) {
+        OR = o;
     }
 
-    public void SetPValue(double P) {
-        PValue = P;
+    public void setChiSq_pval(double p) {
+        chiSq_pval = p;
     }
 
-    public void SetCorrectedPValue(double P) {
-        correctedPValue = P;
+    public void setCorrectedChiSq_pval(double p) {
+        correctedChiSq_pval = p;
+    }
+    
+    public void setFishersExact_pval(double p){
+    	fishersExact_pval = p;
+    }
+    
+    public void setMidP_pval(double p){
+    	midp_pval = p;
     }
 
     /*
@@ -145,30 +147,42 @@ public class Association {
         return counts;
     }
 
-    public double calcOR(long[] caseAlleleCount, long[] controlAlleleCount) {
-        if (caseAlleleCount[0] == 0 || controlAlleleCount[1] == 0 || caseAlleleCount[1] == 0 || controlAlleleCount[0] == 0) {
+    public double calcOR(double caseUnexposedAlleleCount, double caseExposedAlleleCount, double controlUnexposedAlleleCount, double controlExposedAlleleCount) {
+        if (caseUnexposedAlleleCount == 0 || caseExposedAlleleCount == 0 || controlUnexposedAlleleCount == 0 || controlExposedAlleleCount == 0) {
             return -1;
         } else {
-            double oddsRatio = ((double) caseAlleleCount[0] * (double) controlAlleleCount[1]) / ((double) caseAlleleCount[1] * (double) controlAlleleCount[0]);
+            double oddsRatio = (caseExposedAlleleCount * controlUnexposedAlleleCount) / (caseUnexposedAlleleCount * controlExposedAlleleCount);
             return oddsRatio;
         }
     }
 
     @Override
     public String toString() {
-    	String PVal = "";
-    	if(PValue!=-1)
-    		PVal = String.format("%.4g%n", PValue);
-    	else
-    		PVal = "NaN";
-    		
+    	String chiSq_pval_str = "";
+    	String fishers_pval_str = "";
+    	String midp_pval_str = "";
+    	if(chiSq_pval!=-1){
+    		chiSq_pval_str = String.format("%.4g", chiSq_pval);
+    		fishers_pval_str = String.format("%.4g", fishersExact_pval);
+    		midp_pval_str = String.format("%.4g", midp_pval);
+    	}
+    	else{
+    		chiSq_pval_str = "NA";
+    		fishers_pval_str = "NA";
+    		midp_pval_str = "NA";
+    	}
+    	
+    	
         String or;
         if (OR == -1) {
             or = "NA";
         } else {
             or = String.format("%.4g", OR);
         }
-        String association = Chr + '\t' + Id + '\t' + Pos + '\t' + Ref + '\t' + Alt + '\t' + CaseRefCount + '\t' + CaseAltCount + '\t' + ControlRefCount + '\t' + ControlAltCount + '\t' + or + '\t' + PVal;
+        String association = Chr + '\t' + Id + '\t' + Pos + '\t' + Ref + '\t'
+        		+ Alt + '\t' + CaseRefCount + '\t' + CaseAltCount + '\t'
+        		+ ControlRefCount + '\t' + ControlAltCount + '\t' + or
+        		+ '\t' + midp_pval_str + '\t' + fishers_pval_str + '\t' + chiSq_pval_str ;
         return association;
     }
 }

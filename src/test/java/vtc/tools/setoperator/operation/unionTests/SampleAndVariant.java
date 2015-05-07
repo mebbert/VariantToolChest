@@ -3,6 +3,8 @@
  */
 package vtc.tools.setoperator.operation.unionTests;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -31,9 +33,10 @@ public class SampleAndVariant {
 	
 	/**
 	 * Test how the union operator works
+	 * @throws IOException 
 	 */
 	@Test
-	public void testUniqueSampleSetsDifferentVariantSets() {
+	public void testUniqueSampleSetsDifferentVariantSets() throws IOException {
 
 		System.out.println(GREEN+"\ntest Unique Sample Sets Different Variant Sets"+RESET);
 		
@@ -52,9 +55,10 @@ public class SampleAndVariant {
 
 	/**
 	 * Test how the union operator works
+	 * @throws IOException 
 	 */
 	@Test
-	public void testOverlappingSampleSameVariantSet() {
+	public void testOverlappingSampleSameVariantSet() throws IOException {
 		
 		System.out.println(GREEN+"\ntest Overlapping Sample Same Variant Set"+RESET);
 		
@@ -74,9 +78,10 @@ public class SampleAndVariant {
 
 	/**
 	 * Test how the union operator works
+	 * @throws IOException 
 	 */
 	@Test
-	public void testDifferentAltsAdded() {
+	public void testDifferentAltsAdded() throws IOException {
 
 		System.out.println(GREEN+"\ntest Different Alts Added"+RESET);
 
@@ -96,9 +101,10 @@ public class SampleAndVariant {
 
 	/**
 	 * Test how the union operator works
+	 * @throws IOException 
 	 */
 	@Test
-	public void testOverlappingSamplesDifferentVariantSets() {
+	public void testOverlappingSamplesDifferentVariantSets() throws IOException {
 
 		System.out.println(GREEN+"\ntest Overlapping Samples Different Variant Sets"+RESET);
 		

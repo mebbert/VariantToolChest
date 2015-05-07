@@ -1,4 +1,4 @@
-package vtc.tools.setoperator.operation.unionTests;
+package miscSetOperTests;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,9 +20,8 @@ import vtc.datastructures.VariantPoolHeavy;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	SampleAndVariant.class
 })
-public class UnionOperationTest {
+public class MiscSetOperTests {
 	public static final String RED = "\u001B[31m";
 	public static final String GREEN = "\u001B[32m";
 	public static final String RESET = "\u001B[0m";
@@ -31,7 +30,7 @@ public class UnionOperationTest {
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		System.out.println(RED+"\n==========================================================================\n"
-				+ "                       UnionOperationTest                  \n"
+				+ "                       MiscSetOperatorTests                  \n"
 				+ "==========================================================================\n"+RESET);	
 	}
 	
@@ -69,7 +68,7 @@ public class UnionOperationTest {
 
 //			currVarAnswerKey = answer_it.next();
 //			currVarTestKey = test_it.next();
-
+//
 //			answer_var = answer_pool.getVariant(currVarAnswerKey);
 //			test_var = test_pool.getVariant(currVarTestKey);
 			

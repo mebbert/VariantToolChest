@@ -2,8 +2,9 @@ package vtc.tools.setoperator.operation.intersectTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import vtc.VTCEngine;
@@ -12,8 +13,8 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class MatchSamples {
 	private static String hgref = UtilityBelt.getHGREF();
 
-	private static String test_path = "/test_data/IntersectTests";
-	private static String output_path = "/test_data/OUTPUT";
+//	private static String test_path = "/test_data/IntersectTests";
+//	private static String output_path = "/test_data/OUTPUT";
 
 	public static final String RED = "\u001B[31m";
 	public static final String GREEN = "\u001B[32m";
@@ -36,9 +37,10 @@ public class MatchSamples {
 	
 	/**
 	 * Test how the intersect operator works for matching samples
+	 * @throws IOException 
 	 */
 	@Test
-	public void testMismatchingSamples() {
+	public void testMismatchingSamples() throws IOException {
 		
 		
 		System.out.println(GREEN+"\ntest Mismatching Samples"+RESET);

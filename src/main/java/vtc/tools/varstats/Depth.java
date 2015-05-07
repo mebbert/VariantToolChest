@@ -21,12 +21,18 @@ public class Depth {
 		return avgDepth;
 	}
 	
-	public int getMinDepth(){
-		return minDepth;
+	public String getMinDepth(){
+		if(minDepth < Integer.MAX_VALUE){
+			return new Integer(minDepth).toString();
+		}
+		return "NA";
 	}
 	
-	public int getMaxDepth(){
-		return maxDepth;
+	public String getMaxDepth(){
+		if(maxDepth >= 0){
+			return new Integer(maxDepth).toString();
+		}
+		return "NA";
 	}
 	
 	public String getError(){

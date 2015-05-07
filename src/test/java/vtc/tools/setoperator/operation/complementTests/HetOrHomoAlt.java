@@ -2,8 +2,9 @@ package vtc.tools.setoperator.operation.complementTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import vtc.VTCEngine;
@@ -12,8 +13,8 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class HetOrHomoAlt {
 	private static String hgref = UtilityBelt.getHGREF();
 
-	private static String test_path = "/test_data/IntersectTests";
-	private static String output_path = "/test_data/OUTPUT";
+//	private static String test_path = "/test_data/IntersectTests";
+//	private static String output_path = "/test_data/OUTPUT";
 
 	public static final String RED = "\u001B[31m";
 	public static final String GREEN = "\u001B[32m";
@@ -36,7 +37,7 @@ public class HetOrHomoAlt {
 
 	
 	@Test
-	public void testDifferentPosOrChr() {
+	public void testDifferentPosOrChr() throws IOException {
 
 		System.out.println(GREEN+"\ntest Different Pos or Chr"+RESET);
 		
@@ -57,7 +58,7 @@ public class HetOrHomoAlt {
 	
 	
 	@Test
-	public void testRefOrAltDifferent() {
+	public void testRefOrAltDifferent() throws IOException {
 
 		System.out.println(GREEN+"\ntest Ref or Alt Different"+RESET);
 		
@@ -78,9 +79,10 @@ public class HetOrHomoAlt {
 	
 	/**
 	 * Test how the complement operator works for the het_homo_alt option.
+	 * @throws IOException 
 	 */
 	@Test
-	public void testHetHomoAltGenotypeTest() {
+	public void testHetHomoAltGenotypeTest() throws IOException {
 		System.out.println(GREEN+"\ntest Het or Homo Alt Genotype Test"+RESET);
 
 		// ///////////Test1//////////////

@@ -3,11 +3,7 @@
  */
 package vtc.tools.varstats;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -22,7 +18,8 @@ import org.apache.log4j.Logger;
 
 import vtc.Engine;
 import vtc.datastructures.InvalidInputFileException;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
+import vtc.datastructures.VariantPoolLight;
 import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
@@ -67,7 +64,7 @@ public class VarStatsEngine implements Engine {
         summary.addArgument("-s", "--summary")
 		.dest("SUMMARY")
 		.type(String.class)
-		.setDefault(SupportedSummaryTypes.TABLE.getName())
+//		.setDefault(SupportedSummaryTypes.TABLE.getName())
         .help("Specify the summary format. Possible options are: " +
                 createSupportedSummaryTypeString());
 //        Stats.addArgument("-s", "--summary").dest("Summary").action(Arguments.storeTrue()).help("Prints summary statistics to the console");
@@ -77,8 +74,8 @@ public class VarStatsEngine implements Engine {
         summary.addArgument("-d", "--detailed-summary")
         		.dest("DETAILED")
         		.type(String.class)
-        		.setDefault(SupportedDetailedSummaryTypes.INDIVIDUAL.getName())
-        		.help("Prints detailed summary statistics to file. Possible options are: "
+//        		.setDefault(SupportedDetailedSummaryTypes.INDIVIDUAL.getName())
+        		.help("Prints detailed summary statistics to file. Possible opteions are: "
         				+ createSupportedDetailedSummaryTypeString());
         summary.addArgument("-P", "--percentage").dest("percentage").action(Arguments.storeTrue()).type(String.class).help("Get the het-homo-alt and homo-alt percentages and write to accompanying file.");
         assoc.addArgument("-a", "--association").action(Arguments.storeTrue()).dest("association")
@@ -109,7 +106,7 @@ public class VarStatsEngine implements Engine {
         boolean doPercentage = parsedArgs.getBoolean("percentage");
         try {
 
-            TreeMap<String, VariantPool> AllVPs;
+            TreeMap<String, VariantPoolLight> AllVPs;
             boolean sum = false, detailedSummary = false;
             SupportedSummaryTypes  summaryType = null;
             SupportedDetailedSummaryTypes detSumType = null;
@@ -140,7 +137,7 @@ public class VarStatsEngine implements Engine {
             
             HashMap<String, VariantPoolSummary> summaries = new HashMap<String, VariantPoolSummary>();
             
-            AllVPs = UtilityBelt.createVariantPools(vcfArgs, true);
+            AllVPs = UtilityBelt.createLightVariantPools(vcfArgs, true);
             if(sum){
             	summaries = VariantPoolSummarizer.summarizeVariantPools(AllVPs);
             	if(summaryType == SupportedSummaryTypes.SIDE_BY_SIDE)
@@ -159,15 +156,17 @@ public class VarStatsEngine implements Engine {
             	// generate detailed summary
             	
             	if(detSumType == SupportedDetailedSummaryTypes.COMBINED){
-                    VariantPoolDetailedSummary summary =
-                            VariantPoolSummarizer.summarizeVariantPoolsDetailedCombined(AllVPs);
-                    String fileName = "unionedVP_detailed_summary.txt";
-                    printDetailedSummaryToFile(summary, fileName);
+				    TreeMap<String, VariantPoolHeavy> AllVPsHeavy = UtilityBelt.createHeavyVariantPools(vcfArgs, true);
+//                    VariantPoolDetailedSummary summary =
+                            VariantPoolSummarizer.summarizeVariantPoolsDetailedCombined(AllVPsHeavy);
+//                    String fileName = "unionedVP_detailed_summary.txt";
+//                    printDetailedSummaryToFile(summary, fileName);
             	}
             	else if(detSumType == SupportedDetailedSummaryTypes.INDIVIDUAL){
-                    HashMap<String, VariantPoolDetailedSummary> detailedSummaries =
+                    summaries =
                             VariantPoolSummarizer.summarizeVariantPoolsDetailed(AllVPs);
-                    printDetailedSummariesToFile(detailedSummaries);
+            		VariantPoolSummarizer.printSummary(summaries, false);
+//                    printDetailedSummariesToFile(detailedSummaries);
             	}
             }
             if(assoc){
@@ -186,18 +185,18 @@ public class VarStatsEngine implements Engine {
         }
     }
     
-	private void printDetailedSummariesToFile(HashMap<String, VariantPoolDetailedSummary> detailedSummaries) throws IOException{
-        
-        Iterator<String> summaryIT = detailedSummaries.keySet().iterator();
-        String vpID, fileName;
-        VariantPoolDetailedSummary summary;
-        while(summaryIT.hasNext()){
-            vpID = summaryIT.next();
-            fileName = vpID + "_detailed_summary.txt";
-            summary = detailedSummaries.get(vpID);
-            printDetailedSummaryToFile(summary, fileName);
-        }
-	}
+//	private void printDetailedSummariesToFile(HashMap<String, VariantPoolDetailedSummary> detailedSummaries) throws IOException{
+//        
+//        Iterator<String> summaryIT = detailedSummaries.keySet().iterator();
+//        String vpID, fileName;
+//        VariantPoolDetailedSummary summary;
+//        while(summaryIT.hasNext()){
+//            vpID = summaryIT.next();
+//            fileName = vpID + "_detailed_summary.txt";
+//            summary = detailedSummaries.get(vpID);
+//            printDetailedSummaryToFile(summary, fileName);
+//        }
+//	}
 	
 	private static String createSupportedDetailedSummaryTypeString(){
 		StringBuilder sb = new StringBuilder();
@@ -244,18 +243,18 @@ public class VarStatsEngine implements Engine {
      * @param fileName
      * @throws FileNotFoundException
      */
-    private void printDetailedSummaryToFile(VariantPoolDetailedSummary summary, String fileName) throws FileNotFoundException{
-        logger.info("Writing detailed summary to: " + fileName);
-        String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count" +
-                "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_genos_called\tN_total_samples\t" +
-                "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
-        PrintWriter writer = new PrintWriter(fileName);
-        writer.println(header);
-        VariantRecordSummary vrs;
-        for(String vrsKey : summary.getVariantRecordSummaries().keySet()){
-        	vrs = summary.getVariantRecordSummary(vrsKey);
-            writer.println(vrs.toString());
-        }
-        writer.close();   	
-    }
+//    private void printDetailedSummaryToFile(VariantPoolDetailedSummary summary, String fileName) throws FileNotFoundException{
+//        logger.info("Writing detailed summary to: " + fileName);
+//        String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count" +
+//                "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_genos_called\tN_total_samples\t" +
+//                "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
+//        PrintWriter writer = new PrintWriter(fileName);
+//        writer.println(header);
+//        VariantRecordSummary vrs;
+//        for(String vrsKey : summary.getVariantRecordSummaries().keySet()){
+//        	vrs = summary.getVariantRecordSummary(vrsKey);
+//            writer.println(vrs.toString());
+//        }
+//        writer.close();   	
+//    }
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import vtc.datastructures.SamplePool;
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.VariantPoolHeavy;
 import vtc.tools.setoperator.Operator;
 
 /**
@@ -33,7 +33,7 @@ public class ComplementOperation extends Operation {
 	 * @param operationString
 	 * @throws InvalidOperationException
 	 */
-	public ComplementOperation(String operationString, TreeMap<String, VariantPool> variantPools) throws InvalidOperationException{
+	public ComplementOperation(String operationString, TreeMap<String, VariantPoolHeavy> variantPools) throws InvalidOperationException{
 		super(operationString, variantPools);
 		samplePools = new ArrayList<SamplePool>();
 		this.allPoolIDs = new ArrayList<String>();

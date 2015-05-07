@@ -3,11 +3,16 @@
  */
 package vtc.tools.varstats;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -16,7 +21,9 @@ import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.VariantContext;
 
-import vtc.datastructures.VariantPool;
+import vtc.datastructures.AbstractVariantPool;
+import vtc.datastructures.VariantPoolHeavy;
+import vtc.datastructures.VariantPoolLight;
 import vtc.tools.setoperator.SetOperator;
 import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.setoperator.operation.Operation;
@@ -31,6 +38,9 @@ import vtc.tools.utilitybelt.UtilityBelt;
 public class VariantPoolSummarizer {
     
     private static Logger logger = Logger.getLogger(VariantPoolSummarizer.class);
+    
+    private static PrintWriter detailedVariantRecordWriter;
+    private static String detailedSummaryFile;
 
     public VariantPoolSummarizer(){}
     
@@ -40,19 +50,18 @@ public class VariantPoolSummarizer {
      * @param combined
      * @return
      * @throws InvalidOperationException 
+     * @throws IOException 
      */
-    public static HashMap<String, VariantPoolDetailedSummary> summarizeVariantPoolsDetailed(TreeMap<String, VariantPool> allVPs)
-    		throws InvalidOperationException{
+    public static HashMap<String, VariantPoolSummary> summarizeVariantPoolsDetailed(TreeMap<String, VariantPoolLight> allVPs)
+    		throws InvalidOperationException, IOException{
 
-    	HashMap<String, VariantPoolDetailedSummary> detailedVariantPoolSummaries =
-    			new HashMap<String, VariantPoolDetailedSummary>();
-    	
-        VariantPoolDetailedSummary vpsd;
-        for(VariantPool vp : allVPs.values()){
-            vpsd = summarizeVariantPoolDetailed(vp);
-            detailedVariantPoolSummaries.put(vp.getPoolID(), vpsd);
+    	HashMap<String, VariantPoolSummary> variantPoolSummaries = new HashMap<String, VariantPoolSummary>();
+    	VariantPoolSummary vps; 
+        for(VariantPoolLight vp : allVPs.values()){
+            vps = summarizeVariantPoolDetailed(vp);
+            variantPoolSummaries.put(vp.getPoolID(), vps);
         }
-    	return detailedVariantPoolSummaries;
+    	return variantPoolSummaries;
     }
     
     /**
@@ -60,13 +69,14 @@ public class VariantPoolSummarizer {
      * 
      * @param allVPs
      * @throws InvalidOperationException 
+     * @throws IOException 
      */
-    public static VariantPoolDetailedSummary summarizeVariantPoolsDetailedCombined(TreeMap<String, VariantPool> allVPs) throws InvalidOperationException{
+    public static void summarizeVariantPoolsDetailedCombined(TreeMap<String, VariantPoolHeavy> allVPs) throws InvalidOperationException, IOException{
 
-    	ArrayList<VariantPool> allVPsList = new ArrayList<VariantPool>(allVPs.values());
+    	ArrayList<VariantPoolHeavy> allVPsList = new ArrayList<VariantPoolHeavy>(allVPs.values());
     	if(allVPsList.size() > 1){
     		String union = "", unionName = "combined";
-    		VariantPool unionVP = null;
+    		VariantPoolHeavy unionVP = null;
     		SetOperator so = new SetOperator();
     		
     		/* Build the operation string */
@@ -84,10 +94,10 @@ public class VariantPoolSummarizer {
     		Operation op = OperationFactory.createOperation(union, allVPs);
     		unionVP = so.performUnion((UnionOperation)op, allVPsList, true);
     		
-    		return summarizeVariantPoolDetailed(unionVP);
+//    		return summarizeVariantPoolDetailed(unionVP);
     	}   	
     	else if(allVPsList.size() == 1){
-    		return summarizeVariantPoolDetailed(allVPsList.get(0));
+//    		return summarizeVariantPoolDetailed(allVPsList.get(0));
     	}
     	else{
     		throw new RuntimeException("ERROR: There were no VariantPools to summarize!");
@@ -99,18 +109,22 @@ public class VariantPoolSummarizer {
      * 
      * @param vp
      * @return
+     * @throws IOException 
      */
-    public static VariantPoolDetailedSummary summarizeVariantPoolDetailed(VariantPool vp){
-    	Iterator<String> varIT = vp.getVariantIterator();
-    	String currVarKey;
+    public static <T extends AbstractVariantPool> VariantPoolSummary summarizeVariantPoolDetailed(T vp) throws IOException{
+//    	Iterator<String> varIT = vp.getVariantIterator();
+//    	String currVarKey;
 //    	ArrayList<VariantRecordSummary> summaries = new ArrayList<VariantRecordSummary>();
-    	VariantPoolDetailedSummary vpds = new VariantPoolDetailedSummary(summarizeVariantPool(vp));
-    	while(varIT.hasNext()){
-    		currVarKey = varIT.next();
-//    		summaries.add(collectVariantStatistics(vp.getVariant(currVarKey)));
-    		vpds.addVariantRecordSummary(collectVariantStatistics(vp.getVariant(currVarKey)));
-    	}
-    	return vpds;
+    	boolean printDetailedReport = true;
+//    	VariantPoolDetailedSummary vpds = new VariantPoolDetailedSummary(summarizeVariantPool(vp, printDetailedReport));
+    	VariantPoolSummary vps = summarizeVariantPool(vp, printDetailedReport);
+//    	VariantContext var = vp.getNextVar();
+//    	while(var != null){
+//    		vpds.addVariantRecordSummary(collectVariantStatistics(var));
+//    		var = vp.getNextVar();
+//    	}
+//    	return vpds;
+    	return vps;
     }
     
     /**
@@ -118,13 +132,15 @@ public class VariantPoolSummarizer {
      * 
      * @param allVPs
      * @return HashMap<String, VariantPoolSummary>
+     * @throws IOException 
      */
-    public static HashMap<String, VariantPoolSummary> summarizeVariantPools(TreeMap<String, VariantPool> allVPs){
+    public static <T extends AbstractVariantPool> HashMap<String, VariantPoolSummary> summarizeVariantPools(TreeMap<String, T> allVPs) throws IOException{
     	
     	VariantPoolSummary vpSummary;
     	HashMap<String, VariantPoolSummary> vpSummaries = new HashMap<String, VariantPoolSummary>();
-    	for(VariantPool vp : allVPs.values()){
-    		vpSummary = summarizeVariantPool(vp);
+    	boolean printDetailedReport = false;
+    	for(T vp : allVPs.values()){
+    		vpSummary = summarizeVariantPool(vp, printDetailedReport);
     		vpSummary.setNumSamples(vp.getSamples().size());
     		//vpSummaries.put(vp.getPoolID(), vpSummary);
     		vpSummaries.put(vp.getFile().getName(), vpSummary);
@@ -136,35 +152,50 @@ public class VariantPoolSummarizer {
      * Summarize statistics in a single VariantPool
      * @param vp
      * @return
+     * @throws IOException 
      */
-    public static VariantPoolSummary summarizeVariantPool(VariantPool vp){
+    public static <T extends AbstractVariantPool> VariantPoolSummary summarizeVariantPool(T vp, boolean printDetailed) throws IOException{
     	
-		Iterator<String> varIT = vp.getVariantIterator();
-		String currVarKey;
-		VariantContext var;
+//		Iterator<String> varIT = vp.getVariantIterator();
+//		String currVarKey;
 		VariantRecordSummary vrs;
 		TreeSet<String> allInsertions = new TreeSet<String>(), allDeletions = new TreeSet<String>();
-    	int totalVarCount = 0, snvCount = 0, mnvCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0,
-    			multiAltCount = 0, tiCount = 0, tvCount = 0, genoTiCount = 0, genoTvCount = 0, hetCount = 0, homCount = 0;
-		while (varIT.hasNext()) {
-			currVarKey = varIT.next();
+    	int recordCount = 0, varRecordCount = 0, totalVarCount = 0, snvCount = 0, mnvCount = 0,
+    			structIndelCount = 0, structInsCount = 0, structDelCount = 0,
+    			sampleCount = 0,
+    			multiAltCount = 0, tiCount = 0, tvCount = 0, genoTiCount = 0, genoTvCount = 0;
+    	
+        NumberFormat nf = NumberFormat.getInstance(Locale.US);
+        
+        if(printDetailed){
+            detailedSummaryFile = vp.getPoolID() + "_detailed_summary.txt";
+        }
 
-			var = vp.getVariant(currVarKey);
+		VariantContext var = vp.getNextVar();
+		sampleCount = var.getNSamples();
+		while (var != null) {
+
+			if(recordCount > 1 && recordCount % 10000 == 0)
+				System.out.print("Parsed variant records: "
+					+ nf.format(recordCount) + "\r");
+			
+			recordCount++; // count total num records
+
+			vrs = collectVariantStatistics(var);
 			if (var.isVariant()) {
-				totalVarCount++; // Increment the total var counts by one for every record
+				
+				varRecordCount++; // count num records that are variants.
 				
 				if(var.getAlternateAlleles().size() > 1){
 					multiAltCount++;
 				}
 
-				/* Increment the total var count by the number of alts - 1. This
-				 * will keep the total count equal to the number of counted alts
-				 * when there are multiple alts in a single record.
+				/* 
+				 * Track total alts observed
 				 */
-				totalVarCount += var.getAlternateAlleles().size() - 1; 
+				totalVarCount += var.getAlternateAlleles().size(); 
 
 				// Count the different types of alternates for a single record
-				vrs = collectVariantStatistics(var);
 				
 				snvCount += vrs.getSnvCount();
 				mnvCount += vrs.getMnvCount();
@@ -182,9 +213,19 @@ public class VariantPoolSummarizer {
 				allDeletions.addAll(vrs.getDeletions());
 
 			}
+
+			if(printDetailed){
+				printVariantRecordSummaryToFile(vrs);
+			}
+			
+			var = vp.getNextVar();
 		}
 		
-		return new VariantPoolSummary(vp.getNumVarRecords(), totalVarCount, snvCount, mnvCount,
+		if(printDetailed){
+	        detailedVariantRecordWriter.close();
+		}
+		
+		return new VariantPoolSummary(recordCount, varRecordCount, sampleCount, totalVarCount, snvCount, mnvCount,
 				structIndelCount, structInsCount, structDelCount, multiAltCount,
 				tiCount, tvCount, genoTiCount, genoTvCount, allInsertions, allDeletions);
     }
@@ -435,6 +476,31 @@ public class VariantPoolSummarizer {
 		}
 		
 	}
+	
+	private static void openDetailedFileForWriting(String fileName) throws FileNotFoundException{
+        logger.info("Writing detailed summary to: " + fileName);
+
+        String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count" +
+                "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_genos_called\tN_total_samples\t" +
+                "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
+
+        detailedVariantRecordWriter = new PrintWriter(fileName);
+        detailedVariantRecordWriter.println(header);
+	}
+	
+   /**
+     * Print a single detailed summary to the given file
+     * 
+     * @param summary
+     * @param fileName
+     * @throws FileNotFoundException
+     */
+    private static void printVariantRecordSummaryToFile(VariantRecordSummary varSummary) throws FileNotFoundException{
+    	if(detailedVariantRecordWriter == null){
+    		openDetailedFileForWriting(detailedSummaryFile);
+    	}
+    	detailedVariantRecordWriter.println(varSummary.toString());
+    }
 
 	private static void PrintCombinedStats(Object[] keys, VariantPoolSummary vps) {
 		int length = vps.longest_length();
@@ -519,8 +585,10 @@ public class VariantPoolSummarizer {
 
 		
 		System.out.format(s + newLine);
+		System.out.format(leftalignFormatint, "TotalRecs:", vps.getNumRecords());
+		System.out.format(leftalignFormatint, "TotalVarRecs:", vps.getNumVarRecords());
 		System.out.format(leftalignFormatint, "TotalVars:", vps.getNumVars());
-		System.out.format(leftalignFormatint, "Total Samples:", vps.getNumSamples());
+		System.out.format(leftalignFormatint, "N Samples:", vps.getNumSamples());
 		System.out.format(s + newLine);
 		System.out.format(rightalignFormati, "SNVs:      ", Integer.toString(vps.getNumSNVs()));
 		System.out.format(rightalignFormatf, "Ti/Tv:", vps.getTiTv());
