@@ -358,7 +358,10 @@ public class VariantPoolSummary {
 	 * @return the tiTv
 	 */
 	public double getTiTv() {
-		return getTiCount()/getTvCount();
+		Double TiTv = getTiCount()/getTvCount();
+		if(TiTv.isInfinite() || TiTv == 0)
+			return Double.NaN;
+		return TiTv;
 	}
 
 
@@ -394,7 +397,10 @@ public class VariantPoolSummary {
 	 * @return the genoTiTv
 	 */
 	public double getGenoTiTv() {
-		return getGenoTiCount()/getGenoTvCount();
+		Double TiTv = getGenoTiCount()/getGenoTvCount();
+		if(TiTv.isInfinite() || TiTv == 0)
+			return Double.NaN;
+		return TiTv;
 	}
 	
 	/**
