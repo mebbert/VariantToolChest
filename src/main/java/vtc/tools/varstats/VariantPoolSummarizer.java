@@ -171,8 +171,9 @@ public class VariantPoolSummarizer {
 		// Iterator<String> varIT = vp.getVariantIterator();
 		// String currVarKey;
 		VariantRecordSummary vrs;
-		TreeSet<String> allInsertions = new TreeSet<String>(), allDeletions = new TreeSet<String>();
-		int recordCount = 0, varRecordCount = 0, totalVarCount = 0, snvCount = 0, mnvCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0, sampleCount = 0, multiAltCount = 0, tiCount = 0, tvCount = 0, genoTiCount = 0, genoTvCount = 0;
+		int recordCount = 0, varRecordCount = 0, totalVarCount = 0, snvCount = 0, mnvCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0, sampleCount = 0, multiAltCount = 0, tiCount = 0, tvCount = 0,
+				genoTiCount = 0, genoTvCount = 0, indelCount = 0, insCount = 0, delCount = 0, smallestIns = Integer.MAX_VALUE, smallestDel = Integer.MAX_VALUE, largestIns = 0, largestDel = 0, smallestStructIns = Integer.MAX_VALUE,
+				smallestStructDel = Integer.MAX_VALUE, largestStructIns = 0, largestStructDel = 0, structInsSum = 0, insSum = 0, delSum = 0, structDelSum = 0;
 
 		NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
@@ -217,12 +218,35 @@ public class VariantPoolSummarizer {
 				tvCount += vrs.getTvCount();
 				genoTiCount += vrs.getGenoTiCount();
 				genoTvCount += vrs.getGenoTvCount();
+				
+				indelCount += vrs.getIndelCount();
+				delCount += vrs.getDelCount();
+				insCount += vrs.getInsCount();
+				
+				insSum += vrs.getInsSum();
+				structInsSum += vrs.getStructInsSum();
+				delSum += vrs.getDelSum();
+				structDelSum += vrs.getStructDelSum();
+				
+				
+				if(smallestIns > vrs.getSmallestIns())
+					smallestIns = vrs.getSmallestIns();
+				if(smallestDel > vrs.getSmallestDel())
+					smallestDel = vrs.getSmallestDel();
+				if(largestIns < vrs.getLargestIns())
+					largestIns = vrs.getLargestIns();
+				if(largestDel < vrs.getLargestDel())
+					largestDel = vrs.getLargestDel();
+				if(smallestStructIns > vrs.getSmallestStructIns())
+					smallestStructIns = vrs.getSmallestStructIns();
+				if(smallestStructDel > vrs.getSmallestStructDel())
+					smallestStructDel = vrs.getSmallestStructDel();
+				if(largestStructIns < vrs.getLargestStructIns())
+					largestStructIns = vrs.getLargestStructIns();
+				if(largestStructDel < vrs.getLargestStructDel())
+					largestStructDel = vrs.getLargestStructDel();
+				
 
-				// Keep track of all alternates that were insertions and
-				// deletions
-				// to calculate shortest, longest, and average length
-				allInsertions.addAll(vrs.getInsertions());
-				allDeletions.addAll(vrs.getDeletions());
 
 			}
 
@@ -240,7 +264,8 @@ public class VariantPoolSummarizer {
 		return new VariantPoolSummary(recordCount, varRecordCount, sampleCount,
 				totalVarCount, snvCount, mnvCount, structIndelCount,
 				structInsCount, structDelCount, multiAltCount, tiCount,
-				tvCount, genoTiCount, genoTvCount, allInsertions, allDeletions);
+				tvCount, genoTiCount, genoTvCount, /*allInsertions, allDeletions,*/ indelCount, insCount, delCount, insSum, delSum, structInsSum, structDelSum, smallestIns, smallestDel,
+				largestIns, largestDel, smallestStructIns, smallestStructDel, largestStructIns, largestStructDel);
 	}
 
 	/**
@@ -256,6 +281,7 @@ public class VariantPoolSummarizer {
 
 		Allele ref = var.getReference();
 		List<Allele> alts = var.getAlternateAlleles();
+		
 
 		Integer snvCount = 0, mnvCount = 0, indelCount = 0, insCount = 0, delCount = 0, structIndelCount = 0, structInsCount = 0, structDelCount = 0, tiCount = 0, tvCount = 0;
 		AltType type;
@@ -274,27 +300,60 @@ public class VariantPoolSummarizer {
 				}
 			} else if (type == AltType.MNP) {
 				mnvCount++;
-			} else if (type == AltType.INSERTION) {
-				indelCount++;
-				insCount++;
-				vrs.addInsertion(alt.getBaseString());
-			} else if (type == AltType.DELETION) {
-				indelCount++;
-				delCount++;
-				vrs.addDeletion(ref.getBaseString()); // input the ref allele
-														// since that's what was
-														// deleted
 			} else if (type == AltType.STRUCTURAL_INSERTION) {
 				structIndelCount++;
 				structInsCount++;
-				vrs.addInsertion(alt.getBaseString());
+
+				int structInsLength = alt.length() - ref.length();
+
+				if(vrs.getSmallestStructIns() > structInsLength)
+					vrs.setSmallestStructIns(structInsLength);
+				if(vrs.getLargestStructIns() < structInsLength)
+					vrs.setLargestStructIns(structInsLength);
+
+				vrs.setStructInsSum(structInsLength);
+				
 			} else if (type == AltType.STRUCTURAL_DELETION) {
 				structIndelCount++;
 				structDelCount++;
-				vrs.addDeletion(ref.getBaseString()); // input the ref allele
-														// since that's what was
-														// deleted
-			}
+
+				int structDelLength = ref.length() - alt.length();
+
+				if(vrs.getSmallestStructDel() > structDelLength)
+					vrs.setSmallestStructDel(structDelLength);
+				if(vrs.getLargestStructDel() < structDelLength)
+					vrs.setLargestStructDel(structDelLength);
+
+				vrs.setStructDelSum(structDelLength);
+				
+			} else if (type == AltType.INSERTION) {
+				indelCount++;
+				insCount++;
+				
+				int insLength = alt.length() - ref.length();
+
+				if(vrs.getSmallestIns() > insLength)
+					vrs.setSmallestIns(insLength);
+				if(vrs.getLargestIns() < insLength)
+					vrs.setLargestIns(insLength);
+
+				vrs.setInsSum(insLength);
+				
+			} else if (type == AltType.DELETION) {
+				indelCount++;
+				delCount++;
+				
+				int delLength = ref.length() - alt.length();
+
+				if(vrs.getSmallestDel() > delLength)
+					vrs.setSmallestDel(delLength);
+				if(vrs.getLargestDel() < delLength)
+					vrs.setLargestDel(delLength);
+
+				vrs.setDelSum(delLength);
+				
+			
+			} 
 		}
 
 		vrs.setSnvCount(snvCount);
@@ -362,7 +421,7 @@ public class VariantPoolSummarizer {
 			// for(Allele alt : alts){
 			List<Allele> alleles = geno.getAlleles();
 			for (Allele allele : alleles) {
-				if (!allele.isReference()) {
+				if (!allele.isReference() && !allele.isNoCall()) {
 					if (iterCount == 0 || alts.contains(allele)) {
 						alts.remove(allele);
 						altGenoCount = 0;
@@ -621,34 +680,34 @@ public class VariantPoolSummarizer {
 				Integer.toString(vps.getNumMNVs()));
 		System.out.format(s + newLine);
 		System.out.format(rightalignFormati, "INDELs:    ",
-				Integer.toString(vps.getNumIndels()));
+				Integer.toString(vps.getIndelCount()));
 		System.out.format(rightalignFormati, "INS:",
-				Integer.toString(vps.getNumInsertions()));
+				Integer.toString(vps.getInsCount()));
 		System.out.format(rightalignFormati, "DEL:",
-				Integer.toString(vps.getNumDeletions()));
+				Integer.toString(vps.getDelCount()));
 
 		System.out.format(rightalignFormati, "Sizes:    ", "");
-		if (vps.getNumInsertions() > 0) {
+		if (vps.getInsCount() > 0) {
 			System.out
 					.format(rightalignFormati, "smallINS:", UtilityBelt
-							.roundDoubleToString(vps.getSmallestInsertion()));
+							.roundDoubleToString(vps.getSmallestIns()));
 			System.out.format(rightalignFormati, "largeINS:",
-					UtilityBelt.roundDoubleToString(vps.getLargestInsertion()));
+					UtilityBelt.roundDoubleToString(vps.getLargestIns()));
 			System.out.format(rightalignFormati, "avgINS:",
-					UtilityBelt.roundDoubleToString(vps.getAvgInsertionSize()));
+					UtilityBelt.roundDoubleToString(vps.getAvgIns()));
 		} else {
 			System.out.format(rightalignFormati, "smallINS:", "NaN");
 			System.out.format(rightalignFormati, "largeINS:", "NaN");
 			System.out.format(rightalignFormati, "avgINS:", "NaN");
 		}
 
-		if (vps.getNumDeletions() > 0) {
+		if (vps.getDelCount() > 0) {
 			System.out.format(rightalignFormati, "smallDEL:",
-					UtilityBelt.roundDoubleToString(vps.getSmallestDeletion()));
+					UtilityBelt.roundDoubleToString(vps.getSmallestDel()));
 			System.out.format(rightalignFormati, "largeDEL:",
-					UtilityBelt.roundDoubleToString(vps.getLargestDeletion()));
+					UtilityBelt.roundDoubleToString(vps.getLargestDel()));
 			System.out.format(rightalignFormati, "avgDEL:",
-					UtilityBelt.roundDoubleToString(vps.getAvgDeletionSize()));
+					UtilityBelt.roundDoubleToString(vps.getAvgDel()));
 		} else {
 			System.out.format(rightalignFormati, "smallDEL:", "NaN");
 			System.out.format(rightalignFormati, "largeDEL:", "NaN");
@@ -661,6 +720,33 @@ public class VariantPoolSummarizer {
 				Integer.toString(vps.getNumStructIns()));
 		System.out.format(rightalignFormati, "StructDEL:",
 				Integer.toString(vps.getNumStructDels()));
+		System.out.format(rightalignFormati, "Sizes:    ", "");
+		if(vps.getNumStructIns() > 0){
+			System.out.format(rightalignFormati, "smallStructINS:",
+				Integer.toString(vps.getSmallestStructIns()));
+			System.out.format(rightalignFormati, "largeStructINS:",
+				Integer.toString(vps.getLargestStructIns()));
+			System.out.format(rightalignFormati, "avgStructINS:",
+				UtilityBelt.roundDoubleToString(vps.getAvgStructIns()));
+		}
+		else{
+			System.out.format(rightalignFormati, "smallStructINS:", "NaN");
+			System.out.format(rightalignFormati, "largeStructINS:", "NaN");
+			System.out.format(rightalignFormati, "avgStructINS:", "NaN");
+		}
+		if(vps.getAvgStructDel() > 0){
+			System.out.format(rightalignFormati, "smallStructDEL:",
+				Integer.toString(vps.getSmallestStructDel()));
+			System.out.format(rightalignFormati, "largeStructDEL:",
+				Integer.toString(vps.getLargestStructDel()));
+			System.out.format(rightalignFormati, "avgStructDEL:",
+				UtilityBelt.roundDoubleToString(vps.getAvgStructDel()));
+		}
+		else{
+			System.out.format(rightalignFormati, "smallStructDEL:", "NaN");
+			System.out.format(rightalignFormati, "largeStructDEL:", "NaN");
+			System.out.format(rightalignFormati, "avgStructDEL:", "NaN");
+		}
 		System.out.format(s + newLine);
 		System.out.format(leftalignFormatint, "MultiAlts:",
 				vps.getNumMultiAlts());
@@ -795,41 +881,41 @@ public class VariantPoolSummarizer {
 
 		for (int i = 0; i < size; i++)
 			System.out.format(rightalignFormati, "INDELs:    ", Integer
-					.toString(Summaries.get(filenames[i]).getNumIndels()));
+					.toString(Summaries.get(filenames[i]).getIndelCount()));
 
 		System.out.format(newLine);
 
 		for (int i = 0; i < size; i++)
 			System.out.format(rightalignFormati, "INS:", Integer
-					.toString(Summaries.get(filenames[i]).getNumInsertions()));
+					.toString(Summaries.get(filenames[i]).getInsCount()));
 
 		System.out.format(newLine);
 
 		for (int i = 0; i < size; i++)
 			System.out.format(rightalignFormati, "DEL:", Integer
-					.toString(Summaries.get(filenames[i]).getNumDeletions()));
+					.toString(Summaries.get(filenames[i]).getDelCount()));
 
 		System.out.format(newLine);
 
 		for (int i = 0; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumInsertions() > 0)
+			if (Summaries.get(filenames[i]).getInsCount() > 0)
 				System.out.format(
 						rightalignFormati,
 						"smallINS:",
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getSmallestInsertion()));
+								filenames[i]).getSmallestIns()));
 			else
 				System.out.format(rightalignFormati, "smallINS:", "NaN");
 		}
 		System.out.format(newLine);
 
 		for (int i = 0; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumInsertions() > 0)
+			if (Summaries.get(filenames[i]).getInsCount() > 0)
 				System.out.format(
 						rightalignFormati,
 						"largeINS:",
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getLargestInsertion()));
+								filenames[i]).getLargestIns()));
 			else
 				System.out.format(rightalignFormati, "largeINS:", "NaN");
 		}
@@ -837,12 +923,12 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 
 		for (int i = 0; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumInsertions() > 0)
+			if (Summaries.get(filenames[i]).getInsCount() > 0)
 				System.out.format(
 						rightalignFormati,
 						"avgINS:",
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getAvgInsertionSize()));
+								filenames[i]).getAvgIns()));
 			else
 				System.out.format(rightalignFormati, "avgINS:", "NaN");
 
@@ -850,12 +936,12 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 
 		for (int i = 0; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumDeletions() > 0)
+			if (Summaries.get(filenames[i]).getDelCount() > 0)
 				System.out.format(
 						rightalignFormati,
 						"smallDEL:",
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getSmallestDeletion()));
+								filenames[i]).getSmallestDel()));
 			else
 				System.out.format(rightalignFormati, "smallDEL:", "NaN");
 
@@ -863,12 +949,12 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 
 		for (int i = 0; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumDeletions() > 0)
+			if (Summaries.get(filenames[i]).getDelCount() > 0)
 				System.out.format(
 						rightalignFormati,
 						"largeDEL:",
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getLargestDeletion()));
+								filenames[i]).getLargestDel()));
 			else
 				System.out.format(rightalignFormati, "largeDEL:", "NaN");
 
@@ -876,12 +962,12 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 
 		for (int i = 0; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumDeletions() > 0)
+			if (Summaries.get(filenames[i]).getDelCount() > 0)
 				System.out.format(
 						rightalignFormati,
 						"avgDEL:",
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getAvgDeletionSize()));
+								filenames[i]).getAvgDel()));
 			else
 				System.out.format(rightalignFormati, "avgDEL:", "NaN");
 		}
@@ -1060,46 +1146,46 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 
 		System.out.format(rightalignFormati, "INDELs:    ",
-				Integer.toString(Summaries.get(filenames[0]).getNumIndels()));
+				Integer.toString(Summaries.get(filenames[0]).getIndelCount()));
 		for (int i = 1; i < size; i++)
 			System.out.format(r_string_align, Integer.toString(Summaries.get(
-					filenames[i]).getNumIndels()));
+					filenames[i]).getIndelCount()));
 
 		System.out.format(bar);
 		System.out.format(newLine);
 
 		System.out.format(rightalignFormati, "INS:", Integer.toString(Summaries
-				.get(filenames[0]).getNumInsertions()));
+				.get(filenames[0]).getInsCount()));
 		for (int i = 1; i < size; i++)
 			System.out.format(r_string_align, Integer.toString(Summaries.get(
-					filenames[i]).getNumInsertions()));
+					filenames[i]).getInsCount()));
 
 		System.out.format(bar);
 		System.out.format(newLine);
 
 		System.out
 				.format(rightalignFormati, "DEL:", Integer.toString(Summaries
-						.get(filenames[0]).getNumDeletions()));
+						.get(filenames[0]).getDelCount()));
 		for (int i = 1; i < size; i++)
 			System.out.format(r_string_align, Integer.toString(Summaries.get(
-					filenames[i]).getNumDeletions()));
+					filenames[i]).getDelCount()));
 
 		System.out.format(bar);
 		System.out.format(newLine);
 
-		if (Summaries.get(filenames[0]).getNumInsertions() > 0)
+		if (Summaries.get(filenames[0]).getInsCount() > 0)
 			System.out.format(rightalignFormati, "smallINS:", UtilityBelt
 					.roundDoubleToString(Summaries.get(filenames[0])
-							.getSmallestInsertion()));
+							.getSmallestIns()));
 		else
 			System.out.format(rightalignFormati, "smallINS:", "NaN");
 
 		for (int i = 1; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumInsertions() > 0)
+			if (Summaries.get(filenames[i]).getInsCount() > 0)
 				System.out.format(
 						r_string_align,
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getSmallestInsertion()));
+								filenames[i]).getSmallestIns()));
 			else
 				System.out.format(r_string_align, "NaN");
 		}
@@ -1107,18 +1193,18 @@ public class VariantPoolSummarizer {
 		System.out.format(bar);
 		System.out.format(newLine);
 
-		if (Summaries.get(filenames[0]).getNumInsertions() > 0)
+		if (Summaries.get(filenames[0]).getInsCount() > 0)
 			System.out.format(rightalignFormati, "largeINS:", UtilityBelt
 					.roundDoubleToString(Summaries.get(filenames[0])
-							.getLargestInsertion()));
+							.getLargestIns()));
 		else
 			System.out.format(rightalignFormati, "largeINS:", "NaN");
 		for (int i = 1; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumInsertions() > 0)
+			if (Summaries.get(filenames[i]).getInsCount() > 0)
 				System.out.format(
 						r_string_align,
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getLargestInsertion()));
+								filenames[i]).getLargestIns()));
 			else
 				System.out.format(r_string_align, "NaN");
 		}
@@ -1126,19 +1212,19 @@ public class VariantPoolSummarizer {
 		System.out.format(bar);
 		System.out.format(newLine);
 
-		if (Summaries.get(filenames[0]).getNumInsertions() > 0)
+		if (Summaries.get(filenames[0]).getInsCount() > 0)
 			System.out.format(rightalignFormati, "avgINS:", UtilityBelt
 					.roundDoubleToString(Summaries.get(filenames[0])
-							.getAvgInsertionSize()));
+							.getAvgIns()));
 		else
 			System.out.format(rightalignFormati, "avgINS:", "NaN");
 
 		for (int i = 1; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumInsertions() > 0)
+			if (Summaries.get(filenames[i]).getInsCount() > 0)
 				System.out.format(
 						r_string_align,
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getAvgInsertionSize()));
+								filenames[i]).getAvgIns()));
 			else
 				System.out.format(r_string_align, "NaN");
 		}
@@ -1146,18 +1232,18 @@ public class VariantPoolSummarizer {
 		System.out.format(bar);
 		System.out.format(newLine);
 
-		if (Summaries.get(filenames[0]).getNumDeletions() > 0)
+		if (Summaries.get(filenames[0]).getDelCount() > 0)
 			System.out.format(rightalignFormati, "smallDEL:", UtilityBelt
 					.roundDoubleToString(Summaries.get(filenames[0])
-							.getSmallestDeletion()));
+							.getSmallestDel()));
 		else
 			System.out.format(rightalignFormati, "smallDEL:", "NaN");
 		for (int i = 1; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumDeletions() > 0)
+			if (Summaries.get(filenames[i]).getDelCount() > 0)
 				System.out.format(
 						r_string_align,
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getSmallestDeletion()));
+								filenames[i]).getSmallestDel()));
 			else
 				System.out.format(r_string_align, "NaN");
 		}
@@ -1165,19 +1251,19 @@ public class VariantPoolSummarizer {
 		System.out.format(bar);
 		System.out.format(newLine);
 
-		if (Summaries.get(filenames[0]).getNumDeletions() > 0)
+		if (Summaries.get(filenames[0]).getDelCount() > 0)
 			System.out.format(rightalignFormati, "largeDEL:", UtilityBelt
 					.roundDoubleToString(Summaries.get(filenames[0])
-							.getLargestDeletion()));
+							.getLargestDel()));
 		else
 			System.out.format(rightalignFormati, "largeDEL:", "NaN");
 
 		for (int i = 1; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumDeletions() > 0)
+			if (Summaries.get(filenames[i]).getDelCount() > 0)
 				System.out.format(
 						r_string_align,
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getLargestDeletion()));
+								filenames[i]).getLargestDel()));
 			else
 				System.out.format(r_string_align, "NaN");
 		}
@@ -1185,19 +1271,19 @@ public class VariantPoolSummarizer {
 		System.out.format(bar);
 		System.out.format(newLine);
 
-		if (Summaries.get(filenames[0]).getNumDeletions() > 0)
+		if (Summaries.get(filenames[0]).getDelCount() > 0)
 			System.out.format(rightalignFormati, "avgDEL:", UtilityBelt
 					.roundDoubleToString(Summaries.get(filenames[0])
-							.getAvgDeletionSize()));
+							.getAvgDel()));
 		else
 			System.out.format(rightalignFormati, "avgDEL:", "NaN");
 
 		for (int i = 1; i < size; i++) {
-			if (Summaries.get(filenames[i]).getNumDeletions() > 0)
+			if (Summaries.get(filenames[i]).getDelCount() > 0)
 				System.out.format(
 						r_string_align,
 						UtilityBelt.roundDoubleToString(Summaries.get(
-								filenames[i]).getAvgDeletionSize()));
+								filenames[i]).getAvgDel()));
 			else
 				System.out.format(r_string_align, "NaN");
 		}

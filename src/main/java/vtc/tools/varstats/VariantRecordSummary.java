@@ -25,7 +25,6 @@ public class VariantRecordSummary {
 	private int position;
 	private Allele ref;
 	private TreeSet<Allele> alts;
-	private TreeSet<String> insertions, deletions;
 	private int snvCount, mnvCount, indelCount, insCount,
 		delCount, structIndelCount, structInsCount,
 		structDelCount, tiCount, tvCount, genoTiCount,
@@ -35,6 +34,22 @@ public class VariantRecordSummary {
 	private HashMap<Allele, Integer> altGenotypeCounts, altSampleCounts,
 		hetSampleCounts, homoVarSampleCounts;
 	private Depth depth;
+	private int smallestIns;
+	private int largestIns;
+	private int smallestStructIns;
+	private int largestStructIns;
+	private int smallestDel;
+	private int largestDel;
+	private int smallestStructDel;
+	private int largestStructDel;
+	private int structInsSum;
+	private int insSum;
+	private int structDelSum;
+	private int delSum;
+	
+
+	
+
 	
 
 	/**
@@ -85,9 +100,21 @@ public class VariantRecordSummary {
 	}
 	
 	private void init(){
-		this.insertions = new TreeSet<String>();
-		this.deletions = new TreeSet<String>();
+		this.smallestIns = Integer.MAX_VALUE;
+		this.smallestDel = Integer.MAX_VALUE;
+		this.smallestStructIns = Integer.MAX_VALUE;
+		this.smallestStructDel = Integer.MAX_VALUE;
+		this.largestIns = 0;
+		this.largestDel = 0;
+		this.largestStructIns = 0;
+		this.largestStructDel = 0;
+		this.structInsSum = 0;
+		this.insSum = 0;
+		this.structDelSum = 0;
+		this.delSum = 0;	
 	}
+
+
 
 	/**
 	 * @return the chr
@@ -485,69 +512,177 @@ public class VariantRecordSummary {
 		this.depth = depth;
 	}
 	
-	public TreeSet<String> getInsertions(){
-		return this.insertions;
+	/**
+	 * @return the smallestIns
+	 */
+	public int getSmallestIns() {
+		return smallestIns;
 	}
-	
-	public void addInsertion(String insertion){
-		this.insertions.add(insertion);
+
+	/**
+	 * @param smallestIns the smallestIns to set
+	 */
+	public void setSmallestIns(int smallestIns) {
+		this.smallestIns = smallestIns;
+	}
+
+	/**
+	 * @return the largestIns
+	 */
+	public int getLargestIns() {
+		return largestIns;
+	}
+
+	/**
+	 * @param largestIns the largestIns to set
+	 */
+	public void setLargestIns(int largestIns) {
+		this.largestIns = largestIns;
+	}
+
+	/**
+	 * @return the smallestStructIns
+	 */
+	public int getSmallestStructIns() {
+		return smallestStructIns;
+	}
+
+	/**
+	 * @param smallestStructIns the smallestStructIns to set
+	 */
+	public void setSmallestStructIns(int smallestStructIns) {
+		this.smallestStructIns = smallestStructIns;
+	}
+
+	/**
+	 * @return the largestStructIns
+	 */
+	public int getLargestStructIns() {
+		return largestStructIns;
+	}
+
+	/**
+	 * @param largestStructIns the largestStructIns to set
+	 */
+	public void setLargestStructIns(int largestStructIns) {
+		this.largestStructIns = largestStructIns;
+	}
+
+	/**
+	 * @return the smallestDel
+	 */
+	public int getSmallestDel() {
+		return smallestDel;
+	}
+
+	/**
+	 * @param smallestDel the smallestDel to set
+	 */
+	public void setSmallestDel(int smallestDel) {
+		this.smallestDel = smallestDel;
+	}
+
+	/**
+	 * @return the largestDel
+	 */
+	public int getLargestDel() {
+		return largestDel;
+	}
+
+	/**
+	 * @param largestDel the largestDel to set
+	 */
+	public void setLargestDel(int largestDel) {
+		this.largestDel = largestDel;
+	}
+
+	/**
+	 * @return the smallestStructDel
+	 */
+	public int getSmallestStructDel() {
+		return smallestStructDel;
+	}
+
+	/**
+	 * @param smallestStructDel the smallestStructDel to set
+	 */
+	public void setSmallestStructDel(int smallestStructDel) {
+		this.smallestStructDel = smallestStructDel;
+	}
+
+	/**
+	 * @return the largestStrucDel
+	 */
+	public int getLargestStructDel() {
+		return largestStructDel;
+	}
+
+	/**
+	 * @param largestStrucDel the largestStrucDel to set
+	 */
+	public void setLargestStructDel(int largestStrucDel) {
+		this.largestStructDel = largestStrucDel;
 	}
 	
 	/**
-	 * Get the smallest insertion length
-	 * @return
+	 * @return the structInsSum
 	 */
-	public int getSmallestInsertionLength(){
-		return UtilityBelt.getSmallestLength(this.insertions);
+	public int getStructInsSum() {
+		return structInsSum;
 	}
-	
+
 	/**
-	 * Get the largest insertion length
-	 * @return
+	 * @param structInsSum the structInsSum to set
 	 */
-	public int getLargestInsertionLength(){
-		return UtilityBelt.getLargestLength(this.insertions);
+	public void setStructInsSum(int structInsSum) {
+		this.structInsSum += structInsSum;
 	}
-	
+
 	/**
-	 * Get the average insertion length
-	 * @return
+	 * @return the insSum
 	 */
-	public double getAverageInsertionLength(){
-		return UtilityBelt.getAverageLength(this.insertions);
+	public int getInsSum() {
+		return insSum;
 	}
-	
-	public TreeSet<String> getDeletions(){
-		return this.deletions;
-	}
-	
-	public void addDeletion(String deletion){
-		this.deletions.add(deletion);
-	}
-	
-		/**
-	 * Get the smallest deletion length
-	 * @return
-	 */
-	public int getSmallestDeletionLength(){
-		return UtilityBelt.getSmallestLength(this.deletions);
-	}
-	
+
 	/**
-	 * Get the largest deletion length
-	 * @return
+	 * @param insSum the insSum to set
 	 */
-	public int getLargestDeletionLength(){
-		return UtilityBelt.getLargestLength(this.deletions);
+	public void setInsSum(int insSum) {
+		this.insSum += insSum;
+	}
+
+	/**
+	 * @return the structDelSum
+	 */
+	public int getStructDelSum() {
+		return structDelSum;
+	}
+
+	/**
+	 * @param structDelSum the structDelSum to set
+	 */
+	public void setStructDelSum(int structDelSum) {
+		this.structDelSum += structDelSum;
+	}
+
+	/**
+	 * @return the delSum
+	 */
+	public int getDelSum() {
+		return delSum;
+	}
+
+	/**
+	 * @param delSum the delSum to set
+	 */
+	public void setDelSum(int delSum) {
+		this.delSum += delSum;
 	}
 	
-	/**
-	 * Get average deletion length
-	 * @return
-	 */
-	public double getAverageDeletionLength(){
-		return UtilityBelt.getAverageLength(this.deletions);
-	}
+	
+	
+	
 	
 	/**
 	 * @return the nSamples

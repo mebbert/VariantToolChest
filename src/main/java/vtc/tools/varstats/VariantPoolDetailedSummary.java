@@ -52,11 +52,10 @@ public class VariantPoolDetailedSummary extends VariantPoolSummary {
 			int numSNVs, int numMNVs, int numStructVars, int numStructIns,
 			int numStructDels, int numMultiAlts, double tiCount,
 			double tvCount, double tiTv, double genoTiCount,
-			double genoTvCount, double genoTiTv, TreeSet<String> allInsertions,
-			TreeSet<String> allDeletions) {
+			double genoTvCount, double genoTiTv) {
 		super(numRecords, numVarRecords, numSamples, numVars, numSNVs, numMNVs, numStructVars, numStructIns,
-				numStructDels, numMultiAlts, tiCount, tvCount, genoTiCount, genoTvCount,
-				allInsertions, allDeletions);
+				numStructDels, numMultiAlts, tiCount, tvCount, genoTiCount, genoTvCount/*,
+				allInsertions, allDeletions*/);
 		init();
 	}
 
@@ -66,8 +65,10 @@ public class VariantPoolDetailedSummary extends VariantPoolSummary {
 	public VariantPoolDetailedSummary(VariantPoolSummary vps) {
 		super(vps.getNumRecords(), vps.getNumVarRecords(), vps.getNumSamples(), vps.getNumVars(), vps.getNumSNVs(), vps.getNumMNVs(),
 				vps.getNumStructVars(), vps.getNumStructIns(), vps.getNumStructDels(), vps.getNumMultiAlts(),
-				vps.getTiCount(), vps.getTvCount(), vps.getGenoTiCount(), vps.getGenoTvCount(),
-				vps.getAllInsertions(), vps.getAllDeletions());
+				vps.getTiCount(), vps.getTvCount(), vps.getGenoTiCount(), vps.getGenoTvCount(), vps.getIndelCount(), vps.getInsCount(), vps.getDelCount(),vps.getInsSum(),
+				vps.getDelSum(), vps.getStructInsSum(), vps.getStructDelSum(), vps.getSmallestIns(), vps.getSmallestDel(),
+				vps.getLargestIns(), vps.getLargestDel(), vps.getSmallestStructIns(), vps.getSmallestStructDel(),
+				vps.getLargestStructIns(), vps.getLargestStructDel());
 		init();
 	}
 	

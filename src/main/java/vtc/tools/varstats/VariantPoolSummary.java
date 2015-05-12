@@ -30,8 +30,11 @@ public class VariantPoolSummary {
 	private double tvCount;
 	private double genoTiCount;
 	private double genoTvCount;
-	TreeSet<String> allInsertions, allDeletions;
-	
+	private int indelCount;
+	private int insCount;
+	private int delCount;
+	private int insSum, delSum, structDelSum, structInsSum;
+	private int smallestIns, smallestDel, largestIns, largestDel, smallestStructIns, smallestStructDel, largestStructDel, largestStructIns;
 	
 	/**
 	 * @param numVars
@@ -56,8 +59,7 @@ public class VariantPoolSummary {
 	 */
 	public VariantPoolSummary(int numRecords, int numVarRecords, int numSamples, int numVars, int numSNVs, int numMNVs,
 			int numStructVars, int numStructIns, int numStructDels, int numMultiAlts,
-			double tiCount, double tvCount, double genoTiCount, double genoTvCount,
-			TreeSet<String> allInsertions, TreeSet<String> allDeletions) {
+			double tiCount, double tvCount, double genoTiCount, double genoTvCount) {
 		this.numRecords = numRecords;
 		this.numSamples = numSamples;
 		this.numVarRecords = numVarRecords;
@@ -72,8 +74,9 @@ public class VariantPoolSummary {
 		this.tvCount = tvCount;
 		this.genoTiCount = genoTiCount;
 		this.genoTvCount = genoTvCount;
-		this.allInsertions = allInsertions;
-		this.allDeletions = allDeletions;
+		this.indelCount = 0;
+		this.insCount = 0;
+		this.delCount = 0;
 	}
 	
 	
@@ -93,11 +96,96 @@ public class VariantPoolSummary {
 		tvCount = 0;
 		genoTiCount = 0;
 		genoTvCount = 0;
-		this.allInsertions = new TreeSet<String>();
-		this.allDeletions = new TreeSet<String>();
+		this.indelCount = 0;
+		this.insCount = 0;
+		this.delCount = 0;
 	}
 	
 	
+
+
+
+	public VariantPoolSummary(int recordCount, int varRecordCount,
+			int sampleCount, int totalVarCount, int snvCount, int mnvCount,
+			int structIndelCount, int structInsCount, int structDelCount,
+			int multiAltCount, double tiCount2, double tvCount2, double genoTiCount2,
+			double genoTvCount2, int indelCount, int insCount,
+			int delCount) {
+		
+		this.numRecords = recordCount;
+		this.numSamples = sampleCount;
+		this.numVarRecords = varRecordCount;
+		this.numVars = totalVarCount;
+		this.numSNVs = snvCount;
+		this.numMNVs = mnvCount;
+		this.numStructVars = structIndelCount;
+		this.numStructIns = structInsCount;
+		this.numStructDels = structDelCount;
+		this.numMultiAlts = multiAltCount;
+		this.tiCount = tiCount2;
+		this.tvCount = tvCount2;
+		this.genoTiCount = genoTiCount2;
+		this.genoTvCount = genoTvCount2;
+		this.indelCount = indelCount;
+		this.insCount = insCount;
+		this.delCount = delCount;
+	}
+	
+	
+
+
+
+
+	public VariantPoolSummary(int recordCount, int varRecordCount,
+			int sampleCount, int totalVarCount, int snvCount, int mnvCount,
+			int structIndelCount, int structInsCount, int structDelCount,
+			int multiAltCount, double tiCount2, double tvCount2, double genoTiCount2,
+			double genoTvCount2, int indelCount2, int insCount2,
+			int delCount2, int insSum, int delSum, int structInsSum, int structDelSum,
+			int smallestIns, int smallestDel, int largestIns, int largestDel,
+			int smallestStructIns, int smallestStructDel, int largestStructIns,
+			int largestStructDel) {
+		
+		this.numRecords = recordCount;
+		this.numSamples = sampleCount;
+		this.numVarRecords = varRecordCount;
+		this.numVars = totalVarCount;
+		this.numSNVs = snvCount;
+		this.numMNVs = mnvCount;
+		this.numStructVars = structIndelCount;
+		this.numStructIns = structInsCount;
+		this.numStructDels = structDelCount;
+		this.numMultiAlts = multiAltCount;
+		this.tiCount = tiCount2;
+		this.tvCount = tvCount2;
+		this.genoTiCount = genoTiCount2;
+		this.genoTvCount = genoTvCount2;
+		this.indelCount = indelCount2;
+		this.insCount = insCount2;
+		this.delCount = delCount2;
+		this.insSum = insSum;
+		this.delSum = delSum;
+		this.structDelSum = structDelSum;
+		this.structInsSum = structInsSum;
+		this.smallestDel = smallestDel;
+		this.smallestIns = smallestIns;
+		this.largestDel = largestDel;
+		this.largestIns = largestIns;
+		this.largestStructDel = largestStructDel;
+		this.largestStructIns = largestStructIns;
+		this.smallestStructDel = smallestStructDel;
+		this.smallestStructIns = smallestStructIns;
+		
+	}
+
+
+
+
+	
+
+
+
+
 	/**
 	 * @return the numSamples
 	 */
@@ -180,27 +268,6 @@ public class VariantPoolSummary {
 	}
 
 	/**
-	 * @return the numIndels
-	 */
-	public int getNumIndels() {
-		return this.allDeletions.size() + this.allInsertions.size();
-	}
-
-	/**
-	 * @return the numInsertions
-	 */
-	public int getNumInsertions() {
-		return this.allInsertions.size();
-	}
-
-	/**
-	 * @return the numDeletions
-	 */
-	public int getNumDeletions() {
-		return this.allDeletions.size();
-	}
-	
-	/**
 	 * @return the numHets
 	 */
 	public int getNumHets() {
@@ -228,48 +295,8 @@ public class VariantPoolSummary {
 		this.numHomos = numHomos;
 	}
 
-	/**
-	 * @return the smallestInsertion
-	 */
-	public int getSmallestInsertion() {
-		return UtilityBelt.getSmallestLength(this.allInsertions);
-	}
-
-	/**
-	 * @return the largestInsertion
-	 */
-	public int getLargestInsertion() {
-		return UtilityBelt.getLargestLength(this.allInsertions);
-	}
-
-	/**
-	 * @return the avgInsertionSize
-	 */
-	public double getAvgInsertionSize() {
-		return UtilityBelt.getAverageLength(this.allInsertions);
-	}
-
-	/**
-	 * @return the smallestDeletion
-	 */
-	public int getSmallestDeletion() {
-		return UtilityBelt.getSmallestLength(this.allDeletions);
-	}
-
-	/**
-	 * @return the largestDeletion
-	 */
-	public int getLargestDeletion() {
-		return UtilityBelt.getLargestLength(this.allDeletions);
-	}
-
-	/**
-	 * @return the avgDeletionSize
-	 */
-	public double getAvgDeletionSize() {
-		return UtilityBelt.getAverageLength(this.allDeletions);
-	}
-
+	
+	
 	/**
 	 * @return the numStructVars
 	 */
@@ -404,50 +431,224 @@ public class VariantPoolSummary {
 	}
 	
 	/**
-	 * @return the allInsertions
+	 * @return the indelCount
 	 */
-	public TreeSet<String> getAllInsertions() {
-		return allInsertions;
+	public int getIndelCount() {
+		return indelCount;
 	}
 
 	/**
-	 * @param allInsertions the allInsertions to set
+	 * @param indelCount the indelCount to set
 	 */
-	public void setAllInsertions(TreeSet<String> allInsertions) {
-		this.allInsertions = allInsertions;
+	public void setIndelCount(int indelCount) {
+		this.indelCount = indelCount;
+	}
+
+	/**
+	 * @return the insCount
+	 */
+	public int getInsCount() {
+		return insCount;
+	}
+
+	/**
+	 * @param insCount the insCount to set
+	 */
+	public void setInsCount(int insCount) {
+		this.insCount = insCount;
+	}
+
+	/**
+	 * @return the delCount
+	 */
+	public int getDelCount() {
+		return delCount;
+	}
+
+	/**
+	 * @param delCount the delCount to set
+	 */
+	public void setDelCount(int delCount) {
+		this.delCount = delCount;
+	}
+
+	/**
+	 * @return the insSum
+	 */
+	public int getInsSum() {
+		return insSum;
+	}
+
+	/**
+	 * @param insSum the insSum to set
+	 */
+	public void setInsSum(int insSum) {
+		this.insSum = insSum;
+	}
+
+	/**
+	 * @return the delSum
+	 */
+	public int getDelSum() {
+		return delSum;
+	}
+
+	/**
+	 * @param delSum the delSum to set
+	 */
+	public void setDelSum(int delSum) {
+		this.delSum = delSum;
+	}
+
+	/**
+	 * @return the structDelSum
+	 */
+	public int getStructDelSum() {
+		return structDelSum;
+	}
+
+	/**
+	 * @param structDelSum the structDelSum to set
+	 */
+	public void setStructDelSum(int structDelSum) {
+		this.structDelSum = structDelSum;
+	}
+
+	/**
+	 * @return the structInsSum
+	 */
+	public int getStructInsSum() {
+		return structInsSum;
+	}
+
+	/**
+	 * @param structInsSum the structInsSum to set
+	 */
+	public void setStructInsSum(int structInsSum) {
+		this.structInsSum = structInsSum;
+	}
+
+	/**
+	 * @return the smallestIns
+	 */
+	public int getSmallestIns() {
+		if(this.smallestIns!=Integer.MAX_VALUE)
+			return smallestIns;
+		return 0;
+	}
+
+	/**
+	 * @param smallestIns the smallestIns to set
+	 */
+	public void setSmallestIns(int smallestIns) {
+		this.smallestIns = smallestIns;
+	}
+
+	/**
+	 * @return the smallestDel
+	 */
+	public int getSmallestDel() {
+		if(this.smallestDel!=Integer.MAX_VALUE)
+			return smallestDel;
+		return 0;
+	}
+
+	/**
+	 * @param smallestDel the smallestDel to set
+	 */
+	public void setSmallestDel(int smallestDel) {
+		this.smallestDel = smallestDel;
+	}
+
+	/**
+	 * @return the largestIns
+	 */
+	public int getLargestIns() {
+		return largestIns;
+	}
+
+	/**
+	 * @param largestIns the largestIns to set
+	 */
+	public void setLargestIns(int largestIns) {
+		this.largestIns = largestIns;
+	}
+
+	/**
+	 * @return the largestDel
+	 */
+	public int getLargestDel() {
+		return largestDel;
+	}
+
+	/**
+	 * @param largestDel the largestDel to set
+	 */
+	public void setLargestDel(int largestDel) {
+		this.largestDel = largestDel;
+	}
+
+	/**
+	 * @return the smallestStructIns
+	 */
+	public int getSmallestStructIns() {
+		if(this.smallestStructIns!=Integer.MAX_VALUE)
+			return smallestStructIns;
+		return 0;
+	}
+
+	/**
+	 * @param smallestStructIns the smallestStructIns to set
+	 */
+	public void setSmallestStructIns(int smallestStructIns) {
+		this.smallestStructIns = smallestStructIns;
+	}
+
+	/**
+	 * @return the smallestStructDel
+	 */
+	public int getSmallestStructDel() {
+		if(this.smallestStructDel!=Integer.MAX_VALUE)
+			return smallestStructDel;
+		return 0;
+	}
+
+	/**
+	 * @param smallestStructDel the smallestStructDel to set
+	 */
+	public void setSmallestStructDel(int smallestStructDel) {
+		this.smallestStructDel = smallestStructDel;
+	}
+
+	/**
+	 * @return the largestStructDel
+	 */
+	public int getLargestStructDel() {
+		return largestStructDel;
+	}
+
+	/**
+	 * @param largestStructDel the largestStructDel to set
+	 */
+	public void setLargestStructDel(int largestStructDel) {
+		this.largestStructDel = largestStructDel;
+	}
+
+	/**
+	 * @return the largestStructIns
+	 */
+	public int getLargestStructIns() {
+		return largestStructIns;
+	}
+
+	/**
+	 * @param largestStructIns the largestStructIns to set
+	 */
+	public void setLargestStructIns(int largestStructIns) {
+		this.largestStructIns = largestStructIns;
 	}
 	
-	/**
-	 * @param newInsertions
-	 */
-	public void addInsertions(TreeSet<String> newInsertions){
-		if(newInsertions != null){
-            this.allInsertions.addAll(newInsertions);
-		}
-	}
 
-	/**
-	 * @return the allDeletions
-	 */
-	public TreeSet<String> getAllDeletions() {
-		return allDeletions;
-	}
-
-	/**
-	 * @param allDeletions the allDeletions to set
-	 */
-	public void setAllDeletions(TreeSet<String> allDeletions) {
-		this.allDeletions = allDeletions;
-	}
-	
-	/**
-	 * @param newDeletions
-	 */
-	public void addDeletions(TreeSet<String> newDeletions){
-		if(newDeletions != null){
-            this.allDeletions.addAll(newDeletions);
-		}
-	}
 
 	/**
 	 * Add two VariantPoolSummaryObjects together
@@ -464,11 +665,7 @@ public class VariantPoolSummary {
         newVPS.setNumSNVs(vps1.getNumSNVs() + vps2.getNumSNVs());
         newVPS.setNumMNVs(vps1.getNumMNVs() + vps2.getNumMNVs());	
         
-        /* give newVPS all insertions and deletions from both VariantPoolSummary objects */
-        newVPS.setAllDeletions(vps1.getAllDeletions());
-        newVPS.addDeletions(vps2.getAllDeletions());
-        newVPS.setAllInsertions(vps1.getAllInsertions());
-        newVPS.addInsertions(vps2.getAllInsertions());
+        
         
         newVPS.setNumStructVars(vps1.getNumStructVars() + vps2.getNumStructVars());
         newVPS.setNumStructIns(vps1.getNumStructIns() + vps2.getNumStructIns());
@@ -495,15 +692,15 @@ public class VariantPoolSummary {
 		values.add(Integer.toString(this.getNumVars()));
 		values.add(Integer.toString(this.getNumSNVs()));
 		values.add(Integer.toString(this.getNumMNVs()));
-		values.add(Integer.toString(this.getNumIndels()));
-		values.add(Integer.toString(this.getNumInsertions()));
-		values.add(Integer.toString(this.getNumDeletions()));
-		values.add(Integer.toString(this.getSmallestInsertion()));
-		values.add(Integer.toString(this.getLargestInsertion()));
-		values.add(UtilityBelt.roundDoubleToString((this.getAvgInsertionSize())));
-		values.add(Integer.toString(this.getSmallestDeletion()));
-		values.add(Integer.toString(this.getLargestDeletion()));
-		values.add(UtilityBelt.roundDoubleToString((this.getAvgDeletionSize())));
+		values.add(Integer.toString(this.getIndelCount()));
+		values.add(Integer.toString(this.getInsCount()));
+		values.add(Integer.toString(this.getDelCount()));
+		values.add(Integer.toString(this.getSmallestIns()));
+		values.add(Integer.toString(this.getLargestIns()));
+		values.add(UtilityBelt.roundDoubleToString((this.getAvgIns())));
+		values.add(Integer.toString(this.getSmallestDel()));
+		values.add(Integer.toString(this.getLargestDel()));
+		values.add(UtilityBelt.roundDoubleToString((this.getAvgDel())));
 		values.add(Integer.toString(this.getNumStructVars()));
 		values.add(Integer.toString(this.getNumStructIns()));
 		values.add(Integer.toString(this.getNumStructDels()));
@@ -517,5 +714,35 @@ public class VariantPoolSummary {
 		return length;
 	}
 
+
+
+
+	public double getAvgDel() {
+		if(this.delCount != 0)
+			return this.delSum/this.delCount;
+		return Double.NaN;
+	}
+
+
+
+	public double getAvgIns() {
+		if(this.insCount!=0)
+			return this.insSum/this.insCount;
+		return Double.NaN;
+	}
+
+	public double getAvgStructIns() {
+		if(this.numStructIns!=0)
+			return this.structInsSum/this.numStructIns;
+		return Double.NaN;
+	}
+
+	public double getAvgStructDel() {
+		if(this.numStructDels!=0)
+			return this.structDelSum/this.numStructDels;
+		return Double.NaN;
+	}
+	
+	
 }
 	
