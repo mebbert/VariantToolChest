@@ -222,13 +222,13 @@ public class UtilityBelt {
 			}
 		}
 		else if(ref.length() > alt.length()){ // Deletion
-			if(ref.length() > MAX_ALLELE_SIZE_FOR_NON_SV){
+			if(Math.abs(alt.length()-ref.length()) > MAX_ALLELE_SIZE_FOR_NON_SV){
 				return AltType.STRUCTURAL_DELETION;
 			}
 			return AltType.DELETION;
 		}
 		else if(ref.length() < alt.length()){
-			if(alt.length() > MAX_ALLELE_SIZE_FOR_NON_SV){
+			if(Math.abs(alt.length()-ref.length()) > MAX_ALLELE_SIZE_FOR_NON_SV){
 				return AltType.STRUCTURAL_INSERTION;
 			}
 			return AltType.INSERTION;

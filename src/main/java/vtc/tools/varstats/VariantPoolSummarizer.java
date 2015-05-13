@@ -289,6 +289,7 @@ public class VariantPoolSummarizer {
 				var.getStart(), var.getReference(), new TreeSet<Allele>(
 						var.getAlternateAlleles()));
 		for (Allele alt : alts) {
+			
 			type = UtilityBelt.determineAltType(ref, alt);
 
 			if (type == AltType.SNV) {
