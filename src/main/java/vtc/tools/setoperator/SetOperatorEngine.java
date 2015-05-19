@@ -409,7 +409,7 @@ public class SetOperatorEngine implements Engine {
                 result = so.performComplement((ComplementOperation) op, associatedVPs, complementType);
             } else if (o == Operator.INTERSECT) {
             	System.out.println("\nPerforming intersect...");
-                result = so.performIntersect((IntersectOperation) op, associatedVPs, intersectType);
+                result = so.performIntersect((IntersectOperation) op, associatedVPs, intersectType, outFile.getCanonicalPath());
             } else if (o == Operator.UNION) {
             	System.out.println("\nPerforming union...");
                 result = so.performUnion((UnionOperation)op, associatedVPs, forceUniqueNames);

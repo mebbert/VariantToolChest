@@ -1,0 +1,9 @@
+This will test comparing two vcfs with the two overlapping samples using the 
+Match_Sample. This tests if variants with REF or ALT columns that are different are excluded and makes sure
+that match sample is checking actual genotype and not just the numbers.
+
+
+Expected result:
+20	17330	Pass
+20	1110696	Fail for different reference allele
+20	1230237	Fail for different alternate allele

@@ -3,8 +3,10 @@ package vtc.tools.setoperator.operation.intersectTests;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Scanner;
 
 import org.broadinstitute.variant.variantcontext.Genotype;
 import org.broadinstitute.variant.variantcontext.GenotypesContext;
@@ -26,7 +28,7 @@ import vtc.datastructures.VariantPoolHeavy;
    Pos.class,
    Alt.class,
    HomoAlt.class,
-//   MatchSamples.class
+   MatchSamples.class
 })
 public class IntersectOperationTest {
 	public static final String RED = "\u001B[31m";
@@ -107,6 +109,39 @@ public class IntersectOperationTest {
 			
 			
 		}
+		
+		
+	}
+	
+	public static void testMatchSampleFiles(String Path1, String Path2){
+		
+		try {
+			Scanner sc1 = new Scanner(new File(Path1));
+			Scanner sc2 = new Scanner(new File(Path2));
+			
+			Assert.assertTrue(sc1.hasNext());
+			Assert.assertTrue(sc2.hasNext());
+			
+			String header1 = sc1.next();
+			String header2 = sc2.next();
+			
+			Assert.assertTrue(header1.equals(header2));
+			
+			while(sc1.hasNext() && sc2.hasNext()){
+				String line1 = sc1.next();
+				String line2 = sc2.next();
+				
+				Assert.assertTrue(line1.equals(line2));
+			}
+			
+			sc1.close();
+			sc2.close();
+			
+		} catch (FileNotFoundException e) {
+			Assert.assertTrue(false);
+			e.printStackTrace();
+		}
+		
 		
 		
 	}

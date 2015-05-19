@@ -1,0 +1,4 @@
+This will test comparing two vcfs with all samples overlapping.
+Using the Match_Sample test all variants should pass even though
+different alts are present.
+

@@ -1,0 +1,2 @@
+CHR	POS	REF	ALT	Num_Match	Percent_Match	Num_Mismatch	Percent_Mismatch	Num_PartialMatch	Percent_PartialMatch	Num_Total
+20	17330	T	A   2	100.0	0	NA	0	NA	2

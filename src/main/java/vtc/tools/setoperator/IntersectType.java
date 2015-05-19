@@ -20,7 +20,7 @@ public enum IntersectType {
 	 * Basically, the purpose is to compare the same samples across multiple sequencing runs.
 	 */
 	
-//	MATCH_SAMPLE("MATCH_SAMPLE", "match_sample", "All samples with the same name must have identical genotypes", ""),
+	MATCH_SAMPLE("MATCH_SAMPLE", "match_sample", "All samples with the same name must have identical genotypes", ""),
 //	PERFECT("PERFECT", "perfect", "Require all samples to have identical genotypes. Will also generate" +
 //			" a file of 'imperfect' matches and 'complete mismatches'", ""),
 	POS("POS", "pos", "Ignore samples when intersecting. Only consider chr, pos, ref", ""),

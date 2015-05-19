@@ -285,7 +285,7 @@ public class UtilityBeltTest {
 		try {
 			AllVPs = UtilityBelt.createHeavyVariantPools(testlist, true);
 			ArrayList<VariantPoolHeavy> allVPsList = new ArrayList<VariantPoolHeavy>(AllVPs.values());
-			System.out.println(allVPsList);
+//			System.out.println(allVPsList);
 			int i=0;
 			VariantContext var;
 			for (VariantPoolHeavy vp : allVPsList) {
@@ -298,7 +298,7 @@ public class UtilityBeltTest {
 					// SNV, MNP, insertion, deletion or structural insertion or deletion
 					for(Allele a : var.getAlternateAlleles()) {
 						 AltType alt_type = UtilityBelt.determineAltType(var.getReference(), a);
-						 System.out.println("Comparing: " + answers.get(i) + " with " + alt_type);
+//						 System.out.println("Comparing: " + answers.get(i) + " with " + alt_type);
 						 assertTrue(answers.get(i)==alt_type);
 						 i += 1;
 					}
@@ -336,14 +336,14 @@ public class UtilityBeltTest {
 
 		String file1 = "target/test-classes/1000_genomes_example.vcf";
 		Integer[] answers = new Integer[] {1,1,1,1,1,3,-1,-1};
-		System.out.println(Arrays.toString(answers));
+//		System.out.println(Arrays.toString(answers));
 		testlist.add(file1);
 
 		TreeMap<String, VariantPoolHeavy> AllVPs;
 		try {
 			AllVPs = UtilityBelt.createHeavyVariantPools(testlist, true);
 			ArrayList<VariantPoolHeavy> allVPsList = new ArrayList<VariantPoolHeavy>(AllVPs.values());
-			System.out.println(allVPsList);
+//			System.out.println(allVPsList);
 			int i=0;
 			VariantContext var;
 			for (VariantPoolHeavy vp : allVPsList) {
@@ -357,7 +357,7 @@ public class UtilityBeltTest {
 					for(Allele a : var.getAlternateAlleles()) {
 						 //System.out.println("Comparing: " + var.getReference() + " with " + a+"\n");
 						 int diff_count = UtilityBelt.getDiffCount(var.getReference(), a);
-						 System.out.println("Comparing: " + answers[i] + " with " + diff_count+"\n");
+//						 System.out.println("Comparing: " + answers[i] + " with " + diff_count+"\n");
 						 assertTrue(answers[i]==diff_count);
 						 i += 1;
 					}

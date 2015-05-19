@@ -1,0 +1,3 @@
+CHR	POS	REF	ALT	Num_Match	Percent_Match	Num_Mismatch	Percent_Mismatch	Num_PartialMatch	Percent_PartialMatch	Num_Total
+20	1110696	A	G,T	2	66.7	1	33.3	0	NA	3
+20	1234567	GTC	G,GTCT   0	NA	0	NA	3	100.0	3

@@ -4,6 +4,7 @@
 package vtc.tools.setoperator;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -372,12 +373,13 @@ public class SetOperator {
 	 * @param op
 	 * @param variantPools
 	 * @param type
+	 * @param outFilePath 
 	 * @return A VariantPool with all variants that intersect, including only the samples of interest.
 	 * @throws InvalidOperationException 
 	 * @throws IOException 
 	 */
 	public VariantPoolHeavy performIntersect(IntersectOperation op,
-			ArrayList<VariantPoolHeavy> variantPools, IntersectType type) throws InvalidOperationException, IOException{
+			ArrayList<VariantPoolHeavy> variantPools, IntersectType type, String outFilePath) throws InvalidOperationException, IOException{
 		
 		if(type == null){
 			throw new RuntimeException("Received null IntersectType in \'performIntersect.\' Something is very wrong!");
@@ -413,7 +415,16 @@ public class SetOperator {
 		int potentialMatchingIndelAlleles = 0;
 		int potentialMatchingIndelRecords = 0;
 
-
+		
+		FileWriter matchSampleFile = null;
+		if(type == IntersectType.MATCH_SAMPLE){
+			
+			matchSampleFile = new FileWriter(new File(outFilePath.substring(0,
+                			outFilePath.lastIndexOf(File.separator) + 1) +
+                			"/"+op.getOperationID()+"_MatchSampleStats.txt"));
+			matchSampleFile.append("CHR\tPOS\tREF\tALT\tNum_Match\tPercent_Match\tNum_Mismatch\tPercent_Mismatch\tNum_PartialMatch\tPercent_PartialMatch\tNum_Total\n");
+			
+		}
 
 		// Iterate over the smallest VariantPool and lookup each variant in the other(s)
 //		while(it.hasNext()){
@@ -426,6 +437,12 @@ public class SetOperator {
 			genotypes = new ArrayList<Genotype>();
 			tmpGenotypes = new ArrayList<Genotype>();
 			allAlleles = new LinkedHashSet<Allele>();
+			
+			MatchSampleStatistics mss = null;
+			
+			if(type == IntersectType.MATCH_SAMPLE){
+				mss = new MatchSampleStatistics();
+			}
 			
 			/* If intersect type is POS, only check that */
 			if(type == IntersectType.POS){
@@ -482,7 +499,12 @@ public class SetOperator {
 						/* Iterate over the sample genotypes in this GenotypeContext
 						 * and determine if they intersect by genotype
 						 */
-						tmpGenotypes = intersectsByGenotypeAndIntersectType(gc, var, sampleGenotypes, type, currVarKey, op.getOperationID());
+						if(type == IntersectType.MATCH_SAMPLE){
+							tmpGenotypes = intersectsByGenotypeAndIntersectType(gc, var, sampleGenotypes, type, currVarKey, op.getOperationID(),mss);
+						}
+						else{
+							tmpGenotypes = intersectsByGenotypeAndIntersectType(gc, var, sampleGenotypes, type, currVarKey, op.getOperationID(),null);
+						}
 						if(tmpGenotypes == null){
 							intersects = false;
 							break;
@@ -509,10 +531,11 @@ public class SetOperator {
 							sampleGenotypes = new HashMap<String, Genotype>();
 							fuzzyIntersects = true;
 							int count = 0;
+							
 							for(VariantContext fuzzyVar : fuzzyVars){
 								fuzzyVar = fuzzyVars.get(count);
 								fuzzyGenos = intersectsByGenotypeAndIntersectType(fuzzyVar.getGenotypes(), fuzzyVar,
-										sampleGenotypes, type, currVarKey, op.getOperationID());
+										sampleGenotypes, type, currVarKey, op.getOperationID(), mss);
 								if(fuzzyGenos == null){
 									fuzzyIntersects = false;
 									break;
@@ -545,7 +568,23 @@ public class SetOperator {
 				if(intersection.getNumVarRecords() > 1 && intersection.getNumVarRecords() % 100 == 0)
 					System.out.print("Added " + nf.format(intersection.getNumVarRecords()) + " variant records to intersection.\r");
 			}
+			
+			if(matchSampleFile != null && var != null){
+				matchSampleFile.write(var.getChr()+"\t"+String.valueOf(var.getStart())+"\t"+var.getReference().getBaseString()+"\t");
+				List<Allele> alleles = var.getAlternateAlleles();
+				for(Allele a : alleles){
+					matchSampleFile.write(a.getBaseString());
+					if(alleles.indexOf(a)!=alleles.size()-1)
+						matchSampleFile.write(",");
+				}
+				matchSampleFile.write("\t"+mss.toString()+"\n");
+				mss.clear();
+			}
 		}
+		
+		if(matchSampleFile != null)
+			matchSampleFile.close();
+		
 		intersection.setPotentialMatchingIndelRecords(potentialMatchingIndelRecords);
 		intersection.setPotentialMatchingIndelAlleles(potentialMatchingIndelAlleles);
 		return intersection;
@@ -560,11 +599,12 @@ public class SetOperator {
 	 * @param type
 	 * @param currVarKey
 	 * @param operID
+	 * @param mss 
 	 * @return
 	 */
 	private ArrayList<Genotype> intersectsByGenotypeAndIntersectType(GenotypesContext gc,
 			VariantContext var, HashMap<String, Genotype> sampleGenotypes,
-			IntersectType type, String currVarKey, String operID){
+			IntersectType type, String currVarKey, String operID, MatchSampleStatistics mss){
 		Iterator<Genotype> genoIt = gc.iterator();
 		Genotype geno;
 		ArrayList<Genotype> genotypes = new ArrayList<Genotype>();
@@ -579,7 +619,7 @@ public class SetOperator {
 						"genotypes for position " + var.getStart();
 				emitExcludedVariantWarning(s, currVarKey, operID, null);
 			}
-			else if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, operID)){
+			else if(!intersectsByType(geno, type, sampleGenotypes, currVarKey, operID,mss) && type!=IntersectType.MATCH_SAMPLE){
 				return null;
 			}
 			/* TODO: Why was I modifying the genotype using 'getCorrectGenotype'? I already
@@ -593,7 +633,9 @@ public class SetOperator {
 			sampleGenotypes.put(geno.getSampleName(), geno);
 		}
 		
-		if(type == IntersectType.ALT || type == IntersectType.HOMOZYGOUS_REF){
+		//Match sample should be here because we don't care if all samples have the same alternate.  We only care if the overlapping samples are the same.
+		
+		if(type == IntersectType.ALT || type == IntersectType.HOMOZYGOUS_REF || type == IntersectType.MATCH_SAMPLE){ 
 			return genotypes;
 		}
 		else if(commonAltAlleleAcrossAllSamples(var.getAlternateAlleles(), GenotypesContext.create(genotypes), null)){
@@ -762,10 +804,11 @@ public class SetOperator {
 	 * Determine if the genotype matches the specified intersect type
 	 * @param geno
 	 * @param type
+	 * @param mss 
 	 * @return True if the genotype matches the intersect type
 	 */
 	private boolean intersectsByType(Genotype geno, IntersectType type, HashMap<String, Genotype> sampleGenotypes,
-			String currVarKey, String operationID){
+			String currVarKey, String operationID, MatchSampleStatistics mss){
 		
 		/* If any sample is found in multiple VariantPools and the sample's 
 		 * genotype is not identical, return false
@@ -776,11 +819,21 @@ public class SetOperator {
 				String s = "exists in multiple variant pools but the genotype did not match.";
 				emitExcludedVariantWarning(s, currVarKey, operationID, geno.getSampleName());
 			}
+			if(type==IntersectType.MATCH_SAMPLE){
+				MismatchType mismatch = getTypeOfMismatch(sg,geno,mss);
+				if(mismatch == MismatchType.Mismatch)
+					mss.addMismatch();
+				else if(mismatch == MismatchType.PartialMatch)
+					mss.addPartialMatch();
+			}
 			return false;
 		}
-//		else if(type == IntersectType.MATCH_SAMPLE){
-//			return true;
-//		}
+		else if(type == IntersectType.MATCH_SAMPLE){
+			if(sg != null){
+				mss.addMatch();
+			}
+			return true;
+		}
 
 		if(type == IntersectType.HOMOZYGOUS_REF){
 			if(geno.isHomRef())
@@ -862,7 +915,21 @@ public class SetOperator {
 	}
 
 	
-	
+	private MismatchType getTypeOfMismatch(Genotype sg, Genotype geno, MatchSampleStatistics mss) {
+		List<Allele> sgAlleles = sg.getAlleles();
+		List<Allele> genoAlleles = geno.getAlleles();
+		
+		
+		
+		for(Allele a : genoAlleles){
+			if(!a.isReference()){
+				if(sgAlleles.contains(a)){
+					return MismatchType.PartialMatch;
+				}
+			}
+		}
+		return MismatchType.Mismatch;
+	}	
 	
 	
 	
@@ -875,6 +942,8 @@ public class SetOperator {
 	 * Union logic
 	 */
 	
+	
+
 	/**
 	 * Perform union between VariantPools
 	 * @param op
