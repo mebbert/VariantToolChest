@@ -665,19 +665,83 @@ public class VariantPoolSummary {
         newVPS.setNumSNVs(vps1.getNumSNVs() + vps2.getNumSNVs());
         newVPS.setNumMNVs(vps1.getNumMNVs() + vps2.getNumMNVs());	
         
-        
-        
         newVPS.setNumStructVars(vps1.getNumStructVars() + vps2.getNumStructVars());
         newVPS.setNumStructIns(vps1.getNumStructIns() + vps2.getNumStructIns());
         newVPS.setNumStructDels(vps1.getNumStructDels() + vps2.getNumStructDels());
+        newVPS.setStructDelSum(vps1.getStructDelSum()+vps2.getStructDelSum());
+        newVPS.setStructInsSum(vps1.getStructInsSum()+vps2.getStructInsSum());
+        
+        newVPS.setSmallestStructIns(getSmallestInDel(vps1.getSmallestStructIns(),vps2.getSmallestStructIns()));
+        newVPS.setSmallestStructDel(getSmallestInDel(vps1.getSmallestStructDel(),vps2.getSmallestStructDel()));
+        newVPS.setLargestStructIns(getLargestInDel(vps1.getLargestStructIns(),vps2.getLargestStructIns()));
+        newVPS.setLargestStructDel(getLargestInDel(vps1.getLargestStructDel(),vps2.getLargestStructDel()));
+        
+        
+        
+        newVPS.setDelCount(vps1.getDelCount()+vps2.getDelCount());
+        newVPS.setInsCount(vps1.getInsCount()+vps2.getInsCount());
+        newVPS.setIndelCount(vps1.getIndelCount()+vps2.getIndelCount());
+        newVPS.setDelSum(vps1.getDelSum()+vps2.getDelSum());
+        newVPS.setInsSum(vps1.getInsSum()+vps2.getInsSum());
+
+        newVPS.setSmallestIns(getSmallestInDel(vps1.getSmallestIns(),vps2.getSmallestIns()));
+        newVPS.setSmallestDel(getSmallestInDel(vps1.getSmallestDel(),vps2.getSmallestDel()));
+        newVPS.setLargestIns(getLargestInDel(vps1.getLargestIns(),vps2.getLargestIns()));
+        newVPS.setLargestDel(getLargestInDel(vps1.getLargestDel(),vps2.getLargestDel()));
+
         newVPS.setNumMultiAlts(vps1.getNumMultiAlts() + vps2.getNumMultiAlts());
+        
         newVPS.setTiCount(vps1.getTiCount() + vps2.getTiCount());
         newVPS.setTvCount(vps1.getTvCount() + vps2.getTvCount());
+        
         newVPS.setGenoTiCount(vps1.getGenoTiCount() + vps2.getGenoTiCount());
         newVPS.setGenoTvCount(vps1.getGenoTvCount() + vps2.getGenoTvCount());
+        
         return newVPS;
 	}
 	
+
+
+
+
+	private static int getSmallestInDel(int vps1, int vps2) {
+		if(vps1 > 0){
+        	if(vps2 > 0){
+        		if(vps1 < vps2){
+        			return vps1;
+        		}
+        		else{
+        			return vps2;
+        		}
+        	}
+        	else{
+        		return vps1;
+        	}
+        }
+        
+		return vps2;
+	}
+
+	private static int getLargestInDel(int vps1, int vps2) {
+		if(vps1 > 0){
+        	if(vps2 > 0){
+        		if(vps1 > vps2){
+        			return vps1;
+        		}
+        		else{
+        			return vps2;
+        		}
+        	}
+        	else{
+        		return vps1;
+        	}
+        }
+        
+		return vps2;
+	}
+
+
+
 	/**
 	 * Get the longest value that will be printed in the summary tables. This
 	 * will allow the table to be formatted with the proper width.
