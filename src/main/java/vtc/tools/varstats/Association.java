@@ -10,16 +10,16 @@ public class Association {
     /*
      * Variables
      */
-    private String  Chr;
-    private String  Id;
-    private Integer Pos;
-    private String  Ref;
-    private String  Alt;
+    private String  chr;
+    private String  id;
+    private Integer pos;
+    private String  ref;
+    private String  alt;
 
-    private long    CaseRefCount    = 0;
-    private long    CaseAltCount    = 0;
-    private long    ControlRefCount = 0;
-    private long    ControlAltCount = 0;
+    private long    caseRefCount    = 0;
+    private long    caseAltCount    = 0;
+    private long    controlRefCount = 0;
+    private long    controlAltCount = 0;
 
     private double  OR              = 0;
     private double  chiSq_pval          = 0;
@@ -36,11 +36,11 @@ public class Association {
     }
 
     Association(String chr, String id, Integer pos, String ref, String alt) {
-        Chr = chr;
-        Id = id;
-        Pos = pos;
-        Ref = ref;
-        Alt = alt;
+        this.chr = chr;
+        this.id = id;
+        this.pos = pos;
+        this.ref = ref;
+        this.alt = alt;
     }
 
     Association(Integer RefCount, Integer AltCount, List<Allele> Alts, Allele Ref, VariantContext var, ArrayList<String> Case, ArrayList<String> Control) {
@@ -50,40 +50,40 @@ public class Association {
     /*
      * setters
      */
-    public void setChr(String C) {
-        Chr = C;
+    public void setChr(String chr) {
+        this.chr = chr;
     }
 
-    public void setId(String I) {
-        Id = I;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setPos(Integer pos) {
-        Pos = pos;
+        this.pos = pos;
     }
 
-    public void setRef(String R) {
-        Ref = R;
+    public void setRef(String ref) {
+        this.ref = ref;
     }
 
-    public void setAlt(String A) {
-        Alt = A;
+    public void setAlt(String alt) {
+        this.alt = alt;
     }
 
-    public void setCaseRefCount(long c) {
-        CaseRefCount = c;
+    private void setCaseRefCount(long count) {
+        caseRefCount = count;
     }
 
-    public void setCaseAltCount(long c) {
-        CaseAltCount = c;
+    private void setCaseAltCount(long c) {
+        caseAltCount = c;
     }
 
-    public void setControlRefCount(long c) {
-        ControlRefCount = c;
+    private void setControlRefCount(long c) {
+        controlRefCount = c;
     }
 
-    public void setControlAltCount(long c) {
-        ControlAltCount = c;
+    private void setControlAltCount(long c) {
+        controlAltCount = c;
     }
 
     public void setOR(double o) {
@@ -110,18 +110,47 @@ public class Association {
      * 
      * Getters
      */
+    
+    public long getCaseRefCount(){
+    	return this.caseRefCount;
+    }
+    
+    public long getCaseAltCount(){
+    	return this.caseAltCount;
+    }
+    
+    public long getControlRefCount(){
+    	return this.controlRefCount;
+    }
+    
+    public long getControlAltCount(){
+    	return this.controlAltCount;
+    }
 
     /*
      * 
      * Functions
      */
 
-    public long[] CaseControlCounts(ArrayList<String> CaseControl, VariantContext vc, String alt) {
-        long[] counts = new long[2];
+    public void setCaseControlCounts(ArrayList<String> cases, ArrayList<String> controls, VariantContext vc, String alt) {
+    	
+    	/* Index '0' is the unexposed (ref) count. */
+        long[] caseCounts = this.countAlleles(cases, vc, alt);
+        this.setCaseRefCount(caseCounts[0]);
+        this.setCaseAltCount(caseCounts[1]);
+
+        long[] controlCounts = this.countAlleles(controls, vc, alt);
+        this.setControlRefCount(controlCounts[0]);
+        this.setControlAltCount(controlCounts[1]);
+    }
+    
+    private long[] countAlleles(ArrayList<String> samples, VariantContext vc, String alt){
+    	long[] counts = new long[2];
         int refcount = 0;
         int altcount = 0;
-        // System.out.println(CaseControl.size() + '\n');
-        for (String s : CaseControl) {
+//        System.out.println("N Samples: " + samples.size());
+
+        for (String s : samples) {
             String geno = vc.getGenotype(s).getGenotypeString();
             // System.out.println(s + "  " + geno + '\n');
             String[] genos = new String[2];
@@ -145,6 +174,7 @@ public class Association {
         counts[1] = altcount;
 
         return counts;
+   	
     }
 
     public double calcOR(double caseUnexposedAlleleCount, double caseExposedAlleleCount, double controlUnexposedAlleleCount, double controlExposedAlleleCount) {
@@ -179,9 +209,9 @@ public class Association {
         } else {
             or = String.format("%.4g", OR);
         }
-        String association = Chr + '\t' + Id + '\t' + Pos + '\t' + Ref + '\t'
-        		+ Alt + '\t' + CaseRefCount + '\t' + CaseAltCount + '\t'
-        		+ ControlRefCount + '\t' + ControlAltCount + '\t' + or
+        String association = chr + '\t' + id + '\t' + pos + '\t' + ref + '\t'
+        		+ alt + '\t' + caseRefCount + '\t' + caseAltCount + '\t'
+        		+ controlRefCount + '\t' + controlAltCount + '\t' + or
         		+ '\t' + midp_pval_str + '\t' + fishers_pval_str + '\t' + chiSq_pval_str ;
         return association;
     }
