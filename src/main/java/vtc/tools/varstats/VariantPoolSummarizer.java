@@ -539,7 +539,7 @@ public class VariantPoolSummarizer {
 			boolean PrintCombined) {
 		Object[] keys = vpSummaries.keySet().toArray();
 		VariantPoolSummary vps = new VariantPoolSummary();
-		System.out.println(keys.length);
+//		System.out.println(keys.length);
 		for (Object o : keys) {
 			if (PrintCombined == false) {
 				PrintIndividualFiles(o.toString(), vpSummaries.get(o));
@@ -672,7 +672,7 @@ public class VariantPoolSummarizer {
 				vps.getNumVarRecords());
 		System.out.format(leftalignFormatint, "TotalVars:", vps.getNumVars());
 		System.out
-				.format(leftalignFormatint, "N Samples:", vps.getNumSamples());
+				.format(leftalignFormatint, "TotalSamples:", vps.getNumSamples());
 		System.out.format(s + newLine);
 		System.out.format(rightalignFormati, "SNVs:      ",
 				Integer.toString(vps.getNumSNVs()));
@@ -830,7 +830,18 @@ public class VariantPoolSummarizer {
 			System.out.format(s + "          ");
 
 		System.out.format(newLine);
+		
+		for (int i = 0; i < size; i++)
+			System.out.format(leftalignFormatint, "TotalRecs:", Summaries.get(filenames[i]).getNumRecords());
 
+		System.out.format(newLine);
+		
+		for (int i = 0; i < size; i++)
+			System.out.format(leftalignFormatint, "TotalVarRecs:",
+					Summaries.get(filenames[i]).getNumVarRecords());
+
+		System.out.format(newLine);
+		
 		for (int i = 0; i < size; i++)
 			System.out.format(leftalignFormatint, "TotalVars:",
 					Summaries.get(filenames[i]).getNumVars());
@@ -838,7 +849,7 @@ public class VariantPoolSummarizer {
 		System.out.format(newLine);
 
 		for (int i = 0; i < size; i++)
-			System.out.format(leftalignFormatint, "Total Samples:", Summaries
+			System.out.format(leftalignFormatint, "TotalSamples:", Summaries
 					.get(filenames[i]).getNumSamples());
 
 		System.out.format(newLine);
@@ -1172,6 +1183,24 @@ public class VariantPoolSummarizer {
 		System.out.format(s);
 
 		System.out.format(newLine);
+		
+		System.out.format(leftalignFormatint, "TotalRecs:",
+				Summaries.get(filenames[0]).getNumRecords());
+		for (int i = 1; i < size; i++)
+			System.out.format(r_int_align, Summaries.get(filenames[i])
+					.getNumRecords());
+
+		System.out.format(bar);
+		System.out.format(newLine);
+		
+		System.out.format(leftalignFormatint, "TotalVarRecs:",
+				Summaries.get(filenames[0]).getNumVarRecords());
+		for (int i = 1; i < size; i++)
+			System.out.format(r_int_align, Summaries.get(filenames[i])
+					.getNumVarRecords());
+
+		System.out.format(bar);
+		System.out.format(newLine);
 
 		System.out.format(leftalignFormatint, "TotalVars:",
 				Summaries.get(filenames[0]).getNumVars());
@@ -1182,7 +1211,7 @@ public class VariantPoolSummarizer {
 		System.out.format(bar);
 		System.out.format(newLine);
 
-		System.out.format(leftalignFormatint, "Total Samples:",
+		System.out.format(leftalignFormatint, "TotalSamples:",
 				Summaries.get(filenames[0]).getNumSamples());
 		for (int i = 1; i < size; i++)
 			System.out.format(r_int_align, Summaries.get(filenames[i])
