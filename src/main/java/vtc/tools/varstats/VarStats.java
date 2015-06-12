@@ -51,6 +51,7 @@ public class VarStats {
     @SuppressWarnings("unused")
 	private static final String MaxInsertion = null;
 
+    HashMap<String, String>     phenoInfo    = new HashMap<String, String>();
     
     private static Logger logger = Logger.getLogger(VarStats.class);
 
@@ -71,8 +72,6 @@ public class VarStats {
     @SuppressWarnings("unused")
 	public void doAssociation(TreeMap<String, VariantPoolLight> AllVPs, List<String> phenoArgs) throws IOException {
 
-	    HashMap<String, String> phenoInfo = new HashMap<String, String>();
-
         if (phenoArgs != null) {
             // Make a structure to read in the phenotype information...
             phenoInfo = ParsePhenoFile(phenoArgs);
@@ -83,32 +82,32 @@ public class VarStats {
         	logger.info("Collecting case-control status for samples in " + vp.getPoolID());
             ArrayList<Association> association = new ArrayList<Association>();
 
-            String[] sampleList = vp.getSamples().toArray(new String[vp.getSamples().size()]);
-            ArrayList<String> casePhenos = new ArrayList<String>();
-            ArrayList<String> controlPhenos = new ArrayList<String>();
-            for (String sample : sampleList) {
-                if (phenoInfo.containsKey(sample)) {
-                    String phenotype = phenoInfo.get(sample);
+            Object[] SampleList = vp.getSamples().toArray();
+            ArrayList<String> CasePhenos = new ArrayList<String>();
+            ArrayList<String> ControlPhenos = new ArrayList<String>();
+            for (Object o : SampleList) {
+                if (phenoInfo.containsKey(o)) {
+                    String phenotype = phenoInfo.get(o);
                     // System.out.println(o + phenotype);
                     if (phenotype.equals("2")) {
-                        casePhenos.add(sample);
+                        CasePhenos.add((String) o);
 
                     } else if (phenotype.equals("1"))
-                        controlPhenos.add(sample);
+                        ControlPhenos.add((String) o);
                     // System.out.println(o + "'s pheno is " +phenoInfo.get(o));
                 }
             }
             
-            if(casePhenos.size() == 0 || controlPhenos.size() == 0){
+            if(CasePhenos.size() == 0 || ControlPhenos.size() == 0){
             	logger.error("Missing either cases or controls in "
 				    + vp.getPoolID() + ": "
-            		+ casePhenos.size() + " cases, " + controlPhenos.size() +
+            		+ CasePhenos.size() + " cases, " + ControlPhenos.size() +
             		" controls. Exiting...");
             	System.exit(1);
             }
             else{
             	logger.info("Counts in " + vp.getPoolID() + ": "
-            		+ casePhenos.size() + " cases, " + controlPhenos.size() +
+            		+ CasePhenos.size() + " cases, " + ControlPhenos.size() +
             		" controls.");
             }
 
@@ -122,8 +121,8 @@ public class VarStats {
             VariantContext vc;
             while ((vc = vp.getNextVar()) != null) {
 
-            	if(count > 1 && count % 1000 == 0) System.out.print("\rVariants tested: "
-                		+ nf.format(count));
+            	if(count > 1 && count % 1000 == 0) System.out.print("Variants tested: "
+                		+ nf.format(count) + "\r");
 
 //                currVarKey = it.next();
 //                VariantContext vc = vp.getVariant(currVarKey);
@@ -136,16 +135,21 @@ public class VarStats {
 
                 for (Allele A : Alts) {
 
-                    Association assoc = new Association(vc.getChr(), vc.getID(), vc.getStart(), vc.getReference().getBaseString(), A.getBaseString());
+                    Association Assoc = new Association(vc.getChr(), vc.getID(), vc.getStart(), vc.getReference().getBaseString(), A.getBaseString());
                     
                     /* Index '0' is the unexposed (ref) count. */
-                    assoc.setCaseControlCounts(casePhenos, controlPhenos, vc, A.getBaseString());
+                    long[] CaseAlleleCount = Assoc.countAlleles(CasePhenos, vc, A.getBaseString());
+                    long[] ControlAlleleCount = Assoc.countAlleles(ControlPhenos, vc, A.getBaseString());
                     
-                    caseRefCount = assoc.getCaseRefCount();
-                    caseAltCount = assoc.getCaseAltCount();
-                    ctrlRefCount = assoc.getControlRefCount();
-                    ctrlAltCount = assoc.getControlAltCount();
+                    caseRefCount = CaseAlleleCount[0];
+                    caseAltCount = CaseAlleleCount[1];
+                    ctrlRefCount = ControlAlleleCount[0];
+                    ctrlAltCount = ControlAlleleCount[1];
 
+                    Assoc.setCaseRefCount(caseRefCount);
+                    Assoc.setCaseAltCount(caseAltCount);
+                    Assoc.setControlRefCount(ctrlRefCount);
+                    Assoc.setControlAltCount(ctrlAltCount);
 
                     chiSq_pval = -1;
                     fisher_pval = -1;
@@ -153,9 +157,7 @@ public class VarStats {
                     if(caseRefCount !=0 && caseAltCount !=0 &&
                     		ctrlRefCount !=0 && ctrlAltCount !=0){
                     	ChiSquareTest test = new ChiSquareTest();
-                   		chiSq_pval = test.chiSquareTestDataSetsComparison(
-                   				new long[] {ctrlRefCount, ctrlAltCount},
-                   				new long[] {caseRefCount, caseAltCount});
+                   		chiSq_pval = test.chiSquareTestDataSetsComparison(ControlAlleleCount, CaseAlleleCount);
                    		
 
 					    FishersExactTest fet = new FishersExactTest(
@@ -169,15 +171,15 @@ public class VarStats {
                     }
 
 
-                    assoc.setMidP_pval(midp_pval);
-				    assoc.setFishersExact_pval(fisher_pval);
-                    assoc.setChiSq_pval(chiSq_pval);
+                    Assoc.setMidP_pval(midp_pval);
+				    Assoc.setFishersExact_pval(fisher_pval);
+                    Assoc.setChiSq_pval(chiSq_pval);
 
-                    double OR = assoc.calcOR(caseRefCount, caseAltCount,
+                    double OR = Assoc.calcOR(caseRefCount, caseAltCount,
                     		ctrlRefCount, ctrlAltCount);
 
-                    assoc.setOR(OR);
-                    association.add(assoc);
+                    Assoc.setOR(OR);
+                    association.add(Assoc);
 
                 }
                 count++;
@@ -193,23 +195,23 @@ public class VarStats {
 
     private HashMap<String, String> ParsePhenoFile(List<String> phenofiles) throws IOException {
         HashMap<String, String> phenos = new HashMap<String, String>();
-        for (String phenoFile : phenofiles) {
+        for (Object o : phenofiles) {
             // lets parse the phenotype file.
             BufferedReader br;
-			br = new BufferedReader(new FileReader(phenoFile.toString()));
+			br = new BufferedReader(new FileReader(o.toString()));
 			String line;
 			while ((line = br.readLine()) != null) {
 			    // process the line.
-			    String lineToks[] = line.split("\t");
+			    String line1[] = line.split("\t");
 			    
-			    if(lineToks.length != 2){
+			    if(line1.length != 2){
 					br.close();
-				    throw new IOException("ERROR: Found " + lineToks.length +
+				    throw new IOException("ERROR: Found " + line1.length +
 						    " columns. Expected 2. Verify the file is tab-delimited.");
 			    }
 
 			  //  System.out.println(line);
-			    phenos.put(lineToks[0], lineToks[1]);
+			    phenos.put(line1[0], line1[1]);
 			}
 			br.close();
 
@@ -229,8 +231,8 @@ public class VarStats {
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(OutFile));
             out.write("Chr" + '\t' + "ID" + '\t' + "Pos" + '\t' + "Ref" + '\t'
-            + "Alt" + '\t' + "CaseRefAlleleCount" + '\t' + "CaseAltAlleleCount" + '\t'
-		    + "ControlRefAlleleCount" + '\t' + "ControlAltAlleleCount" + '\t' + "OR" + '\t'
+            + "Alt" + '\t' + "CaseRefCount" + '\t' + "CaseAltCount" + '\t'
+		    + "ControlRefCount" + '\t' + "ControlAltCount" + '\t' + "OR" + '\t'
             + "MidP pval (2-sided)" + "\t"
 		    + "Fisher Exact pval (2-sided)" + '\t' + "ChiSq pval (2-sided)"
             + '\n');
@@ -243,11 +245,6 @@ public class VarStats {
         }
     }
 
-	public void doPercentage(TreeMap<String, VariantPoolLight> allVPs) throws IOException {
-		for(VariantPoolLight vp : allVPs.values()){
-			VariantPoolPercents vpp = new VariantPoolPercents(vp);
-		}
-	}
-
+	
 
 }

@@ -70,19 +70,19 @@ public class Association {
         this.alt = alt;
     }
 
-    private void setCaseRefCount(long count) {
+    public void setCaseRefCount(long count) {
         caseRefCount = count;
     }
 
-    private void setCaseAltCount(long c) {
+    public void setCaseAltCount(long c) {
         caseAltCount = c;
     }
 
-    private void setControlRefCount(long c) {
+    public void setControlRefCount(long c) {
         controlRefCount = c;
     }
 
-    private void setControlAltCount(long c) {
+    public void setControlAltCount(long c) {
         controlAltCount = c;
     }
 
@@ -144,7 +144,7 @@ public class Association {
         this.setControlAltCount(controlCounts[1]);
     }
     
-    private long[] countAlleles(ArrayList<String> samples, VariantContext vc, String alt){
+    public long[] countAlleles(ArrayList<String> samples, VariantContext vc, String alt){
     	long[] counts = new long[2];
         int refcount = 0;
         int altcount = 0;

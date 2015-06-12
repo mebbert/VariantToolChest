@@ -3,6 +3,7 @@
  */
 package vtc.tools.varstats;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -44,21 +45,31 @@ public class VariantPoolSummarizer {
 	private static String detailedSummaryFile;
 
 	public VariantPoolSummarizer() {
+		this.detailedSummaryFile = null;
+		this.detailedVariantRecordWriter = null;
 	}
 
 	/**
 	 * Provide a detailed summary for each VariantPool object
 	 * 
 	 * @param allVPs
+	 * @param outFile 
 	 * @param combined
 	 * @return
 	 * @throws InvalidOperationException
 	 * @throws IOException
 	 */
 	public static HashMap<String, VariantPoolSummary> summarizeVariantPoolsDetailed(
-			TreeMap<String, VariantPoolLight> allVPs)
+			TreeMap<String, VariantPoolLight> allVPs, String outFile)
 			throws InvalidOperationException, IOException {
 
+		if(outFile != null)
+			detailedSummaryFile = outFile;
+		else
+			detailedSummaryFile = null;
+		
+		detailedVariantRecordWriter = null;
+		
 		HashMap<String, VariantPoolSummary> variantPoolSummaries = new HashMap<String, VariantPoolSummary>();
 		VariantPoolSummary vps;
 		for (VariantPoolLight vp : allVPs.values()) {
@@ -72,13 +83,24 @@ public class VariantPoolSummarizer {
 	 * Provide a combined detailed summary of all VariantPool objects
 	 * 
 	 * @param allVPs
+	 * @param outFile 
+	 * @return 
 	 * @throws InvalidOperationException
 	 * @throws IOException
 	 */
-	public static void summarizeVariantPoolsDetailedCombined(
-			TreeMap<String, VariantPoolHeavy> allVPs)
+	public static HashMap<String, VariantPoolSummary> summarizeVariantPoolsDetailedCombined(
+			TreeMap<String, VariantPoolHeavy> allVPs, String outFile)
 			throws InvalidOperationException, IOException {
 
+		if(outFile != null)
+			detailedSummaryFile = outFile;
+		else
+			detailedSummaryFile = null;
+		
+		
+		detailedVariantRecordWriter = null;
+		
+		HashMap<String,VariantPoolSummary> summary = new HashMap<String, VariantPoolSummary>();
 		ArrayList<VariantPoolHeavy> allVPsList = new ArrayList<VariantPoolHeavy>(
 				allVPs.values());
 		if (allVPsList.size() > 1) {
@@ -99,10 +121,12 @@ public class VariantPoolSummarizer {
 
 			Operation op = OperationFactory.createOperation(union, allVPs);
 			unionVP = so.performUnion((UnionOperation) op, allVPsList, true);
-
-			// return summarizeVariantPoolDetailed(unionVP);
+			
+			summary.put(op.getOperationID(), summarizeVariantPoolDetailed(unionVP));
+			return summary;
 		} else if (allVPsList.size() == 1) {
-			// return summarizeVariantPoolDetailed(allVPsList.get(0));
+			summary.put(allVPsList.get(0).getPoolID(), summarizeVariantPoolDetailed(allVPsList.get(0)));
+			return summary;
 		} else {
 			throw new RuntimeException(
 					"ERROR: There were no VariantPools to summarize!");
@@ -179,7 +203,10 @@ public class VariantPoolSummarizer {
 		NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
 		if (printDetailed) {
-			detailedSummaryFile = vp.getPoolID() + "_detailed_summary.txt";
+			if(detailedSummaryFile == null)
+				detailedSummaryFile = vp.getPoolID() + "_detailed_summary.txt";
+			else
+				detailedSummaryFile = detailedSummaryFile+"_"+vp.getPoolID() + "_detailed_summary.txt"; 
 		}
 
 		VariantContext var = vp.getNextVar();
@@ -192,8 +219,14 @@ public class VariantPoolSummarizer {
 
 			recordCount++; // count total num records
 //				System.out.println(recordCount);
-
+			
 			vrs = collectVariantStatistics(var);
+			try {
+				getPercents(var, vp.getSamples(), vrs);
+			} catch (VarStatsException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (var.isVariant()) {
 
 				varRecordCount++; // count num records that are variants.
@@ -269,6 +302,47 @@ public class VariantPoolSummarizer {
 				largestIns, largestDel, smallestStructIns, smallestStructDel, largestStructIns, largestStructDel);
 	}
 
+	public static void getPercents(VariantContext vc, TreeSet<String> Samples, VariantRecordSummary vrs) throws VarStatsException, IOException{
+		
+		Iterable<Genotype> gts = vc.getGenotypesOrderedByName();
+		
+		int homoref = 0;
+		int homoalt = 0;
+		int het = 0;
+		int hetalt = 0;
+		int nocall=0;
+		
+		for(Genotype gt : gts){
+			if(gt.isHomRef()){
+				homoref++;
+				continue;
+			}
+			if(gt.isHomVar()){
+				homoalt++;
+				continue;
+			}
+			if(gt.isHet()){
+				String genotype = gt.getGenotypeString(false);
+				String[] types = genotype.split("[|/]");
+				if(types[0].contains("*") || types[1].contains("*"))
+					het++;
+				else
+					hetalt++;
+				continue;
+			}
+			if(gt.isNoCall()){
+				nocall++;
+				continue;
+			}
+		}
+		
+		vrs.setHomoAltPercent(homoalt/(Double.valueOf(Samples.size())-nocall));
+		vrs.setHetAltPercent(hetalt/(Double.valueOf(Samples.size())-nocall)); 
+		vrs.setHetPercent(het/(Double.valueOf(Samples.size())-nocall));
+		vrs.setHomoRefPercent(homoref/(Double.valueOf(Samples.size())-nocall));
+	
+	}
+	
 	/**
 	 * Count the different alternate types for a single record. i.e., count the
 	 * number of SNVs, MNPs, insertions, deletions, structural insertions, and
@@ -357,7 +431,9 @@ public class VariantPoolSummarizer {
 			
 			} 
 		}
-
+		
+		vrs.setVarID(var.getID());
+		
 		vrs.setSnvCount(snvCount);
 		vrs.setMnvCount(mnvCount);
 		vrs.setIndelCount(indelCount);
@@ -440,8 +516,10 @@ public class VariantPoolSummarizer {
 						hetSampleCount = hetSampleCounts.get(allele);
 						homoVarSampleCount = homoVarSampleCounts.get(allele);
 					}
-					tmpAltGenoCount = geno.countAllele(allele);
+					tmpAltGenoCount = 1;
+					//tmpAltGenoCount = geno.countAllele(allele);
 					altGenoCount += tmpAltGenoCount;
+
 
 					if (tmpAltGenoCount > 0) {
 						altSampleCount++; // increment the number of samples
@@ -560,7 +638,8 @@ public class VariantPoolSummarizer {
 
 		String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count"
 				+ "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_genos_called\tN_total_samples\t"
-				+ "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
+				+ "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality\tHOMO_ALT_percent\t"
+				+ "HET_ALT_percent\tHET_percent\tHOMO_REF_percent";
 
 		detailedVariantRecordWriter = new PrintWriter(fileName);
 		detailedVariantRecordWriter.println(header);
