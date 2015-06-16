@@ -395,9 +395,11 @@ directory: src/main/java/vtc
 
 The file must have the following 2 lines, with the second beinhg the actual
 absolute path to the reference genome on your local machine:
-/\*\*Referece Genome fasta file format: fasta_ref = [Absolute pathway]\*\*/
-fasta_ref = /Users/path/to/reference/fasta/human_g1k_v37.fasta 
 
+<pre><code>
+/**Referece Genome fasta file format: fasta_ref = [Absolute pathway]**/
+fasta_ref = /Users/path/to/reference/fasta/human_g1k_v37.fasta 
+</code></pre>
 
 
 ---
