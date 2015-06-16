@@ -392,6 +392,38 @@ public class VarStatsTest {
 		Compare2DetailedSummaryFiles(combinedOut+"_"+combID+"_detailed_summary.txt", Answer);
 	}
 	
+	
+	@Test
+	public void testCombinedSummary2Files() throws IOException{	
+		System.out.println(GREEN+"\nTest Combined Detailed Summary on Two File\n"+RESET);	
+		
+		
+		String input1 = "target/test-classes/SummaryTests/CheckIndels/input1.vcf";
+		String input2 = "target/test-classes/OUTPUT/Varstats/IndVsCombined/input2.vcf";
+		String combinedOut = "target/test-classes/OUTPUT/Varstats/IndVsCombined/combTest";
+		String Answer = "target/test-classes/OUTPUT/Varstats/IndVsCombined/Answer_detailed_summary.txt";
+		
+		List<String> infiles = new ArrayList<String>();
+		infiles.add(input1);
+		String combID = "";
+		try {
+				
+			TreeMap<String,VariantPoolHeavy> VPs = UtilityBelt.createHeavyVariantPools(infiles,false);
+			combID = (String) VPs.keySet().toArray()[0];
+			System.out.println(combID);
+			VariantPoolSummarizer.summarizeVariantPoolsDetailedCombined(VPs, combinedOut);
+			
+		} catch (InvalidInputFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidOperationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Compare2DetailedSummaryFiles(combinedOut+"_"+combID+"_detailed_summary.txt", Answer);
+	}
+	
 	public static void Compare2DetailedSummaryFiles(String o1, String o2){
 		File out1 = new File(o1);
 		File out2 = new File(o2);

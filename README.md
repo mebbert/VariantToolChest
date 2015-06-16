@@ -390,6 +390,13 @@ Or you can [download Maven](http://maven.apache.org/download.cgi).
 Once you install Maven, run `mvn package assembly:assembly -DskipTests` and you will find
 `VariantToolChest-0.9-SNAPSHOT-jar-with-dependencies.jar` in the `target` directory. The `-DskipTests`
 is not currently necessary, but will save you the time it takes to go through all of the unit tests.
+To build and run all of the tests you will need to add a file named "VTC.properties" to the following
+directory: src/main/java/vtc
+
+The file must have the following 2 lines, with the second beinhg the actual
+absolute path to the reference genome on your local machine:
+/**Referece Genome fasta file format: fasta_ref = [Absolute pathway]**/
+fasta_ref = /Users/path/to/reference/fasta/human_g1k_v37.fasta 
 
 
 

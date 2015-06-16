@@ -479,7 +479,7 @@ public class VariantRecordSummary {
 		for(Allele alt : this.getAlts()){
 			double altSampFreq = (this.getnSamplesWithCall() > 0) ?
 					UtilityBelt.round((double)this.getAltSampleCount(alt)/this.getnSamplesWithCall(),
-							2, BigDecimal.ROUND_HALF_UP) : 0;
+							6, BigDecimal.ROUND_HALF_UP) : 0;
 			altSampleFreqs.put(alt, altSampFreq);
 		}
 		return altSampleFreqs;
@@ -494,7 +494,7 @@ public class VariantRecordSummary {
 		for(Allele alt : this.getAlts()){
             double altGenoFreq = (this.getnGenosCalled() > 0) ?
             		UtilityBelt.round((double)this.getAltGenotypeCount(alt)/this.getnGenosCalled(),
-            				2, BigDecimal.ROUND_HALF_UP) : 0;
+            				6, BigDecimal.ROUND_UP) : 0;
             altGenoFreqs.put(alt, altGenoFreq);
 		}
 		return altGenoFreqs;
