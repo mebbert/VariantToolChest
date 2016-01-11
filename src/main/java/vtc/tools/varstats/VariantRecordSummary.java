@@ -46,6 +46,13 @@ public class VariantRecordSummary {
 	private int insSum;
 	private int structDelSum;
 	private int delSum;
+	private double homoRefPercent;
+	private double homoAltPercent;
+	private double hetPercent;
+	private double hetAltPercent;
+	private String varID;
+	
+
 	
 
 	
@@ -112,6 +119,11 @@ public class VariantRecordSummary {
 		this.insSum = 0;
 		this.structDelSum = 0;
 		this.delSum = 0;	
+		this.homoRefPercent = -1;
+		this.homoAltPercent = -1;
+		this.hetAltPercent = -1;
+		this.hetPercent = -1;
+		this.varID = ".";
 	}
 
 
@@ -144,8 +156,12 @@ public class VariantRecordSummary {
 		this.position = position;
 	}
 	
-	public String getID() {
-		return this.getChr() + ":" + this.getPosition() + ":" + this.getRef().getBaseString();
+	public void setVarID(String ID) {
+		this.varID = ID;
+	}
+	
+	public String getVarID() {
+		return this.varID;
 	}
 
 	/**
@@ -468,6 +484,7 @@ public class VariantRecordSummary {
 						UtilityBelt.round(altSampFreq, 4, BigDecimal.ROUND_HALF_UP) :
 						UtilityBelt.round(altSampFreq, 6, BigDecimal.ROUND_HALF_UP);
 			}
+
 			altSampleFreqs.put(alt, altSampFreq);
 		}
 		return altSampleFreqs;
@@ -727,6 +744,65 @@ public class VariantRecordSummary {
 	public void setnAllelesCalled(int nAllelesCalled) {
 		this.nAllelesCalled = nAllelesCalled;
 	}
+	
+	
+	
+	/**
+	 * @return the homoRefPercent
+	 */
+	public double getHomoRefPercent() {
+		return homoRefPercent;
+	}
+
+	/**
+	 * @param homoRefPercent the homoRefPercent to set
+	 */
+	public void setHomoRefPercent(double homoRefPercent) {
+		this.homoRefPercent = homoRefPercent;
+	}
+
+	/**
+	 * @return the homoAltPercent
+	 */
+	public double getHomoAltPercent() {
+		return homoAltPercent;
+	}
+
+	/**
+	 * @param homoAltPercent the homoAltPercent to set
+	 */
+	public void setHomoAltPercent(double homoAltPercent) {
+		this.homoAltPercent = homoAltPercent;
+	}
+
+	/**
+	 * @return the hetPercent
+	 */
+	public double getHetPercent() {
+		return hetPercent;
+	}
+
+	/**
+	 * @param hetPercent the hetPercent to set
+	 */
+	public void setHetPercent(double hetPercent) {
+		this.hetPercent = hetPercent;
+	}
+
+	/**
+	 * @return the hetAltPercent
+	 */
+	public double getHetAltPercent() {
+		return hetAltPercent;
+	}
+
+	/**
+	 * @param hetAltPercent the hetAltPercent to set
+	 */
+	public void setHetAltPercent(double hetAltPercent) {
+		this.hetAltPercent = hetAltPercent;
+	}
+	
 
 	/**
 	 * Create a comma-separated string
@@ -763,6 +839,10 @@ public class VariantRecordSummary {
 	public String altStatArrayToString(HashMap<Allele, ?> altStat){
 		StringBuilder sb = new StringBuilder();
 		TreeSet<Allele> alts = this.getAlts();
+		if(altStat==null||altStat.isEmpty()){
+			sb.append(0);
+			return sb.toString();
+		}
 		if(alts.isEmpty()){
 			sb.append("0");
 			return sb.toString();
@@ -771,7 +851,7 @@ public class VariantRecordSummary {
 		boolean first = true;
 		for(Allele alt : this.getAlts()){
 			if(!first){
-				sb.append(";");
+				sb.append(",");
 			}
             sb.append(altStat.get(alt));
             first = false;
@@ -843,7 +923,7 @@ public class VariantRecordSummary {
 		sb.append("\t");
 		sb.append(this.getPosition());
 		sb.append("\t");
-		sb.append(this.getID());
+		sb.append(this.getVarID());
 		sb.append("\t");
 		sb.append(this.getRef().getBaseString());
 		sb.append("\t");
@@ -884,6 +964,24 @@ public class VariantRecordSummary {
 		}
 		sb.append("\t");
 		sb.append(this.getQuality());
+		if(this.hetPercent == -1){
+			sb.append("\t");
+            sb.append("NA");
+            sb.append("\t");
+            sb.append("NA");
+            sb.append("\t");
+            sb.append("NA");
+		}
+		else{
+			 sb.append("\t");
+	         sb.append(this.getHomoAltPercent());
+	         sb.append("\t");
+	         sb.append(this.getHetAltPercent());
+	         sb.append("\t");
+	         sb.append(this.getHetPercent());
+	         sb.append("\t");
+	         sb.append(this.getHomoRefPercent());
+		}
 		return sb.toString();
 	}
 	

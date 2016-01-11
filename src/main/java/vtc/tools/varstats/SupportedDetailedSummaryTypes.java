@@ -12,7 +12,7 @@ import java.util.Arrays;
  */
 public enum SupportedDetailedSummaryTypes {
 
-	INDIVIDUAL("Individual", "I", "Print individual summaries.",
+	INDIVIDUAL("Individual", "I", "Print individual summaries including zygosity percentages.",
 			new ArrayList<String>(Arrays.asList(new String[]{"I", "Individual"}))),
     COMBINED("Combined", "C", "Print one combined summary to 'unionedVP_detailed_summary.txt'.",
             new ArrayList<String>(Arrays.asList(new String[]{"C", "Combined"}))),

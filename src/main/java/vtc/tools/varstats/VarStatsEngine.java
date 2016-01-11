@@ -3,6 +3,7 @@
  */
 package vtc.tools.varstats;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -77,7 +78,9 @@ public class VarStatsEngine implements Engine {
 //        		.setDefault(SupportedDetailedSummaryTypes.INDIVIDUAL.getName())
         		.help("Prints detailed summary statistics to file. Possible opteions are: "
         				+ createSupportedDetailedSummaryTypeString());
-        summary.addArgument("-P", "--percentage").dest("percentage").action(Arguments.storeTrue()).type(String.class).help("Get the het-homo-alt and homo-alt percentages and write to accompanying file.");
+//        summary.addArgument("-P", "--percentage").dest("percentage").action(Arguments.storeTrue()).type(String.class).help("Get the het-homo-alt and homo-alt percentages and write to accompanying file.");
+        summary.addArgument("-o","--out").dest("OUTPUT").type(String.class)
+        		.help("This is the path and name for the detailed summary. Don't add a file extension, we add our own.");
         assoc.addArgument("-a", "--association").action(Arguments.storeTrue()).dest("association")
                 .help("Performs an association test (also generates allele frequencies).  It only accepts one file. " + "Must include a phenotype file with columns (Sample IDs) and (Disease Status)           (-p PHENOTYPE_FILE).");
         assoc.addArgument("-p", "--pheno").nargs("+").dest("pheno").type(String.class).help("Allows for multiple pheno files.");
@@ -103,7 +106,6 @@ public class VarStatsEngine implements Engine {
 
         List<String> vcfArgs = parsedArgs.getList("VCF");
         List<String> phenoArgs = parsedArgs.getList("pheno");
-        boolean doPercentage = parsedArgs.getBoolean("percentage");
         try {
 
             TreeMap<String, VariantPoolLight> AllVPs;
@@ -111,6 +113,8 @@ public class VarStatsEngine implements Engine {
             SupportedSummaryTypes  summaryType = null;
             SupportedDetailedSummaryTypes detSumType = null;
 
+            String outFileName = parsedArgs.getString("OUTPUT");
+            
             
             String sumTypeString = parsedArgs.getString("SUMMARY");
             if(sumTypeString != null){
@@ -157,25 +161,22 @@ public class VarStatsEngine implements Engine {
             	
             	if(detSumType == SupportedDetailedSummaryTypes.COMBINED){
 				    TreeMap<String, VariantPoolHeavy> AllVPsHeavy = UtilityBelt.createHeavyVariantPools(vcfArgs, true);
-//                    VariantPoolDetailedSummary summary =
-                            VariantPoolSummarizer.summarizeVariantPoolsDetailedCombined(AllVPsHeavy);
+                    summaries = VariantPoolSummarizer.summarizeVariantPoolsDetailedCombined(AllVPsHeavy,outFileName);
+            		VariantPoolSummarizer.printSummary(summaries, false);
 //                    String fileName = "unionedVP_detailed_summary.txt";
 //                    printDetailedSummaryToFile(summary, fileName);
             	}
             	else if(detSumType == SupportedDetailedSummaryTypes.INDIVIDUAL){
-                    summaries =
-                            VariantPoolSummarizer.summarizeVariantPoolsDetailed(AllVPs);
+                    summaries = VariantPoolSummarizer.summarizeVariantPoolsDetailed(AllVPs,outFileName);
             		VariantPoolSummarizer.printSummary(summaries, false);
 //                    printDetailedSummariesToFile(detailedSummaries);
             	}
+            	
             }
             if(assoc){
             	new VarStats(AllVPs, phenoArgs);
             }
-            if(doPercentage){
-            	VarStats vs = new VarStats();
-            	vs.doPercentage(AllVPs);
-            }
+            	
             
         } catch (InvalidInputFileException e) {
             UtilityBelt.printErrorUsageHelpAndExit(parser, logger, e);

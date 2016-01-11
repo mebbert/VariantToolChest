@@ -5,18 +5,25 @@ package vtc.tools.varstats;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.TreeMap;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import vtc.VTCEngine;
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.VariantPoolHeavy;
 import vtc.datastructures.VariantPoolLight;
@@ -24,7 +31,7 @@ import vtc.tools.setoperator.operation.InvalidOperationException;
 import vtc.tools.utilitybelt.UtilityBelt;
 
 /**
- * @author Kevin
+ * @author Mark
  *
  */
 
@@ -41,7 +48,6 @@ public class VarStatsTest {
 				+ "                       VarStatsTest                  \n"
 				+ "========================================================\n"+RESET);
 	}
-
 
 	@Test
 	public void CheckVarStatsValues() throws IOException {
@@ -105,7 +111,6 @@ public class VarStatsTest {
 		
 
 	}
-	
 	
 	@Test
 	public void CheckIndels() throws IOException {
@@ -179,7 +184,6 @@ public class VarStatsTest {
 
 	}
 	
-	
 	@Test
 	public void TestNoCallGeno() throws IOException {
 		System.out.println(GREEN+"\nTest No Call Genotypes\n"+RESET);	
@@ -252,8 +256,6 @@ public class VarStatsTest {
 
 	}
 	
-	
-	
 	@Test
 	public void TestMNVsAndMulitAlts() throws IOException {
 		System.out.println(GREEN+"\nTest MNVs and Multi Alts\n"+RESET);	
@@ -325,4 +327,124 @@ public class VarStatsTest {
 		
 
 	}
+	
+	@Test
+	public void testIndDetailedSummary() throws IOException{	
+		System.out.println(GREEN+"\nTest Individual Dedailed Summary\n"+RESET);	
+		
+		
+		String input1 = "target/test-classes/OUTPUT/Varstats/IndVsCombined/input1.vcf";
+		String indOut = "target/test-classes/OUTPUT/Varstats/IndVsCombined/indTest";
+		String Answer = "target/test-classes/OUTPUT/Varstats/IndVsCombined/Answer_detailed_summary.txt";
+		String arguments = "VS -i var1="+input1+" -d I -o "+indOut;
+		String[] args = arguments.split(" ");
+		VTCEngine.main(args);
+		
+	//	List<String> infiles = new ArrayList<String>();
+	//	infiles.add(input1);
+	//	String indID = "";
+	//	try {
+	//		
+	//		TreeMap<String, VariantPoolLight> VPl = UtilityBelt.createLightVariantPools(infiles, true);
+	//		indID = (String) VPl.keySet().toArray()[0];
+	//		System.out.println(indID+"\t"+VPl.size());
+	//		VariantPoolSummarizer.summarizeVariantPoolsDetailed(VPl, indOut);
+	//		
+	//	} catch (InvalidInputFileException e) {
+	//		// TODO Auto-generated catch block
+	//		e.printStackTrace();
+	//	} catch (InvalidOperationException e) {
+	//		// TODO Auto-generated catch block
+	//		e.printStackTrace();
+	//	}
+
+		Compare2DetailedSummaryFiles(Answer, indOut+"_var1_detailed_summary.txt");
+//		Compare2DetailedSummaryFiles(Answer, indOut+"_"+indID+"_detailed_summary.txt");
+	}
+	
+	@Test
+	public void testIndDetailedCombinedSummaryOneFile() throws IOException{	
+		System.out.println(GREEN+"\nTest Combined Detailed Summary on One File\n"+RESET);	
+		
+		
+		String input1 = "target/test-classes/SummaryTests/CheckIndels/input1.vcf";
+		String combinedOut = "target/test-classes/OUTPUT/Varstats/IndVsCombined/combTest";
+		String Answer = "target/test-classes/OUTPUT/Varstats/IndVsCombined/Answer_detailed_summary.txt";
+		
+		List<String> infiles = new ArrayList<String>();
+		infiles.add(input1);
+		String combID = "";
+		try {
+				
+			TreeMap<String,VariantPoolHeavy> VPs = UtilityBelt.createHeavyVariantPools(infiles,false);
+			combID = (String) VPs.keySet().toArray()[0];
+			System.out.println(combID);
+			VariantPoolSummarizer.summarizeVariantPoolsDetailedCombined(VPs, combinedOut);
+			
+		} catch (InvalidInputFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidOperationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Compare2DetailedSummaryFiles(combinedOut+"_"+combID+"_detailed_summary.txt", Answer);
+	}
+	
+	
+	@Test
+	public void testCombinedSummary2Files() throws IOException{	
+		System.out.println(GREEN+"\nTest Combined Detailed Summary on Two File\n"+RESET);	
+		
+		
+		String input1 = "target/test-classes/SummaryTests/CheckIndels/input1.vcf";
+		String input2 = "target/test-classes/OUTPUT/Varstats/IndVsCombined/input2.vcf";
+		String combinedOut = "target/test-classes/OUTPUT/Varstats/IndVsCombined/combTest";
+		String Answer = "target/test-classes/OUTPUT/Varstats/IndVsCombined/Answer_detailed_summary.txt";
+		
+		List<String> infiles = new ArrayList<String>();
+		infiles.add(input1);
+		String combID = "";
+		try {
+				
+			TreeMap<String,VariantPoolHeavy> VPs = UtilityBelt.createHeavyVariantPools(infiles,false);
+			combID = (String) VPs.keySet().toArray()[0];
+			System.out.println(combID);
+			VariantPoolSummarizer.summarizeVariantPoolsDetailedCombined(VPs, combinedOut);
+			
+		} catch (InvalidInputFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidOperationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Compare2DetailedSummaryFiles(combinedOut+"_"+combID+"_detailed_summary.txt", Answer);
+	}
+	
+	public static void Compare2DetailedSummaryFiles(String o1, String o2){
+		File out1 = new File(o1);
+		File out2 = new File(o2);
+		
+		try {
+			Scanner file1 = new Scanner(out1);
+			Scanner file2 = new Scanner(out2);
+		
+			while(file1.hasNext() && file2.hasNext()){
+				String line1 = file1.next();
+				String line2 = file2.next();
+				Assert.assertTrue(line1.equals(line2));
+			}
+			
+			if(file1.hasNext() || file2.hasNext())
+				Assert.assertTrue(false);
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }
