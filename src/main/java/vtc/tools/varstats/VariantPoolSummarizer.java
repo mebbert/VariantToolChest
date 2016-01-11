@@ -6,6 +6,7 @@ package vtc.tools.varstats;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -386,18 +387,27 @@ public class VariantPoolSummarizer {
 			ArrayList<String> samples) {
 
 		Allele ref = var.getReference();
-		List<Allele> alts = new ArrayList<Allele>(var.getAlternateAlleles());
+//		List<Allele> alts = new ArrayList<Allele>(var.getAlternateAlleles());
+		List<Allele> allelesSeen = new ArrayList<Allele>(var.getNAlleles());
 
-		int refGenoCount = 0, refSampleCount = 0, tmpRefGenoCount, altGenoCount, altSampleCount, tmpAltGenoCount, genoTiCount = 0, genoTvCount = 0, nSamples = 0, nSamplesWithCall = 0, nGenosCalled = 0, hetSampleCount, homoVarSampleCount;
-		HashMap<Allele, Integer> altGenoCounts = new HashMap<Allele, Integer>(), altSampleCounts = new HashMap<Allele, Integer>(), hetSampleCounts = new HashMap<Allele, Integer>(), homoVarSampleCounts = new HashMap<Allele, Integer>();
+		int refAlleleCount = 0, refSampleCount = 0, tmpRefAlleleCount,
+				altAlleleCount, altSampleCount, tmpAltAlleleCount,
+				genoTiCount = 0, genoTvCount = 0, nSamples = 0,
+				nSamplesWithCall = 0, nAllelesCalled = 0, hetSampleCount,
+				homoVarSampleCount;
+		HashMap<Allele, Integer> altAlleleCounts = new HashMap<Allele, Integer>(),
+				altSampleCounts = new HashMap<Allele, Integer>(),
+				hetSampleCounts = new HashMap<Allele, Integer>(),
+				homoVarSampleCounts = new HashMap<Allele, Integer>();
 		Iterator<Genotype> genoIT = var.getGenotypes().iterator();
 		Genotype geno;
 		int iterCount = 0;
 
 		// Loop over all of the genotypes in the record
 		while (genoIT.hasNext()) {
-			nSamples++;
+
 			geno = genoIT.next();
+			nSamples++;
 
 			if (!geno.isNoCall()) {
 				/*
@@ -405,62 +415,78 @@ public class VariantPoolSummarizer {
 				 * number of genotypes
 				 */
 				nSamplesWithCall++;
-				nGenosCalled += geno.getAlleles().size();
+				nAllelesCalled += geno.getAlleles().size();
 			}
 
 			// Get the reference allele count
-			tmpRefGenoCount = geno.countAllele(ref);
-			refGenoCount += tmpRefGenoCount;
+			tmpRefAlleleCount = geno.countAllele(ref);
+			refAlleleCount += tmpRefAlleleCount;
 
 			// Increment refSampleCount if this genotype has at least one ref
 			// allele
-			if (tmpRefGenoCount > 0) {
+			if (tmpRefAlleleCount > 0) {
 				refSampleCount++;
 			}
 
 			// Get information from each alternate allele present in the Genotype 
-			// for(int i = 0; i < alts.size(); i++){
-			// for(Allele alt : alts){
 			List<Allele> alleles = geno.getAlleles();
+			boolean countedSample = false;
 			for (Allele allele : alleles) {
 				if (!allele.isReference() && !allele.isNoCall()) {
-					if (iterCount == 0 || alts.contains(allele)) {
-						alts.remove(allele);
-						altGenoCount = 0;
-						altSampleCount = 0;
+//					if (iterCount == 0 || alts.contains(allele)) {
+//						alts.remove(allele);
+
+					if (!allelesSeen.contains(allele)) { // If we haven't seen this allele before, initialize
+						allelesSeen.add(allele);
+
+						/* This is the first time seeing allele. start at 1. */
+						altAlleleCount = 1; 
+						altSampleCount = 1;
+
 						hetSampleCount = 0;
 						homoVarSampleCount = 0;
-						altGenoCounts.put(allele, altGenoCount);
+						
+						tmpAltAlleleCount = geno.countAllele(allele);
+						/* Only increment sample counts once per genotype/sample */
+						if(!countedSample){
+							if (tmpAltAlleleCount == 1) { // the sample is het for this alt allele
+								hetSampleCount++;
+							} else if (tmpAltAlleleCount == 2) { // the sample is homo for this alt allele
+								homoVarSampleCount++;
+							}
+							countedSample = true;
+						}
+
+						altAlleleCounts.put(allele, altAlleleCount);
 						altSampleCounts.put(allele, altSampleCount);
 						hetSampleCounts.put(allele, hetSampleCount);
 						homoVarSampleCounts.put(allele, homoVarSampleCount);
 					} else {
-						altGenoCount = altGenoCounts.get(allele);
+						altAlleleCount = altAlleleCounts.get(allele);
 						altSampleCount = altSampleCounts.get(allele);
 						hetSampleCount = hetSampleCounts.get(allele);
 						homoVarSampleCount = homoVarSampleCounts.get(allele);
-					}
-					tmpAltGenoCount = geno.countAllele(allele);
-					altGenoCount += tmpAltGenoCount;
 
-					if (tmpAltGenoCount > 0) {
-						altSampleCount++; // increment the number of samples
-											// with the allele
+						altAlleleCount++;
 
-						if (tmpAltGenoCount == 1) { // the sample is het for
-													// this alt allele
-							hetSampleCount++;
-						} else if (tmpAltGenoCount == 2) { // the sample is homo
-															// for this alt
-															// allele
-							homoVarSampleCount++;
+						tmpAltAlleleCount = geno.countAllele(allele);
+
+						/* Only increment sample counts once per genotype/sample */
+						if(!countedSample){
+							altSampleCount++; // increment the number of samples with the allele
+							if (tmpAltAlleleCount == 1) { // the sample is het for this alt allele
+								hetSampleCount++;
+							} else if (tmpAltAlleleCount == 2) { // the sample is homo for this alt allele
+								homoVarSampleCount++;
+							}
+							countedSample = true;
 						}
-					}
 
-					altGenoCounts.put(allele, altGenoCount);
-					altSampleCounts.put(allele, altSampleCount);
-					hetSampleCounts.put(allele, hetSampleCount);
-					homoVarSampleCounts.put(allele, homoVarSampleCount);
+						altAlleleCounts.put(allele, altAlleleCount);
+						altSampleCounts.put(allele, altSampleCount);
+						hetSampleCounts.put(allele, hetSampleCount);
+						homoVarSampleCounts.put(allele, homoVarSampleCount);
+					}
 
 					// Get ti/tv info too, but only for SNVs
 					if (UtilityBelt.determineAltType(ref, allele) == AltType.SNV) {
@@ -476,15 +502,15 @@ public class VariantPoolSummarizer {
 			iterCount++;
 		}
 
-		vrs.setRefGenotypeCount(refGenoCount);
+		vrs.setRefAlleleCount(refAlleleCount);
 		vrs.setRefSampleCount(refSampleCount);
-		vrs.setAltGenotypeCounts(altGenoCounts);
+		vrs.setAltAlleleCounts(altAlleleCounts);
 		vrs.setAltSampleCounts(altSampleCounts);
 		vrs.setGenoTiCount(genoTiCount);
 		vrs.setGenoTvCount(genoTvCount);
 		vrs.setnSamples(nSamples);
 		vrs.setnSamplesWithCall(nSamplesWithCall);
-		vrs.setnGenosCalled(nGenosCalled);
+		vrs.setnAllelesCalled(nAllelesCalled);
 		vrs.setHetSampleCounts(hetSampleCounts);
 		vrs.setHomoVarSampleCounts(homoVarSampleCounts);
 
@@ -495,7 +521,7 @@ public class VariantPoolSummarizer {
 
 		double qual = var.getPhredScaledQual();
 		if (qual > 0)
-			vrs.setQuality(Double.toString(qual));
+			vrs.setQuality(Double.toString(UtilityBelt.round(qual, 2, BigDecimal.ROUND_HALF_UP)));
 		else
 			vrs.setQuality("NA");
 	}
@@ -559,8 +585,8 @@ public class VariantPoolSummarizer {
 		logger.info("Writing detailed summary to: " + fileName);
 
 		String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count"
-				+ "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_genos_called\tN_total_samples\t"
-				+ "Alt_genotype_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
+				+ "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_alleles_called\tN_total_samples\t"
+				+ "Alt_allele_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
 
 		detailedVariantRecordWriter = new PrintWriter(fileName);
 		detailedVariantRecordWriter.println(header);

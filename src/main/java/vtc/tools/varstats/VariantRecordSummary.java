@@ -28,10 +28,10 @@ public class VariantRecordSummary {
 	private int snvCount, mnvCount, indelCount, insCount,
 		delCount, structIndelCount, structInsCount,
 		structDelCount, tiCount, tvCount, genoTiCount,
-		genoTvCount, refGenotypeCount, refSampleCount,
-		nSamples, nSamplesWithCall, nGenosCalled;
+		genoTvCount, refAlleleCount, refSampleCount,
+		nSamples, nSamplesWithCall, nAllelesCalled;
 	private String quality;
-	private HashMap<Allele, Integer> altGenotypeCounts, altSampleCounts,
+	private HashMap<Allele, Integer> altAlleleCounts, altSampleCounts,
 		hetSampleCounts, homoVarSampleCounts;
 	private Depth depth;
 	private int smallestIns;
@@ -347,15 +347,15 @@ public class VariantRecordSummary {
 	/**
 	 * @return the refGenotypeCount
 	 */
-	public int getRefGenotypeCount() {
-		return refGenotypeCount;
+	public int getRefAlleleCount() {
+		return refAlleleCount;
 	}
 
 	/**
-	 * @param refGenotypeCount the refGenotypeCount to set
+	 * @param refAlleleCount the refGenotypeCount to set
 	 */
-	public void setRefGenotypeCount(int refGenotypeCount) {
-		this.refGenotypeCount = refGenotypeCount;
+	public void setRefAlleleCount(int refAlleleCount) {
+		this.refAlleleCount = refAlleleCount;
 	}
 
 	/**
@@ -398,29 +398,29 @@ public class VariantRecordSummary {
 	}
 
 	/**
-	 * @return the altGenotypeCounts
+	 * @return the altAlleleCounts
 	 */
-	public HashMap<Allele, Integer> getAltGenotypeCounts() {
-		return altGenotypeCounts;
+	public HashMap<Allele, Integer> getAltAlleleCounts() {
+		return altAlleleCounts;
 	}
 	
 	/**
-	 * Get the genotype count for 'alt'
+	 * Get the allele count for 'alt'
 	 * @param alt
 	 * @return the number of 'alt' alleles in this record
 	 */
-	public Integer getAltGenotypeCount(Allele alt){
-		if(this.getAltGenotypeCounts().get(alt) != null){
-            return this.getAltGenotypeCounts().get(alt);
+	public Integer getAltAlleleCount(Allele alt){
+		if(this.getAltAlleleCounts().get(alt) != null){
+            return this.getAltAlleleCounts().get(alt);
 		}
 		return 0;
 	}
 
 	/**
-	 * @param altGenotypeCounts the altGenotypeCounts to set
+	 * @param altAlleleCounts the altAlleleCounts to set
 	 */
-	public void setAltGenotypeCounts(HashMap<Allele, Integer> altGenotypeCounts) {
-		this.altGenotypeCounts = altGenotypeCounts;
+	public void setAltAlleleCounts(HashMap<Allele, Integer> altAlleleCounts) {
+		this.altAlleleCounts = altAlleleCounts;
 	}
 	
 	public HashMap<Allele, Integer> getHetSampleCounts(){
@@ -460,28 +460,36 @@ public class VariantRecordSummary {
 	public HashMap<Allele, Double> getAltSampleFreqs() {
 		
 		HashMap<Allele, Double> altSampleFreqs = new HashMap<Allele, Double>();
+		double altSampFreq = -1;
 		for(Allele alt : this.getAlts()){
-			double altSampFreq = (this.getnSamplesWithCall() > 0) ?
-					UtilityBelt.round((double)this.getAltSampleCount(alt)/this.getnSamplesWithCall(),
-							2, BigDecimal.ROUND_HALF_UP) : 0;
+			if(this.getnSamplesWithCall() > 0){
+				altSampFreq = (double)this.getAltSampleCount(alt)/this.getnSamplesWithCall();
+				altSampFreq = (altSampFreq > 0.01) ? 
+						UtilityBelt.round(altSampFreq, 4, BigDecimal.ROUND_HALF_UP) :
+						UtilityBelt.round(altSampFreq, 6, BigDecimal.ROUND_HALF_UP);
+			}
 			altSampleFreqs.put(alt, altSampFreq);
 		}
 		return altSampleFreqs;
 	}
 	
 	/**
-	 * @return HashMap<Allele, Double> of the genotype frequencies for
+	 * @return HashMap<Allele, Double> of the allele frequencies for
 	 * each alt allele
 	 */
-	public HashMap<Allele, Double> getAltGenotypeFreqs(){
-		HashMap<Allele, Double> altGenoFreqs = new HashMap<Allele, Double>();
+	public HashMap<Allele, Double> getAltAlleleFreqs(){
+		HashMap<Allele, Double> altAlleleFreqs = new HashMap<Allele, Double>();
+		double altAlleleFreq = -1;
 		for(Allele alt : this.getAlts()){
-            double altGenoFreq = (this.getnGenosCalled() > 0) ?
-            		UtilityBelt.round((double)this.getAltGenotypeCount(alt)/this.getnGenosCalled(),
-            				2, BigDecimal.ROUND_HALF_UP) : 0;
-            altGenoFreqs.put(alt, altGenoFreq);
+			if(this.getnAllelesCalled() > 0){
+				altAlleleFreq = (double)this.getAltAlleleCount(alt)/this.getnAllelesCalled();
+				altAlleleFreq = (altAlleleFreq > 0.01) ?
+            		UtilityBelt.round(altAlleleFreq, 4, BigDecimal.ROUND_HALF_UP) :
+            		UtilityBelt.round(altAlleleFreq, 6, BigDecimal.ROUND_HALF_UP);
+			}
+            altAlleleFreqs.put(alt, altAlleleFreq);
 		}
-		return altGenoFreqs;
+		return altAlleleFreqs;
 	}
 	
 	/**
@@ -712,12 +720,12 @@ public class VariantRecordSummary {
 		this.nSamplesWithCall = nSamplesWithCall;
 	}
 	
-	public int getnGenosCalled() {
-		return nGenosCalled;
+	public int getnAllelesCalled() {
+		return nAllelesCalled;
 	}
 	
-	public void setnGenosCalled(int nGenosCalled) {
-		this.nGenosCalled = nGenosCalled;
+	public void setnAllelesCalled(int nAllelesCalled) {
+		this.nAllelesCalled = nAllelesCalled;
 	}
 
 	/**
@@ -841,9 +849,9 @@ public class VariantRecordSummary {
 		sb.append("\t");
 		sb.append(this.altToString());
 		sb.append("\t");
-		sb.append(this.getRefGenotypeCount());
+		sb.append(this.getRefAlleleCount());
 		sb.append("\t");
-		sb.append(this.altStatArrayToString(this.getAltGenotypeCounts()));
+		sb.append(this.altStatArrayToString(this.getAltAlleleCounts()));
 		sb.append("\t");
 		sb.append(this.getRefSampleCount());
 		sb.append("\t");
@@ -851,11 +859,11 @@ public class VariantRecordSummary {
 		sb.append("\t");
 		sb.append(this.getnSamplesWithCall());
 		sb.append("\t");
-		sb.append(this.getnGenosCalled());
+		sb.append(this.getnAllelesCalled());
 		sb.append("\t");
 		sb.append(this.getnSamples());
 		sb.append("\t");
-		sb.append(this.altStatArrayToString(this.getAltGenotypeFreqs()));
+		sb.append(this.altStatArrayToString(this.getAltAlleleFreqs()));
 		sb.append("\t");
 		sb.append(this.altStatArrayToString(this.getAltSampleFreqs()));
 		if(this.getDepth() != null){
@@ -931,11 +939,11 @@ public class VariantRecordSummary {
 			newVRS.setGenoTiCount(vrs1.getGenoTiCount() + vrs2.getGenoTiCount());
 			newVRS.setGenoTvCount(vrs1.getGenoTvCount() + vrs2.getGenoTvCount());
 			newVRS.setMnvCount(vrs1.getMnvCount() + vrs2.getMnvCount());
-			newVRS.setnGenosCalled(vrs1.getnGenosCalled() + vrs2.getnGenosCalled());
+			newVRS.setnAllelesCalled(vrs1.getnAllelesCalled() + vrs2.getnAllelesCalled());
 			newVRS.setnSamples(vrs1.getnSamples() + vrs2.getnSamples());
 			newVRS.setnSamplesWithCall(vrs1.getnSamplesWithCall() + vrs2.getnSamplesWithCall());
 			newVRS.setQuality("NA");
-			newVRS.setRefGenotypeCount(vrs1.getRefGenotypeCount() + vrs2.getRefGenotypeCount());
+			newVRS.setRefAlleleCount(vrs1.getRefAlleleCount() + vrs2.getRefAlleleCount());
 			newVRS.setRefSampleCount(vrs1.getRefSampleCount() + vrs2.getRefSampleCount());
 			newVRS.setSnvCount(vrs1.getSnvCount() + vrs2.getSnvCount());
 			newVRS.setStructIndelCount(vrs1.getStructIndelCount() + vrs2.getStructIndelCount());
@@ -945,17 +953,17 @@ public class VariantRecordSummary {
 			newVRS.setTvCount(vrs1.getTvCount() + vrs2.getTvCount());
 			
 			/* Set alt-specific values */
-            HashMap<Allele, Integer> altGenotypeCounts = new HashMap<Allele, Integer>(),
+            HashMap<Allele, Integer> altAlleleCounts = new HashMap<Allele, Integer>(),
                 altSampleCounts = new HashMap<Allele, Integer>(),
                 hetSampleCounts = new HashMap<Allele, Integer>(),
                 homoVarSampleCounts = new HashMap<Allele, Integer>();
 			for(Allele alt : newAlts){
-				altGenotypeCounts.put(alt, vrs1.getAltGenotypeCount(alt) + vrs2.getAltGenotypeCount(alt));
+				altAlleleCounts.put(alt, vrs1.getAltAlleleCount(alt) + vrs2.getAltAlleleCount(alt));
 				altSampleCounts.put(alt, vrs1.getAltSampleCount(alt) + vrs2.getAltSampleCount(alt));
 				hetSampleCounts.put(alt, vrs1.getHetSampleCount(alt) + vrs2.getHetSampleCount(alt));
 				homoVarSampleCounts.put(alt, vrs1.getHomoVarSampleCount(alt) + vrs2.getHomoVarSampleCount(alt));
 			}
-            newVRS.setAltGenotypeCounts(altGenotypeCounts);
+            newVRS.setAltAlleleCounts(altAlleleCounts);
             newVRS.setAltSampleCounts(altSampleCounts);
             newVRS.setHetSampleCounts(hetSampleCounts);
             newVRS.setHomoVarSampleCounts(homoVarSampleCounts);

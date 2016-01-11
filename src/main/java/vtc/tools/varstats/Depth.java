@@ -1,5 +1,6 @@
 package vtc.tools.varstats;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import org.broadinstitute.variant.variantcontext.VariantContext;
@@ -18,7 +19,7 @@ public class Depth {
 	public Depth(){}
 	
 	public double getAvgDepth(){
-		return avgDepth;
+		return UtilityBelt.round(avgDepth, 2, BigDecimal.ROUND_HALF_UP);
 	}
 	
 	public String getMinDepth(){
