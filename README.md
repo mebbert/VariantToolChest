@@ -393,7 +393,7 @@ is not currently necessary, but will save you the time it takes to go through al
 To build and run all of the tests you will need to add a file named "VTC.properties" to the following
 directory: src/main/java/vtc
 
-The file must have the following 2 lines, with the second beinhg the actual
+The file must have the following 2 lines, with the second being the actual
 absolute path to the reference genome on your local machine:
 
 <pre><code>
