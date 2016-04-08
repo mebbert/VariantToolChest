@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.math3.dfp.DfpField.RoundingMode;
 import org.apache.log4j.Logger;
 import org.broadinstitute.variant.variantcontext.Allele;
 import org.broadinstitute.variant.variantcontext.Genotype;
@@ -326,9 +327,9 @@ public class VariantPoolSummarizer {
 				String genotype = gt.getGenotypeString(false);
 				String[] types = genotype.split("[|/]");
 				if(types[0].contains("*") || types[1].contains("*"))
-					het++;
+					het++; // The number of hets with a ref allele
 				else
-					hetalt++;
+					hetalt++; // The number of hets without a ref allele (e.g., '1/2')
 				continue;
 			}
 			if(gt.isNoCall()){
@@ -337,10 +338,10 @@ public class VariantPoolSummarizer {
 			}
 		}
 		
-		vrs.setHomoAltPercent(homoalt/(Double.valueOf(Samples.size())-nocall));
-		vrs.setHetAltPercent(hetalt/(Double.valueOf(Samples.size())-nocall)); 
-		vrs.setHetPercent(het/(Double.valueOf(Samples.size())-nocall));
-		vrs.setHomoRefPercent(homoref/(Double.valueOf(Samples.size())-nocall));
+		vrs.setHomoAltPercent(UtilityBelt.round(homoalt/(Double.valueOf(Samples.size())-nocall), 2, BigDecimal.ROUND_HALF_UP));
+		vrs.setHetAltPercent(UtilityBelt.round(hetalt/(Double.valueOf(Samples.size())-nocall), 2, BigDecimal.ROUND_HALF_UP)); 
+		vrs.setHetPercent(UtilityBelt.round(het/(Double.valueOf(Samples.size())-nocall), 2, BigDecimal.ROUND_HALF_UP));
+		vrs.setHomoRefPercent(UtilityBelt.round(homoref/(Double.valueOf(Samples.size())-nocall), 2, BigDecimal.ROUND_HALF_UP));
 	
 	}
 	
@@ -662,7 +663,11 @@ public class VariantPoolSummarizer {
 
 		String header = "Chr\tPos\tID\tRef\tAlt\tRef_allele_count\tAlt_allele_count"
 				+ "\tRef_sample_count\tAlt_sample_count\tN_samples_with_call\tN_alleles_called\tN_total_samples\t"
-				+ "Alt_allele_freq\tAlt_sample_freq\tMin_depth\tMax_depth\tAvg_depth\tQuality";
+				+ "Alt_allele_freq\tAlt_sample_freq\tMin_depth\tMax_depth\t"
+				+ "Avg_depth\tQuality\tPercent_samples_hom_alt\t"
+				+ "Percent_samples_heterozygous_with_one_ref_allele\t"
+				+ "Percent_samples_heterozygous_without_ref_allele\t"
+				+ "Percent_samples_hom_ref";
 
 		detailedVariantRecordWriter = new PrintWriter(fileName);
 		detailedVariantRecordWriter.println(header);
