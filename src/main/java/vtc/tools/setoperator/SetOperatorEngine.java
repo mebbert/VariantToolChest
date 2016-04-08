@@ -3,6 +3,12 @@
  */
 package vtc.tools.setoperator;
 
+import htsjdk.tribble.TribbleException;
+import htsjdk.variant.vcf.VCFFormatHeaderLine;
+import htsjdk.variant.vcf.VCFHeader;
+import htsjdk.variant.vcf.VCFHeaderLineType;
+import htsjdk.variant.vcf.VCFUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,11 +28,6 @@ import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import org.apache.log4j.Logger;
-import org.broad.tribble.TribbleException;
-import org.broadinstitute.variant.vcf.VCFFormatHeaderLine;
-import org.broadinstitute.variant.vcf.VCFHeader;
-import org.broadinstitute.variant.vcf.VCFHeaderLineType;
-import org.broadinstitute.variant.vcf.VCFUtils;
 
 import vtc.Engine;
 import vtc.datastructures.InvalidInputFileException;

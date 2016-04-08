@@ -22,6 +22,9 @@
 
 package vtc.tools.varstats;
 
+import htsjdk.variant.variantcontext.Allele;
+import htsjdk.variant.variantcontext.VariantContext;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -40,8 +43,6 @@ import jsc.tests.H1;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.apache.log4j.Logger;
-import org.broadinstitute.variant.variantcontext.Allele;
-import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.datastructures.VariantPool;
 import vtc.datastructures.VariantPoolLight;

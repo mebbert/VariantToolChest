@@ -1,10 +1,10 @@
 package vtc.tools.varstats;
 
+import htsjdk.variant.variantcontext.Allele;
+import htsjdk.variant.variantcontext.VariantContext;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.broadinstitute.variant.variantcontext.Allele;
-import org.broadinstitute.variant.variantcontext.VariantContext;
 
 public class Association {
     /*

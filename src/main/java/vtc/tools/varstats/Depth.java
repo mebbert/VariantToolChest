@@ -1,9 +1,9 @@
 package vtc.tools.varstats;
 
+import htsjdk.variant.variantcontext.VariantContext;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
-
-import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.tools.utilitybelt.UtilityBelt;
 

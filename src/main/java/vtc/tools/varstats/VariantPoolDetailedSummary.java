@@ -6,7 +6,6 @@ package vtc.tools.varstats;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 

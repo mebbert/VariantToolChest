@@ -4,6 +4,12 @@
 package vtc.datastructures;
 
 
+import htsjdk.tribble.AbstractFeatureReader;
+import htsjdk.tribble.FeatureReader;
+import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.vcf.VCFCodec;
+import htsjdk.variant.vcf.VCFHeader;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,11 +18,6 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
-import org.broad.tribble.AbstractFeatureReader;
-import org.broad.tribble.FeatureReader;
-import org.broadinstitute.variant.variantcontext.VariantContext;
-import org.broadinstitute.variant.vcf.VCFCodec;
-import org.broadinstitute.variant.vcf.VCFHeader;
 
 /**
  * @author markebbert

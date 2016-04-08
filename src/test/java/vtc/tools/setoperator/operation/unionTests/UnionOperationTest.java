@@ -1,14 +1,14 @@
 package vtc.tools.setoperator.operation.unionTests;
 
 import static org.junit.Assert.assertEquals;
+import htsjdk.variant.variantcontext.Genotype;
+import htsjdk.variant.variantcontext.GenotypesContext;
+import htsjdk.variant.variantcontext.VariantContext;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.broadinstitute.variant.variantcontext.Genotype;
-import org.broadinstitute.variant.variantcontext.GenotypesContext;
-import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;

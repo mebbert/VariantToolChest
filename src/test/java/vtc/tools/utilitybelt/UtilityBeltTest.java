@@ -4,15 +4,14 @@
 package vtc.tools.utilitybelt;
 
 import static org.junit.Assert.assertTrue;
+import htsjdk.variant.variantcontext.Allele;
+import htsjdk.variant.variantcontext.VariantContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.broadinstitute.variant.variantcontext.Allele;
-import org.broadinstitute.variant.variantcontext.VariantContext;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;

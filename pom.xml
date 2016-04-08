@@ -48,30 +48,10 @@
 			<version>20140107</version>
 		</dependency>
 		<dependency>
-			<groupId>samtools</groupId>
+			<groupId>com.github.samtools</groupId>
 			<artifactId>htsjdk</artifactId>
-			<version>2.0.1</version>
+			<version>2.2.1</version>
 		</dependency>
-		<dependency>
-			<groupId>broad</groupId>
-			<artifactId>picard</artifactId>
-			<version>1.96</version>
-		</dependency>
-		<dependency>
-			<groupId>broad</groupId>
-			<artifactId>sam</artifactId>
-			<version>1.96</version>
-		</dependency>	
-		<dependency>
-			<groupId>broad</groupId>
-			<artifactId>tribble</artifactId>
-			<version>1.96</version>
-		</dependency>	
-		<dependency>
-			<groupId>broad</groupId>
-			<artifactId>variant</artifactId>
-			<version>1.96</version>
-		</dependency>	
 		<dependency>
 			<groupId>jsc</groupId>
 			<artifactId>jsc</artifactId>

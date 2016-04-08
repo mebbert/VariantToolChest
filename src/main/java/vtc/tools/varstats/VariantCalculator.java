@@ -1,10 +1,10 @@
 package vtc.tools.varstats;
 
-import java.util.List;
+import htsjdk.variant.variantcontext.Allele;
+import htsjdk.variant.variantcontext.Genotype;
+import htsjdk.variant.variantcontext.VariantContext;
 
-import org.broadinstitute.variant.variantcontext.Allele;
-import org.broadinstitute.variant.variantcontext.Genotype;
-import org.broadinstitute.variant.variantcontext.VariantContext;
+import java.util.List;
 
 public class VariantCalculator {
 	

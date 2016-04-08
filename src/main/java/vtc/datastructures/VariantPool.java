@@ -3,12 +3,12 @@
  */
 package vtc.datastructures;
 
+import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.vcf.VCFHeader;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.TreeSet;
-
-import org.broadinstitute.variant.variantcontext.VariantContext;
-import org.broadinstitute.variant.vcf.VCFHeader;
 
 /**
  * @author markebbert

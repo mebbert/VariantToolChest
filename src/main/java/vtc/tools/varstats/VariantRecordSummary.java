@@ -3,6 +3,8 @@
  */
 package vtc.tools.varstats;
 
+import htsjdk.variant.variantcontext.Allele;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,8 +12,6 @@ import java.util.TreeSet;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import org.broadinstitute.variant.variantcontext.Allele;
 
 import vtc.tools.utilitybelt.UtilityBelt;
 

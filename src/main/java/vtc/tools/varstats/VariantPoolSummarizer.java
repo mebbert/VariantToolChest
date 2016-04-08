@@ -3,7 +3,10 @@
  */
 package vtc.tools.varstats;
 
-import java.io.File;
+import htsjdk.variant.variantcontext.Allele;
+import htsjdk.variant.variantcontext.Genotype;
+import htsjdk.variant.variantcontext.VariantContext;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -18,11 +21,7 @@ import java.util.Locale;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.math3.dfp.DfpField.RoundingMode;
 import org.apache.log4j.Logger;
-import org.broadinstitute.variant.variantcontext.Allele;
-import org.broadinstitute.variant.variantcontext.Genotype;
-import org.broadinstitute.variant.variantcontext.VariantContext;
 
 import vtc.datastructures.AbstractVariantPool;
 import vtc.datastructures.VariantPoolHeavy;

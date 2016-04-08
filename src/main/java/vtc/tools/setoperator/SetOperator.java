@@ -3,6 +3,13 @@
  */
 package vtc.tools.setoperator;
 
+import htsjdk.variant.variantcontext.Allele;
+import htsjdk.variant.variantcontext.Genotype;
+import htsjdk.variant.variantcontext.GenotypeBuilder;
+import htsjdk.variant.variantcontext.GenotypesContext;
+import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.variantcontext.VariantContextBuilder;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,12 +27,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.broadinstitute.variant.variantcontext.Allele;
-import org.broadinstitute.variant.variantcontext.Genotype;
-import org.broadinstitute.variant.variantcontext.GenotypeBuilder;
-import org.broadinstitute.variant.variantcontext.GenotypesContext;
-import org.broadinstitute.variant.variantcontext.VariantContext;
-import org.broadinstitute.variant.variantcontext.VariantContextBuilder;
 
 import vtc.datastructures.SamplePool;
 import vtc.datastructures.VariantPoolHeavy;

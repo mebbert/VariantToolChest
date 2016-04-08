@@ -3,6 +3,8 @@
  */
 package vtc.tools.utilitybelt;
 
+import htsjdk.variant.variantcontext.Allele;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -19,7 +21,6 @@ import java.util.TreeSet;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 
 import org.apache.log4j.Logger;
-import org.broadinstitute.variant.variantcontext.Allele;
 
 import vtc.datastructures.InvalidInputFileException;
 import vtc.datastructures.VariantPoolHeavy;
